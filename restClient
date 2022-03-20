@@ -1,0 +1,40 @@
+POST http://localhost:8080/signin
+content-type:application/json
+
+{
+    "email":"a123@gmail.com",
+    "password":"123456"
+}
+
+###
+
+GET http://localhost:8080/users
+content-type:application/json
+
+{
+    "email":"a@gmail.com",
+    "password":"123456"
+}
+
+###
+
+POST http://localhost:8080/signup/student
+content-type:application/json
+
+{
+    "email":"sidalihouda.computerscience@gmail.com",
+    "password":"123456",
+    "firstName":"sidali",
+    "lastName":"assoul",
+    "dob":"2022-03-17",
+    "code":"555"
+}
+
+###
+POST http://localhost:8080/forgotpassword
+content-type:application/json
+
+{
+    "email":"sidalihouda.computerscience@gmail.com"
+   
+}
