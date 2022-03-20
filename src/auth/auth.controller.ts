@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Param, Post } from "@nestjs/common";
 import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
 import { AuthService } from "./auth.service";
 
@@ -25,7 +25,8 @@ export class AuthController{
    }
 
    @Post('forgotpassword')
-   async forgotpassword(@Body() email:string){
+   async forgotpassword(@Body('email') email:string){
+        Logger.log(`${email} sffklfsk`)
         return this.authService.forgotPassword(email);
     }
     @Post('resetpassword/:token/:userId')

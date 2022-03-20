@@ -18,7 +18,7 @@ const jwt = require("jsonwebtoken");
 const student_repository_1 = require("../core/repositories/student.repository");
 const reset_password_token_repository_1 = require("../core/repositories/reset.password.token.repository");
 const crypto_1 = require("crypto");
-const nodemailer_1 = require("nodemailer");
+const nodemailer = require("nodemailer");
 let AuthService = class AuthService {
     constructor(userRepository, studentRepository, resetPasswordTokenRepository) {
         this.userRepository = userRepository;
@@ -64,19 +64,21 @@ let AuthService = class AuthService {
     async signupEnterprise(data) {
     }
     async forgotPassword(email) {
-        common_1.Logger.error(typeof email, 'my tests lol');
         const user = await this.userRepository.findOne({ where: { email } });
         if (!user) {
             throw new common_1.HttpException("email does not exist", common_1.HttpStatus.BAD_REQUEST);
         }
-        var token;
-        crypto_1.default.randomBytes(32, (ex, buf) => {
-            token = buf.toString('hex');
+        var token = await new Promise((resolve, reject) => {
+            (0, crypto_1.randomBytes)(32, (err, buf) => {
+                if (err)
+                    reject(err);
+                resolve(buf.toString('hex'));
+            });
         });
         const expiresIn = 15 * 60 * 1000;
-        const resetPasswordToken = this.resetPasswordTokenRepository.create({ token, user, expiresIn });
+        const resetPasswordToken = this.resetPasswordTokenRepository.create({ user, expiresIn, token: token });
         await this.resetPasswordTokenRepository.save(resetPasswordToken);
-        let transporter = nodemailer_1.default.createTransport({
+        let transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
                 user: "assoulsidali@gmail.com",
@@ -84,14 +86,15 @@ let AuthService = class AuthService {
             },
         });
         let info = await transporter.sendMail({
-            from: '"Fred Foo 👻" <assoulsidali@gmail.com>',
+            from: '"booooooooooowaaa3 👻" <assoulsidali@gmail.com>',
             to: "sidalihouda.computerscience@gmail.com",
             subject: "Hello ✔",
             text: `Hello world? http://localhost:8080/resetpassword/${token}/${user.id}`,
-            html: "<b>Hello world?</b>",
+            html: `<b>Hello world?</b> Hello world? http://localhost:3000/resetpassword/${token}/${user.id}`,
         });
         console.log("Message sent: %s", info.messageId);
-        console.log("Preview URL: %s", nodemailer_1.default.getTestMessageUrl(info));
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        return "check you email please";
     }
     async resetPassword(password, token, userId) {
         const resetPasswordToken = await this.resetPasswordTokenRepository.findOne({ where: { userId } });

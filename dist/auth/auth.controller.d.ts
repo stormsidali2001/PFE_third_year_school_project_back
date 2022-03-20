@@ -7,6 +7,6 @@ export declare class AuthController {
     signupTeacher(data: TeacherDTO): Promise<void>;
     signupStudent(data: StudentDTO): Promise<import("../core/dtos/user.dto").UserRO>;
     signupEntereprise(data: EnterpriseDTO): Promise<void>;
-    forgotpassword(email: string): Promise<void>;
+    forgotpassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;
 }

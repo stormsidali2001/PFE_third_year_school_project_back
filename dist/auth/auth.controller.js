@@ -33,6 +33,7 @@ let AuthController = class AuthController {
         return this.authService.signupEnterprise(data);
     }
     async forgotpassword(email) {
+        common_1.Logger.log(`${email} sffklfsk`);
         return this.authService.forgotPassword(email);
     }
     async resetPassword(password, token, userId) {
@@ -69,7 +70,7 @@ __decorate([
 ], AuthController.prototype, "signupEntereprise", null);
 __decorate([
     (0, common_1.Post)('forgotpassword'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)('email')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

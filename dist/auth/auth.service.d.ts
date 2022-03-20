@@ -11,6 +11,6 @@ export declare class AuthService {
     signupStudent(data: StudentDTO): Promise<UserRO>;
     signupTeacher(data: TeacherDTO): Promise<void>;
     signupEnterprise(data: EnterpriseDTO): Promise<void>;
-    forgotPassword(email: string): Promise<void>;
+    forgotPassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;
 }

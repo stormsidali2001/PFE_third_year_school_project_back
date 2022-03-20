@@ -6,12 +6,11 @@ import {  UserEntity, UserType } from "../core/entities/user.entity";
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { StudentRepository } from "src/core/repositories/student.repository";
-import { Transaction } from "typeorm";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { RestPasswordTokenRepository } from "src/core/repositories/reset.password.token.repository";
-import crypto from "crypto";
+import {randomBytes} from "crypto";
 import { RestPasswordTokenEntity } from "src/core/entities/resetPasswordToken.entity";
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 
 
 @Injectable()
@@ -71,19 +70,24 @@ export class AuthService{
     }
 
     async forgotPassword(email:string){
-        Logger.error(typeof email,'my tests lol');
+       
         const user:UserEntity = await this.userRepository.findOne({where:{email}});
         if(!user){
             throw new HttpException("email does not exist",HttpStatus.BAD_REQUEST);
         }
         
-        var token:string;
-        crypto.randomBytes(32,(ex,buf)=>{
-            token = buf.toString('hex');
-        })
+        var token:string =await new Promise((resolve,reject)=>{
+            randomBytes(32,(err,buf)=>{
+                if(err) reject(err);
+                resolve(buf.toString('hex'))
+            })
+        }) 
+        
+       
         const expiresIn = 15*60*1000;// in ms
-        const resetPasswordToken = this.resetPasswordTokenRepository.create({token,user,expiresIn});
+        const resetPasswordToken = this.resetPasswordTokenRepository.create({user,expiresIn,token:token});
         await this.resetPasswordTokenRepository.save(resetPasswordToken);
+       
         //sending an email
         let transporter = nodemailer.createTransport({
             service:'Gmail',
@@ -94,11 +98,11 @@ export class AuthService{
           });
 
           let info = await transporter.sendMail({
-            from: '"Fred Foo 👻" <assoulsidali@gmail.com>', // sender address
+            from: '"booooooooooowaaa3 👻" <assoulsidali@gmail.com>', // sender address
             to: "sidalihouda.computerscience@gmail.com", // list of receivers separated by ,
             subject: "Hello ✔", // Subject line
             text: `Hello world? http://localhost:8080/resetpassword/${token}/${user.id}`, // plain text body
-            html: "<b>Hello world?</b>", // html body
+            html: `<b>Hello world?</b> Hello world? http://localhost:3000/resetpassword/${token}/${user.id}`, // html body
           });
         
           console.log("Message sent: %s", info.messageId);
@@ -107,7 +111,7 @@ export class AuthService{
           // Preview only available when sending through an Ethereal account
           console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
           // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
+          return "check you email please";
     }
     async resetPassword(password:string,token:string,userId:string){
         const resetPasswordToken:RestPasswordTokenEntity = await this.resetPasswordTokenRepository.findOne({where:{userId}})
