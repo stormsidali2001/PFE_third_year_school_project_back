@@ -76,10 +76,10 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "forgotpassword", null);
 __decorate([
-    (0, common_1.Post)('resetpassword/:token/:uid'),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Param)('token')),
-    __param(2, (0, common_1.Param)('userId')),
+    (0, common_1.Post)('resetpassword'),
+    __param(0, (0, common_1.Body)('password')),
+    __param(1, (0, common_1.Body)('token')),
+    __param(2, (0, common_1.Body)('userId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)

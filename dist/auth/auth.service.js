@@ -68,6 +68,10 @@ let AuthService = class AuthService {
         if (!user) {
             throw new common_1.HttpException("email does not exist", common_1.HttpStatus.BAD_REQUEST);
         }
+        const userTokenInDb = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId', { userId: user.id }).getOne();
+        if (userTokenInDb) {
+            this.resetPasswordTokenRepository.delete(userTokenInDb.id);
+        }
         var token = await new Promise((resolve, reject) => {
             (0, crypto_1.randomBytes)(32, (err, buf) => {
                 if (err)
@@ -97,22 +101,21 @@ let AuthService = class AuthService {
         return "check you email please";
     }
     async resetPassword(password, token, userId) {
-        const resetPasswordToken = await this.resetPasswordTokenRepository.findOne({ where: { userId } });
+        const resetPasswordToken = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId', { userId }).getOne();
+        common_1.Logger.log(`tokenDb:${resetPasswordToken}`, "restPassword");
         if (!resetPasswordToken) {
             throw new common_1.HttpException("bad url", common_1.HttpStatus.FORBIDDEN);
         }
         if (resetPasswordToken.token != token) {
-            throw new common_1.HttpException("wrong token", common_1.HttpStatus.FORBIDDEN);
+            return "wrong token";
         }
-        if (resetPasswordToken.createdAt.getTime() + resetPasswordToken.expiresIn >= Date.now()) {
-            await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
-            throw new common_1.HttpException("token expired!!", common_1.HttpStatus.BAD_REQUEST);
+        if (Date.now() >= resetPasswordToken.createdAt.getTime() + resetPasswordToken.expiresIn) {
+            return "token expired createdAt:" + resetPasswordToken.createdAt.getTime() + " resetPasswordToken.expiresIn: " + resetPasswordToken.expiresIn + " date now:" + Date.now();
         }
         const user = await this.userRepository.findOne(userId);
         user.password = await bcrypt.hash(password, 10);
         await this.userRepository.save(user);
-        await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
-        return `${user.email} password has been rest succesfully`;
+        return `${user.email} password has been reset succesfully`;
     }
 };
 AuthService = __decorate([

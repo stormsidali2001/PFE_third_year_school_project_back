@@ -30,10 +30,10 @@ export class AuthController{
     
         return this.authService.forgotPassword(email);
     }
-    @Post('resetpassword/:token/:uid')
-    async resetPassword(@Body() password:string,
-                        @Param('token') token:string,
-                        @Param('userId') userId:string){
+    @Post('resetpassword')
+    async resetPassword(@Body('password') password:string,
+                        @Body('token') token:string,
+                        @Body('userId') userId:string){
         return this.authService.resetPassword(password,token,userId);
      }
 }

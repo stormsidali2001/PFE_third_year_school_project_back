@@ -38,3 +38,14 @@ content-type:application/json
     "email":"sidalihouda.computerscience@gmail.com"
    
 }
+
+###
+###
+POST http://localhost:8080/signin
+content-type:application/json
+
+{
+    "email":"sidalihouda.computerscience@gmail.com",
+    "password":"123456six"
+   
+}

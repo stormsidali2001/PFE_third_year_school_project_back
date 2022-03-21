@@ -76,7 +76,11 @@ export class AuthService{
              throw new HttpException("email does not exist",HttpStatus.BAD_REQUEST);
             // return 'email does not exist';
         }
-        
+        const userTokenInDb:RestPasswordTokenEntity = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId',{userId:user.id}).getOne();
+
+        if(userTokenInDb){
+            this.resetPasswordTokenRepository.delete(userTokenInDb.id);
+        }
         var token:string =await new Promise((resolve,reject)=>{
             randomBytes(32,(err,buf)=>{
                 if(err) reject(err);
@@ -87,6 +91,8 @@ export class AuthService{
        
         const expiresIn = 15*60*1000;// in ms
         const resetPasswordToken = this.resetPasswordTokenRepository.create({user,expiresIn,token:token});
+      
+
         await this.resetPasswordTokenRepository.save(resetPasswordToken);
        
         //sending an email
@@ -115,23 +121,28 @@ export class AuthService{
           return "check you email please";
     }
     async resetPassword(password:string,token:string,userId:string){
-        const resetPasswordToken:RestPasswordTokenEntity = await this.resetPasswordTokenRepository.findOne({where:{userId}})
+        const resetPasswordToken:RestPasswordTokenEntity = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId',{userId}).getOne();
+       
+        Logger.log(`tokenDb:${resetPasswordToken}`,"restPassword")
         if(!resetPasswordToken){
             throw new HttpException("bad url",HttpStatus.FORBIDDEN);
         }
         if(resetPasswordToken.token!= token){
-            throw new HttpException("wrong token",HttpStatus.FORBIDDEN);
+            // throw new HttpException("wrong token",HttpStatus.FORBIDDEN);
+            return "wrong token"
         }
-        if(resetPasswordToken.createdAt.getTime()+resetPasswordToken.expiresIn >= Date.now()){
+       
+        if(Date.now() >= resetPasswordToken.createdAt.getTime()+resetPasswordToken.expiresIn ){
 
-            await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
-            throw new HttpException("token expired!!",HttpStatus.BAD_REQUEST);
+            // await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
+            // throw new HttpException("token expired!!",HttpStatus.BAD_REQUEST);
+            return "token expired createdAt:"+resetPasswordToken.createdAt.getTime()+" resetPasswordToken.expiresIn: "+resetPasswordToken.expiresIn+" date now:"+Date.now();
         }
         const user = await this.userRepository.findOne(userId);
         user.password = await bcrypt.hash(password,10);
         await this.userRepository.save(user);
-        await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
-        return `${user.email} password has been rest succesfully`;
+        // await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
+        return `${user.email} password has been reset succesfully`;
     }
 
 }
