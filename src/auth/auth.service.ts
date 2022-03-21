@@ -73,7 +73,8 @@ export class AuthService{
        
         const user:UserEntity = await this.userRepository.findOne({where:{email}});
         if(!user){
-            throw new HttpException("email does not exist",HttpStatus.BAD_REQUEST);
+             throw new HttpException("email does not exist",HttpStatus.BAD_REQUEST);
+            // return 'email does not exist';
         }
         
         var token:string =await new Promise((resolve,reject)=>{
@@ -101,7 +102,7 @@ export class AuthService{
             from: '"booooooooooowaaa3 👻" <assoulsidali@gmail.com>', // sender address
             to: "sidalihouda.computerscience@gmail.com", // list of receivers separated by ,
             subject: "Hello ✔", // Subject line
-            text: `Hello world? http://localhost:8080/resetpassword/${token}/${user.id}`, // plain text body
+            text: `Hello world? http://localhost:8080/resetpassword/${token}?uid=${user.id}`, // plain text body
             html: `<b>Hello world?</b> Hello world? http://localhost:3000/resetpassword/${token}/${user.id}`, // html body
           });
         

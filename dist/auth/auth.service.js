@@ -89,7 +89,7 @@ let AuthService = class AuthService {
             from: '"booooooooooowaaa3 👻" <assoulsidali@gmail.com>',
             to: "sidalihouda.computerscience@gmail.com",
             subject: "Hello ✔",
-            text: `Hello world? http://localhost:8080/resetpassword/${token}/${user.id}`,
+            text: `Hello world? http://localhost:8080/resetpassword/${token}?uid=${user.id}`,
             html: `<b>Hello world?</b> Hello world? http://localhost:3000/resetpassword/${token}/${user.id}`,
         });
         console.log("Message sent: %s", info.messageId);

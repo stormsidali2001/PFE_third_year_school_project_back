@@ -27,9 +27,10 @@ export class AuthController{
    @Post('forgotpassword')
    async forgotpassword(@Body('email') email:string){
         Logger.log(`${email} sffklfsk`)
+    
         return this.authService.forgotPassword(email);
     }
-    @Post('resetpassword/:token/:userId')
+    @Post('resetpassword/:token/:uid')
     async resetPassword(@Body() password:string,
                         @Param('token') token:string,
                         @Param('userId') userId:string){
