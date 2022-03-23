@@ -6,19 +6,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModule = void 0;
+exports.LoggingInterceptor = void 0;
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const user_controller_1 = require("./user.controller");
-const user_service_1 = require("./user.service");
-let UserModule = class UserModule {
+const operators_1 = require("rxjs/operators");
+let LoggingInterceptor = class LoggingInterceptor {
+    intercept(context, next) {
+        const request = context.switchToHttp().getRequest();
+        const { method, url } = request;
+        const now = Date.now();
+        const call$ = next.handle();
+        return call$.pipe((0, operators_1.tap)(() => common_1.Logger.log(`${method} ${url} ${Date.now() - now}ms`, context.getClass().name)));
+    }
 };
-UserModule = __decorate([
-    (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([])],
-        providers: [user_service_1.UserService],
-        controllers: [user_controller_1.UserController]
-    })
-], UserModule);
-exports.UserModule = UserModule;
-//# sourceMappingURL=user.module.js.map
+LoggingInterceptor = __decorate([
+    (0, common_1.Injectable)()
+], LoggingInterceptor);
+exports.LoggingInterceptor = LoggingInterceptor;
+//# sourceMappingURL=logging.interceptor.js.map

@@ -1,10 +1,4 @@
-import { Repository } from "typeorm";
-import { UserDTO, UserRO } from "./user.dto";
-import { UserEntity } from "./user.entity";
 export declare class UserService {
-    private userRepository;
-    constructor(userRepository: Repository<UserEntity>);
-    signin(data: UserDTO): Promise<UserRO>;
-    signup(data: UserDTO): Promise<UserRO>;
-    getUsers(): Promise<UserRO[]>;
+    getUserInfo(userId: string): Promise<any>;
+    sendATeamInvitation(senderId: string, recieverId: string, description: string): Promise<string>;
 }

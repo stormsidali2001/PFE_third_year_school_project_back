@@ -6,19 +6,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StudentRepository = void 0;
+exports.TeamRepository = void 0;
 const typeorm_1 = require("typeorm");
-const student_entity_1 = require("../entities/student.entity");
-let StudentRepository = class StudentRepository extends typeorm_1.Repository {
-    async getTeam(id) {
-        return await this.createQueryBuilder('student').where('student.teamId = :id', { id }).getOne();
-    }
-    async getInvitationList() {
-        return await this.createQueryBuilder('student').where('student.');
+const team_entity_1 = require("../entities/team.entity");
+let TeamRepository = class TeamRepository extends typeorm_1.Repository {
+    async getTeamsList() {
+        return this.find();
     }
 };
-StudentRepository = __decorate([
-    (0, typeorm_1.EntityRepository)(student_entity_1.StudentEntity)
-], StudentRepository);
-exports.StudentRepository = StudentRepository;
-//# sourceMappingURL=student.repository.js.map
+TeamRepository = __decorate([
+    (0, typeorm_1.EntityRepository)(team_entity_1.TeamEntity)
+], TeamRepository);
+exports.TeamRepository = TeamRepository;
+//# sourceMappingURL=team.list.repository.js.map

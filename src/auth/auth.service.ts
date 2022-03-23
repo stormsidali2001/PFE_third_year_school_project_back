@@ -70,8 +70,15 @@ export class AuthService{
     }
 
     async forgotPassword(email:string){
+        
        
         const user:UserEntity = await this.userRepository.findOne({where:{email}});
+        const service = email.split('@')[1].split('.')[0];
+        const domain = email.split('@')[1].split('.')[1];
+        
+        if(service!== 'esi-sba' && domain !='dz'){
+            throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+        }
         if(!user){
              throw new HttpException("email does not exist",HttpStatus.BAD_REQUEST);
             // return 'email does not exist';
@@ -105,11 +112,10 @@ export class AuthService{
           });
 
           let info = await transporter.sendMail({
-            from: '"booooooooooowaaa3 👻" <assoulsidali@gmail.com>', // sender address
-            to: "sidalihouda.computerscience@gmail.com", // list of receivers separated by ,
+            from: '"It experts👻" <assoulsidali@gmail.com>', // sender address
+            to: email, // list of receivers separated by ,
             subject: "Hello ✔", // Subject line
-            text: `Hello world? http://localhost:8080/resetpassword/${token}?uid=${user.id}`, // plain text body
-            html: `<b>Hello world?</b> Hello world? http://localhost:3000/resetpassword/${token}/${user.id}`, // html body
+            html: `<b>vous avez envoyer une demmande de reincialisation de mot de passe presser sur le lien si il s'agit bien de vous </b><br/> le lien:  http://localhost:3000/resetpassword/${token}?uid=${user.id}`, // html body
           });
         
           console.log("Message sent: %s", info.messageId);
@@ -128,20 +134,20 @@ export class AuthService{
             throw new HttpException("bad url",HttpStatus.FORBIDDEN);
         }
         if(resetPasswordToken.token!= token){
-            // throw new HttpException("wrong token",HttpStatus.FORBIDDEN);
-            return "wrong token"
+            throw new HttpException("wrong token",HttpStatus.FORBIDDEN);
+        
         }
        
         if(Date.now() >= resetPasswordToken.createdAt.getTime()+resetPasswordToken.expiresIn ){
 
-            // await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
-            // throw new HttpException("token expired!!",HttpStatus.BAD_REQUEST);
-            return "token expired createdAt:"+resetPasswordToken.createdAt.getTime()+" resetPasswordToken.expiresIn: "+resetPasswordToken.expiresIn+" date now:"+Date.now();
+            await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
+            throw new HttpException("token expired!!",HttpStatus.BAD_REQUEST);
+            // return "token expired createdAt:"+resetPasswordToken.createdAt.getTime()+" resetPasswordToken.expiresIn: "+resetPasswordToken.expiresIn+" date now:"+Date.now();
         }
         const user = await this.userRepository.findOne(userId);
         user.password = await bcrypt.hash(password,10);
         await this.userRepository.save(user);
-        // await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
+        await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
         return `${user.email} password has been reset succesfully`;
     }
 

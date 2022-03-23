@@ -27,11 +27,13 @@ export class StudentEntity{
     @Column('date')
     dob:Date; 
 
+ 
     //relations
     @ManyToOne(type=>TeamEntity,team=>team.students)
     team:TeamEntity;
-
-    @OneToOne(type=>UserEntity) @JoinColumn()
+   
+    @OneToOne(type=>UserEntity) 
+    @JoinColumn()
     user:UserEntity
 
     @OneToMany(type=>InvitationEntity,invitation=>invitation.sender)

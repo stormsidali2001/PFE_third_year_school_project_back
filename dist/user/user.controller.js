@@ -14,42 +14,34 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
-const user_dto_1 = require("./user.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async getUsers() {
-        return this.userService.getUsers();
+    async getUserInfo(id) {
+        return this.userService.getUserInfo(id);
     }
-    async signin(data) {
-        return this.userService.signin(data);
-    }
-    async signup(data) {
-        return this.userService.signup(data);
+    async sendATeamInvitation(senderId, receiverId, description) {
+        return this.userService.sendATeamInvitation(senderId, receiverId, description);
     }
 };
 __decorate([
-    (0, common_1.Get)('users'),
+    (0, common_1.Post)('/user'),
+    __param(0, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "getUsers", null);
+], UserController.prototype, "getUserInfo", null);
 __decorate([
-    (0, common_1.Post)('signin'),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Post)('/sendATeamInvitation'),
+    __param(0, (0, common_1.Body)('senderId')),
+    __param(1, (0, common_1.Body)('receiverId')),
+    __param(2, (0, common_1.Body)('description')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.UserDTO]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "signin", null);
-__decorate([
-    (0, common_1.Post)('signup'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.UserDTO]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "signup", null);
+], UserController.prototype, "sendATeamInvitation", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

@@ -22,12 +22,12 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"sidalihouda.computerscience@gmail.com",
+    "email":"sid.assoul@esi-sba.dz",
     "password":"123456",
     "firstName":"sidali",
     "lastName":"assoul",
     "dob":"2022-03-17",
-    "code":"555"
+    "code":"191933000776"
 }
 
 ###
@@ -49,3 +49,39 @@ content-type:application/json
     "password":"123456six"
    
 }
+
+
+###
+POST http://localhost:8080/resetpassword
+content-type:application/json
+
+{
+   
+    "password":"123456six"
+   
+}
+
+
+###
+POST http://localhost:8080/user
+content-type:application/json
+
+{
+   
+    "id":"067db3f4-3919-4982-8ef5-2720288c6ef4"
+   
+}
+
+
+###
+POST http://localhost:8080/sendATeamInvitation
+content-type:application/json
+
+{
+   
+    "senderId":"2f3353b8-132c-475b-8ba7-0abc731cd76b",
+    "receiverId":"2f3353b8-132c-475b-8ba7-0abc731cd76b"
+
+   
+}
+

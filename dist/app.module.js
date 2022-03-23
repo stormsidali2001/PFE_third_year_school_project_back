@@ -44,6 +44,10 @@ const pv_meet_descused_point_entity_1 = require("./core/entities/pv.meet.descuse
 const theme_suggestion_1 = require("./core/entities/theme.suggestion");
 const theme_suggestion_document_entity_1 = require("./core/entities/theme.suggestion.document.entity");
 const resetPasswordToken_entity_1 = require("./core/entities/resetPasswordToken.entity");
+const core_1 = require("@nestjs/core");
+const http_error_filter_1 = require("./shared/http.error.filter");
+const logging_interceptor_1 = require("./shared/logging.interceptor");
+const user_module_1 = require("./user/user.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -90,9 +94,18 @@ AppModule = __decorate([
                     theme_suggestion_document_entity_1.ThemeSuggestionDocumentEntity,
                     resetPasswordToken_entity_1.RestPasswordTokenEntity
                 ]
-            }), auth_module_1.Auth, config_1.ConfigModule.forRoot({ isGlobal: true })],
+            }), auth_module_1.Auth, user_module_1.UserModule, config_1.ConfigModule.forRoot({ isGlobal: true })],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService,
+            {
+                provide: core_1.APP_FILTER,
+                useClass: http_error_filter_1.HttpErrorFilter
+            },
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: logging_interceptor_1.LoggingInterceptor
+            }
+        ],
     })
 ], AppModule);
 exports.AppModule = AppModule;
