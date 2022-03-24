@@ -25,6 +25,21 @@ let UserController = class UserController {
     async sendATeamInvitation(senderId, receiverId, description) {
         return this.userService.sendATeamInvitation(senderId, receiverId, description);
     }
+    async acceptRefuseTeamInvitation(invitationId, accepted) {
+        return this.userService.acceptRefuseTeamInvitation(invitationId, accepted);
+    }
+    async sendTeamJoinRequest(senderId, teamId, description) {
+        return this.userService.sendTeamJoinRequest(senderId, teamId, description);
+    }
+    async getInvitations(studentId) {
+        try {
+            return await this.userService.getInvitations(studentId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/getInvitations');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 __decorate([
     (0, common_1.Post)('/user'),
@@ -42,6 +57,30 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sendATeamInvitation", null);
+__decorate([
+    (0, common_1.Post)('/acceptRefuseTeamInvitation'),
+    __param(0, (0, common_1.Body)('invitationId')),
+    __param(1, (0, common_1.Body)('accepted', common_1.ParseBoolPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "acceptRefuseTeamInvitation", null);
+__decorate([
+    (0, common_1.Post)('/sendTeamJoinRequest'),
+    __param(0, (0, common_1.Body)('senderId')),
+    __param(1, (0, common_1.Body)('teamId')),
+    __param(2, (0, common_1.Body)('description')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sendTeamJoinRequest", null);
+__decorate([
+    (0, common_1.Get)('/invitations/:studentId'),
+    __param(0, (0, common_1.Param)('studentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getInvitations", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

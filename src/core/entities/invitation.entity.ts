@@ -9,8 +9,6 @@ export class InvitationEntity{
     @Column()
     description:string;
 
-    @Column()
-    accepted:boolean;
 
     //relations
     @ManyToOne(type=>StudentEntity,student=>student.sentInvitations)

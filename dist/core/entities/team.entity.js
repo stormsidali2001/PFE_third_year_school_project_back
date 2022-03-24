@@ -32,11 +32,15 @@ __decorate([
     __metadata("design:type", String)
 ], TeamEntity.prototype, "nickName", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({
+        default: ''
+    }),
     __metadata("design:type", String)
 ], TeamEntity.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({
+        default: ''
+    }),
     __metadata("design:type", String)
 ], TeamEntity.prototype, "rules", void 0);
 __decorate([

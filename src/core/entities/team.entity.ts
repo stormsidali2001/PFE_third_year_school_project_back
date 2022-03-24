@@ -19,10 +19,14 @@ export class TeamEntity{
     @Column()
     nickName:string;
 
-    @Column()
+    @Column({
+        default:''
+    })
     description:string;
 
-    @Column()
+    @Column({
+        default:''
+    })
     rules:string;
     //relations
     //for invitation

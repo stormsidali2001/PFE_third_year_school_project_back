@@ -15,7 +15,7 @@ let LoggingInterceptor = class LoggingInterceptor {
         const { method, url } = request;
         const now = Date.now();
         const call$ = next.handle();
-        return call$.pipe((0, operators_1.tap)(() => common_1.Logger.log(`${method} ${url} ${Date.now() - now}ms`, context.getClass().name)));
+        return call$.pipe((0, operators_1.tap)(() => common_1.Logger.log(`${method} ${url} request body:${JSON.stringify(request.body)} ${Date.now() - now}ms`, context.getClass().name)));
     }
 };
 LoggingInterceptor = __decorate([

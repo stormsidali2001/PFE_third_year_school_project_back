@@ -22,12 +22,12 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"sid.assoul@esi-sba.dz",
+    "email":"k.test4@esi-sba.dz",
     "password":"123456",
-    "firstName":"sidali",
-    "lastName":"assoul",
-    "dob":"2022-03-17",
-    "code":"191933000776"
+    "firstName":"test4",
+    "lastName":"footbaleur",
+    "dob":"2001-04-20",
+    "code":"191932004015"
 }
 
 ###
@@ -68,7 +68,7 @@ content-type:application/json
 
 {
    
-    "id":"067db3f4-3919-4982-8ef5-2720288c6ef4"
+    "id":"2f3353b8-132c-475b-8ba7-0abc731cd76b"
    
 }
 
@@ -79,9 +79,36 @@ content-type:application/json
 
 {
    
-    "senderId":"2f3353b8-132c-475b-8ba7-0abc731cd76b",
-    "receiverId":"2f3353b8-132c-475b-8ba7-0abc731cd76b"
+    "senderId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
+    "receiverId":"bd323783-e5ee-4d59-a0a4-0c8e57d60ae0",
+    "description":"qbli inv la bghiti z3ma"
 
    
 }
 
+
+###
+POST http://localhost:8080/acceptRefuseTeamInvitation
+content-type:application/json
+
+{
+   
+    "invitationId":"5451de3c-8c4d-432d-bc89-9cf1f7a7c9a2",
+    "accepted":"false"
+    
+   
+}
+
+###
+
+POST http://localhost:8080/sendTeamJoinRequest
+content-type:application/json
+
+{
+    "teamId":"60f64649-08ff-431c-88da-1de47db942ae",
+    "senderId":"bd323783-e5ee-4d59-a0a4-0c8e57d60ae0",
+    "description":"qbelna f team ta3k la bghit z3ma"
+}
+
+###
+Get http://localhost:8080/invitations/bd323783-e5ee-4d59-a0a4-0c8e57d60ae0

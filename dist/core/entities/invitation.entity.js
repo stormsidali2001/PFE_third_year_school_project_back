@@ -23,10 +23,6 @@ __decorate([
     __metadata("design:type", String)
 ], InvitationEntity.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Boolean)
-], InvitationEntity.prototype, "accepted", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(type => student_entity_1.StudentEntity, student => student.sentInvitations),
     __metadata("design:type", student_entity_1.StudentEntity)
 ], InvitationEntity.prototype, "sender", void 0);
