@@ -34,3 +34,14 @@ export class EnterpriseDTO{
   
 }
 
+export class SurveyDto{
+    title:string;
+    description:string;
+    options:OptionsDto[];
+    period:number;
+    teamId:string;
+    close:boolean;
+}
+export class OptionsDto{
+    description:string;
+}

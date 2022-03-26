@@ -93,8 +93,8 @@ content-type:application/json
 
 {
    
-    "invitationId":"5451de3c-8c4d-432d-bc89-9cf1f7a7c9a2",
-    "accepted":"false"
+    "invitationId":"3d40ca6c-c72d-4691-af75-36e878062073",
+    "accepted":"true"
     
    
 }
@@ -112,3 +112,53 @@ content-type:application/json
 
 ###
 Get http://localhost:8080/invitations/bd323783-e5ee-4d59-a0a4-0c8e57d60ae0
+
+
+### create announcement
+POST http://localhost:8080/createTeamAnnouncement
+content-type:application/json
+
+{
+    "title":"important meet",
+    "studentId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
+    "description":"ya teeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaam",
+    "teamId":"60f64649-08ff-431c-88da-1de47db942ae"
+}
+
+### send a team chat message
+POST http://localhost:8080/sendTeamChatMessage
+content-type:application/json
+
+{
+    "studentId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
+    "teamId":"60f64649-08ff-431c-88da-1de47db942ae",
+    "message":"hada message f chat t3na"
+}
+
+###create a team survey
+POST http://localhost:8080/createSurvey
+content-type:application/json
+
+{
+    "studentId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
+     "survey":{
+            "title":"what programing language do you like the most?",
+             "teamId":"60f64649-08ff-431c-88da-1de47db942ae",
+            "description":"",
+            "close":"false",
+            "period":"300000",
+            "options":[
+                            {
+                                "description":"java"
+                            },
+                            {
+                                "description":"javascript"
+                            },
+                            {
+                                "description":"python"
+                            }
+                    ]
+            
+        }
+}
+ 

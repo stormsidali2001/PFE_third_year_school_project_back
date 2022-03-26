@@ -24,7 +24,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], NotificationEntity.prototype, "title", void 0);
+], NotificationEntity.prototype, "description", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Boolean)
+], NotificationEntity.prototype, "seen", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => teacher_entity_1.TeacherEntity, teacher => teacher.notifications),
     __metadata("design:type", teacher_entity_1.TeacherEntity)

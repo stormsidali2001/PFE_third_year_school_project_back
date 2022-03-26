@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnterpriseDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
+exports.OptionsDto = exports.SurveyDto = exports.EnterpriseDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
 class UserDTO {
 }
 exports.UserDTO = UserDTO;
@@ -16,4 +16,10 @@ exports.StudentDTO = StudentDTO;
 class EnterpriseDTO {
 }
 exports.EnterpriseDTO = EnterpriseDTO;
+class SurveyDto {
+}
+exports.SurveyDto = SurveyDto;
+class OptionsDto {
+}
+exports.OptionsDto = OptionsDto;
 //# sourceMappingURL=user.dto.js.map

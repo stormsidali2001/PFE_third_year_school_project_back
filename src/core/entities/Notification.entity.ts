@@ -10,7 +10,11 @@ export class NotificationEntity{
     id:string;
 
     @Column()
-    title:string;
+    description:string;
+
+    @Column()
+    seen:boolean;
+
 
     @ManyToOne(type=>TeacherEntity,teacher=>teacher.notifications)
     teacher:TeacherEntity;

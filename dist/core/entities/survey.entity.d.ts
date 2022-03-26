@@ -6,7 +6,8 @@ export declare class SurveyEntity {
     title: string;
     description: string;
     createdAt: Date;
-    period: Date;
+    period: number;
+    close: boolean;
     team: TeamEntity;
     options: SurveyOptionEntity[];
     participants: SurveyParticipantEntity[];

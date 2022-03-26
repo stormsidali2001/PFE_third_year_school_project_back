@@ -29,3 +29,14 @@ export declare class EnterpriseDTO {
     password: string;
     name: string;
 }
+export declare class SurveyDto {
+    title: string;
+    description: string;
+    options: OptionsDto[];
+    period: number;
+    teamId: string;
+    close: boolean;
+}
+export declare class OptionsDto {
+    description: string;
+}

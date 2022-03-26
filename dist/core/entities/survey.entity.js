@@ -34,8 +34,12 @@ __decorate([
 ], SurveyEntity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", Date)
+    __metadata("design:type", Number)
 ], SurveyEntity.prototype, "period", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Boolean)
+], SurveyEntity.prototype, "close", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.surveys),
     __metadata("design:type", team_entity_1.TeamEntity)

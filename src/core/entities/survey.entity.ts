@@ -18,7 +18,10 @@ export class SurveyEntity{
     createdAt:Date;
 
     @Column()
-    period:Date;
+    period:number;
+
+    @Column()
+    close:boolean;
 
     //relations
     @ManyToOne(type=>TeamEntity,team=>team.surveys)

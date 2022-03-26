@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const user_dto_1 = require("../core/dtos/user.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
     constructor(userService) {
@@ -37,6 +38,33 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/getInvitations');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createTeamAnnouncement(studentId, teamId, title, description) {
+        try {
+            return await this.userService.createTeamAnnouncement(studentId, teamId, title, description);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/createTeamAnnouncement');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async sendTeamChatMessage(studentId, teamId, message) {
+        try {
+            return await this.userService.sendTeamChatMessage(studentId, teamId, message);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/sendTeamChatMessage');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createSurvey(studentId, survey) {
+        try {
+            return await this.userService.createSurvey(studentId, survey);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/createSurvey');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -81,6 +109,33 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getInvitations", null);
+__decorate([
+    (0, common_1.Post)('/createTeamAnnouncement'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('teamId')),
+    __param(2, (0, common_1.Body)('title')),
+    __param(3, (0, common_1.Body)('description')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createTeamAnnouncement", null);
+__decorate([
+    (0, common_1.Post)('sendTeamChatMessage'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('teamId')),
+    __param(2, (0, common_1.Body)('message')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sendTeamChatMessage", null);
+__decorate([
+    (0, common_1.Post)('createSurvey'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('survey')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createSurvey", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

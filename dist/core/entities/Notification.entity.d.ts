@@ -4,7 +4,8 @@ import { StudentEntity } from "./student.entity";
 import { TeacherEntity } from "./teacher.entity";
 export declare class NotificationEntity {
     id: string;
-    title: string;
+    description: string;
+    seen: boolean;
     teacher: TeacherEntity;
     student: StudentEntity;
     admin: AdminEntity;

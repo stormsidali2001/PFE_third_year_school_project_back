@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, Post } from "@nestjs/common";
+import { SurveyDto } from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
 
@@ -46,7 +47,38 @@ export class UserController{
         }
 
     }
-
-  
+    @Post('/createTeamAnnouncement')
+    async createTeamAnnouncement(@Body('studentId') studentId:string,
+                                @Body('teamId') teamId:string,
+                                @Body('title') title:string,
+                                @Body('description') description:string
+                                ){        
+        try{
+            return await this.userService.createTeamAnnouncement(studentId,teamId,title,description);
+        }catch(err){
+            Logger.error(err,'UsrController/createTeamAnnouncement')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Post('sendTeamChatMessage')
+    async sendTeamChatMessage(  @Body('studentId') studentId :string,
+                                @Body('teamId') teamId:string,
+                                @Body('message') message:string) {
+        try{
+            return await this.userService.sendTeamChatMessage(studentId,teamId,message);
+        }catch(err){
+            Logger.error(err,'UsrController/sendTeamChatMessage')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }          
+    @Post('createSurvey')
+    async createSurvey(@Body('studentId') studentId:string,@Body('survey') survey:SurveyDto){
+        try{
+            return await this.userService.createSurvey(studentId,survey);
+        }catch(err){
+            Logger.error(err,'UsrController/createSurvey')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
   
 }
