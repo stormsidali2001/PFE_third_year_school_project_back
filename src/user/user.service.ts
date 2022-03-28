@@ -6,6 +6,7 @@ import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SurveyOptionEntity } from "src/core/entities/survey.option.entity";
+import { SurveyParticipantEntity } from "src/core/entities/survey.participant.entity";
 import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
@@ -61,6 +62,10 @@ export class UserService{
         
        
     }
+    /*
+     * team leader/student sends an invitation  to a student without a team
+     * 
+     */
     async sendATeamInvitation(senderId:string,recieverId:string,description:string){
 
         if(senderId === recieverId){
@@ -100,13 +105,13 @@ export class UserService{
       
 
     }
-
-    async acceptRefuseTeamInvitation(invitationId:string,accepted:boolean){
-     
-        /**
-         * team leader/student sends an invitation request to a student without a team
+        /*
+         * the receiver of the invitation
          * 
          */
+    async acceptRefuseTeamInvitation(invitationId:string,receiverId:string,accepted:boolean){
+     
+      
      
         const manager = getManager();
 
@@ -121,8 +126,15 @@ export class UserService{
             Logger.error("invitation not found",'UserService/getAcceptRefuseTeamInvitation')
             throw new HttpException("invitation not found",HttpStatus.BAD_REQUEST);
         }
+        if(invitation.reciever.id!= receiverId){
+            Logger.error("you are not the right reciever",'UserService/getAcceptRefuseTeamInvitation')
+            throw new HttpException("invitation not found",HttpStatus.BAD_REQUEST);
+        }
       
       if(!accepted){
+          /*
+            either a teamLeader or a student  refused the invitation
+          */
           await invitationsRepository.delete({id:invitation.id})
           this._sendNotfication(invitation.sender.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `)
           return "the invitation has been refused";
@@ -238,8 +250,8 @@ export class UserService{
             }
             const invitations:InvitationEntity[] =  await invitationsRepository.createQueryBuilder('invitation').leftJoinAndSelect('invitation.sender','sender').getMany()
             if(!invitations){
-                Logger.error(`invitations related to: ${student.firstName+' '+student.lastName}`,'UserService/getInvitations')
-                throw new HttpException(`invitations related to: ${student.firstName+' '+student.lastName}`,HttpStatus.BAD_REQUEST);
+                Logger.error(`invitations related to: ${student.firstName+' '+student.lastName} not found`,'UserService/getInvitations')
+                throw new HttpException(`invitations related to: ${student.firstName+' '+student.lastName} not found`,HttpStatus.BAD_REQUEST);
             }
     
             return invitations;
@@ -272,8 +284,8 @@ export class UserService{
         const teamRepository = manager.getRepository(TeamEntity);
         const team = await teamRepository.findOne({id:teamId  },  {relations:['students']});
         if(!team){
-            Logger.error("team not found",'UserService/sendTeamNotfication')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
+            Logger.error("the student is not a member in a team",'UserService/sendTeamNotfication')
+            throw new HttpException("the student is not a member in a team",HttpStatus.BAD_REQUEST);
         }
         const notificationRepository = manager.getRepository(NotificationEntity);
         for(let student of team.students){
@@ -347,27 +359,27 @@ async createTeamAnnouncement(studentId:string,teamId:string,title:string,descrip
     }
 
 }
-async sendTeamChatMessage(studentId:string,teamId:string,message:string){
+async sendTeamChatMessage(studentId:string,message:string){
+
 
     try{
         const manager = getManager();
-        const teamRepository = manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId});
-        if(!team){
-            Logger.error("team not found",'UserService/sendTeamChatMessage')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
+      
         const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.findOne({id:studentId});
+        const student = await studentRepository.findOne({id:studentId},{relations:['team']});
         if(!student){           
             Logger.error("student not found",'UserService/sendTeamChatMessage')
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
        
+        if(!student.team){
+            Logger.error("the student has no team",'UserService/sendTeamChatMessage')
+            throw new HttpException("the student has no team",HttpStatus.BAD_REQUEST);
+        }
         const chatRepository = manager.getRepository(TeamChatMessageEntity);
-        const chat = chatRepository.create({message,team,owner:student});
+        const chat = chatRepository.create({message,team:student.team,owner:student});
         await chatRepository.save(chat);
-        return `message sent with success to team: ${team.nickName} members`;
+        return `message sent with success to team: ${student.team.nickName} members`;
     }catch(err){
         Logger.error(err,'UserService/sendTeamChatMessage')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -375,30 +387,37 @@ async sendTeamChatMessage(studentId:string,teamId:string,message:string){
     }
 
 }
+/*
+            survey section
+*/
 async createSurvey(studentId:string ,survey:SurveyDto){
-    const {title,description,period,teamId,options,close} = survey;
+    const {title,description,period,options,close} = survey;
+    if(period >=1 && period <=7){
+        Logger.error("period must be between 1 and 7",'UserService/createSurvey');
+        throw new HttpException("period must be between 1 and 7",HttpStatus.BAD_REQUEST);
+    }
+    
 
     try{
         const manager = getManager();
-        const teamRepository = manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId},{ relations:['teamLeader']});
-        if(!team){
-            Logger.error("team not found",'UserService/createSurvey')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
         const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.findOne({id:studentId});
+        const student = await studentRepository.findOne({id:studentId},{relations:['team','team.teamLeader']});
         if(!student){       
             Logger.error("student not found",'UserService/createSurvey')
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
-        if(team.teamLeader.id !== student.id){  
+   
+        if(!student.team){
+            Logger.error("team not found",'UserService/createSurvey')
+            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
+        }
+        if(student.team.teamLeader.id !== student.id){  
             Logger.error("student is not the team leader",'UserService/createSurvey')
             throw new HttpException("student is not the team leader",HttpStatus.BAD_REQUEST);
         }
         const surveyRepository = manager.getRepository(SurveyEntity);
         const surveyOptionRepository = manager.getRepository(SurveyOptionEntity);
-        const survey = surveyRepository.create({title,description,period,team,close});
+        const survey = surveyRepository.create({title,description,period,team:student.team,close});
         await surveyRepository.save(survey);
             for(let key in options){
                 const {description} = options[key];
@@ -406,14 +425,73 @@ async createSurvey(studentId:string ,survey:SurveyDto){
                 await surveyOptionRepository.save(surveyOption);
             }
 
-        this._sendTeamNotfication(team.id,`a new survey has been created a survey with title: ${title}`);
-        return `survey sent with success to team: ${team.nickName} members`;
+        this._sendTeamNotfication(student.team.id,`a new survey has been created a survey with title: ${title}`);
+        return `survey sent with success to team: ${student.team.nickName} members`;
     }catch(err){
         Logger.error(err,'UserService/createSurvey')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
     }
 }
+async getSurveys(teamId:string){
+    try{
+        const manager =     getManager();
+        const teamRepository =   manager.getRepository(TeamEntity);
+        const team = await teamRepository.findOne({id:teamId},{relations:['surveys']});
+        if(!team){
+            Logger.error("team not found",'UserService/getSurveys')
+            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
+        }
+        return team.surveys;
+    }catch(err){
+        Logger.error(err,'UserService/getSurveys')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
+    }
+}
+async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argument:string){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
+        const student = await studentRepository.createQueryBuilder('student')
+        .innerJoinAndSelect('student.team','team')
+        .innerJoinAndSelect('team.surveys','surveys')
+        .where('surveys.id = :surveyId',{surveyId})
+        .innerJoinAndSelect('surveys.options','options')
+        .where('student.id = :studentId',{studentId})
+        .andWhere('options.id = :optionId',{optionId})
+        .getOne();
+     
+       
+        if(!student){   
+            Logger.error("survey or student or option not found",'UserService/submitSurveyAnswer')  
+            throw new HttpException("survey or student or option not found",HttpStatus.BAD_REQUEST);
+        }
+        
+        const surveyParticipantRepository = manager.getRepository(SurveyParticipantEntity);
+        const existingSurveyParticipants = await surveyParticipantRepository.createQueryBuilder('surveyParticipant')
+        .innerJoinAndSelect('surveyParticipant.survey','survey')
+        .innerJoinAndSelect('surveyParticipant.student','student')
+        .where('student.id = :studentId',{studentId})
+        .getMany();
+      
+        if(existingSurveyParticipants.length>=1){
+            Logger.error("survey already answered",'UserService/submitSurveyAnswer')
+            throw new HttpException("survey already answered",HttpStatus.BAD_REQUEST);
+        }
+        const surveyParticipant = surveyParticipantRepository.create({survey:student.team.surveys[0],student:student,answer:student.team.surveys[0].options[0],argument});
+
+     
+       await surveyParticipantRepository.save(surveyParticipant);
+        
+       return 'survey answered succesfully';
+     
+    }catch(err){
+        Logger.error(err,'UserService/submitSurvey')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+       
+}
 
 }

@@ -47,8 +47,19 @@ export class AuthService{
     async signupStudent(data:StudentDTO){
         const {email,password,firstName,lastName,dob,code} = data;
         let user:UserEntity = await this.userRepository.findOne({where:{email}})
+        const service = email.split('@')[1].split('.')[0];
+        const domain = email.split('@')[1].split('.')[1];
+        
+        if(service!== 'esi-sba' && domain !='dz'){
+            throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+        }
         if(user){
             throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+        }
+        // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
+        const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if(password.match(regex)==null){
+            throw new HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters',HttpStatus.BAD_REQUEST); 
         }
      
         user =  this.userRepository.create({email,password,userType:UserType.STUDENT});

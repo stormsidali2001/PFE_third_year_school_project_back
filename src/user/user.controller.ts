@@ -25,11 +25,12 @@ export class UserController{
     @Post('/acceptRefuseTeamInvitation')
     async acceptRefuseTeamInvitation(
         @Body('invitationId') invitationId:string ,
-        @Body('accepted',ParseBoolPipe) accepted:boolean 
+        @Body('accepted',ParseBoolPipe) accepted:boolean,
+        @Body('recieverId') recieverId:string 
         
     ){
       
-        return this.userService.acceptRefuseTeamInvitation(invitationId,accepted);
+        return this.userService.acceptRefuseTeamInvitation(invitationId,recieverId,accepted);
     }
 
     @Post('/sendTeamJoinRequest')
@@ -62,10 +63,9 @@ export class UserController{
     }
     @Post('sendTeamChatMessage')
     async sendTeamChatMessage(  @Body('studentId') studentId :string,
-                                @Body('teamId') teamId:string,
                                 @Body('message') message:string) {
         try{
-            return await this.userService.sendTeamChatMessage(studentId,teamId,message);
+            return await this.userService.sendTeamChatMessage(studentId,message);
         }catch(err){
             Logger.error(err,'UsrController/sendTeamChatMessage')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -77,6 +77,19 @@ export class UserController{
             return await this.userService.createSurvey(studentId,survey);
         }catch(err){
             Logger.error(err,'UsrController/createSurvey')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Post('submitSurveyAnswer')
+    async submitSurveyAnswer( @Body('studentId') studentId:string,
+                                @Body('surveyId') surveyId:string,
+                                @Body('optionId') optionId:string,
+                                @Body('argument') argument:string
+                                ){
+        try{
+            return await this.userService.submitSurveyAnswer(studentId,surveyId,optionId,argument);
+        }catch(err){
+            Logger.error(err,'UsrController/submitSurveyAnswer')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }

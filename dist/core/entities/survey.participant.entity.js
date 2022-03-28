@@ -13,12 +13,17 @@ exports.SurveyParticipantEntity = void 0;
 const typeorm_1 = require("typeorm");
 const student_entity_1 = require("./student.entity");
 const survey_entity_1 = require("./survey.entity");
+const survey_option_entity_1 = require("./survey.option.entity");
 let SurveyParticipantEntity = class SurveyParticipantEntity {
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
 ], SurveyParticipantEntity.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], SurveyParticipantEntity.prototype, "argument", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => student_entity_1.StudentEntity, student => student.participationsInSurveys),
     __metadata("design:type", student_entity_1.StudentEntity)
@@ -27,6 +32,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => survey_entity_1.SurveyEntity, survey => survey.participants),
     __metadata("design:type", survey_entity_1.SurveyEntity)
 ], SurveyParticipantEntity.prototype, "survey", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(type => survey_option_entity_1.SurveyOptionEntity, option => option.participations),
+    __metadata("design:type", survey_option_entity_1.SurveyOptionEntity)
+], SurveyParticipantEntity.prototype, "answer", void 0);
 SurveyParticipantEntity = __decorate([
     (0, typeorm_1.Entity)('survey_participant')
 ], SurveyParticipantEntity);

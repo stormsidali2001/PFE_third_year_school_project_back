@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SurveyOptionEntity = void 0;
 const typeorm_1 = require("typeorm");
 const survey_entity_1 = require("./survey.entity");
+const survey_participant_entity_1 = require("./survey.participant.entity");
 let SurveyOptionEntity = class SurveyOptionEntity {
 };
 __decorate([
@@ -26,6 +27,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => survey_entity_1.SurveyEntity, survey => survey.options),
     __metadata("design:type", survey_entity_1.SurveyEntity)
 ], SurveyOptionEntity.prototype, "survey", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => survey_participant_entity_1.SurveyParticipantEntity, participation => participation.answer),
+    __metadata("design:type", Array)
+], SurveyOptionEntity.prototype, "participations", void 0);
 SurveyOptionEntity = __decorate([
     (0, typeorm_1.Entity)('survey_option')
 ], SurveyOptionEntity);

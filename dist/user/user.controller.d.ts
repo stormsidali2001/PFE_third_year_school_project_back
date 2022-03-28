@@ -5,10 +5,11 @@ export declare class UserController {
     constructor(userService: UserService);
     getUserInfo(id: string): Promise<any>;
     sendATeamInvitation(senderId: string, receiverId: string, description: string): Promise<string>;
-    acceptRefuseTeamInvitation(invitationId: string, accepted: boolean): Promise<string>;
+    acceptRefuseTeamInvitation(invitationId: string, accepted: boolean, recieverId: string): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
     getInvitations(studentId: string): Promise<import("../core/entities/invitation.entity").InvitationEntity[]>;
     createTeamAnnouncement(studentId: string, teamId: string, title: string, description: string): Promise<string>;
-    sendTeamChatMessage(studentId: string, teamId: string, message: string): Promise<string>;
+    sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
+    submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<string>;
 }

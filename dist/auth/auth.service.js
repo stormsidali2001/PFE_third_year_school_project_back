@@ -47,8 +47,17 @@ let AuthService = class AuthService {
     async signupStudent(data) {
         const { email, password, firstName, lastName, dob, code } = data;
         let user = await this.userRepository.findOne({ where: { email } });
+        const service = email.split('@')[1].split('.')[0];
+        const domain = email.split('@')[1].split('.')[1];
+        if (service !== 'esi-sba' && domain != 'dz') {
+            throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+        }
         if (user) {
             throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (password.match(regex) == null) {
+            throw new common_1.HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters', common_1.HttpStatus.BAD_REQUEST);
         }
         user = this.userRepository.create({ email, password, userType: user_entity_1.UserType.STUDENT });
         user.password = await bcrypt.hash(user.password, 10);

@@ -26,8 +26,8 @@ let UserController = class UserController {
     async sendATeamInvitation(senderId, receiverId, description) {
         return this.userService.sendATeamInvitation(senderId, receiverId, description);
     }
-    async acceptRefuseTeamInvitation(invitationId, accepted) {
-        return this.userService.acceptRefuseTeamInvitation(invitationId, accepted);
+    async acceptRefuseTeamInvitation(invitationId, accepted, recieverId) {
+        return this.userService.acceptRefuseTeamInvitation(invitationId, recieverId, accepted);
     }
     async sendTeamJoinRequest(senderId, teamId, description) {
         return this.userService.sendTeamJoinRequest(senderId, teamId, description);
@@ -50,9 +50,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async sendTeamChatMessage(studentId, teamId, message) {
+    async sendTeamChatMessage(studentId, message) {
         try {
-            return await this.userService.sendTeamChatMessage(studentId, teamId, message);
+            return await this.userService.sendTeamChatMessage(studentId, message);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/sendTeamChatMessage');
@@ -65,6 +65,15 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/createSurvey');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async submitSurveyAnswer(studentId, surveyId, optionId, argument) {
+        try {
+            return await this.userService.submitSurveyAnswer(studentId, surveyId, optionId, argument);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/submitSurveyAnswer');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -89,8 +98,9 @@ __decorate([
     (0, common_1.Post)('/acceptRefuseTeamInvitation'),
     __param(0, (0, common_1.Body)('invitationId')),
     __param(1, (0, common_1.Body)('accepted', common_1.ParseBoolPipe)),
+    __param(2, (0, common_1.Body)('recieverId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:paramtypes", [String, Boolean, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "acceptRefuseTeamInvitation", null);
 __decorate([
@@ -122,10 +132,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('sendTeamChatMessage'),
     __param(0, (0, common_1.Body)('studentId')),
-    __param(1, (0, common_1.Body)('teamId')),
-    __param(2, (0, common_1.Body)('message')),
+    __param(1, (0, common_1.Body)('message')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sendTeamChatMessage", null);
 __decorate([
@@ -136,6 +145,16 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createSurvey", null);
+__decorate([
+    (0, common_1.Post)('submitSurveyAnswer'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('surveyId')),
+    __param(2, (0, common_1.Body)('optionId')),
+    __param(3, (0, common_1.Body)('argument')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "submitSurveyAnswer", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

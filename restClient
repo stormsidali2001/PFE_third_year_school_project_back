@@ -22,10 +22,10 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"k.test4@esi-sba.dz",
-    "password":"123456",
-    "firstName":"test4",
-    "lastName":"footbaleur",
+    "email":"a3.assoul@esi-sba.dz",
+    "password":"1@2@3Abc",
+    "firstName":"a3",
+    "lastName":"test3",
     "dob":"2001-04-20",
     "code":"191932004015"
 }
@@ -79,8 +79,8 @@ content-type:application/json
 
 {
    
-    "senderId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
-    "receiverId":"bd323783-e5ee-4d59-a0a4-0c8e57d60ae0",
+    "senderId":"274d1180-45fe-483d-a2ac-2b9865f6f60c",
+    "receiverId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
     "description":"qbli inv la bghiti z3ma"
 
    
@@ -93,7 +93,8 @@ content-type:application/json
 
 {
    
-    "invitationId":"3d40ca6c-c72d-4691-af75-36e878062073",
+    "invitationId":"80d4fab8-f905-470a-a465-47285649235b",
+    "recieverId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
     "accepted":"true"
     
    
@@ -131,7 +132,6 @@ content-type:application/json
 
 {
     "studentId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
-    "teamId":"60f64649-08ff-431c-88da-1de47db942ae",
     "message":"hada message f chat t3na"
 }
 
@@ -140,10 +140,9 @@ POST http://localhost:8080/createSurvey
 content-type:application/json
 
 {
-    "studentId":"4735647e-7b2c-4e3d-9f6a-f29da7086956",
+    "studentId":"274d1180-45fe-483d-a2ac-2b9865f6f60c",
      "survey":{
             "title":"what programing language do you like the most?",
-             "teamId":"60f64649-08ff-431c-88da-1de47db942ae",
             "description":"",
             "close":"false",
             "period":"300000",
@@ -162,3 +161,13 @@ content-type:application/json
         }
 }
  
+### submit a survey answer
+POST http://localhost:8080/submitSurveyAnswer
+content-type:application/json
+
+{
+    "studentId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
+    "surveyId":"85a2bf95-ab23-43d9-bfe5-9939ec55574d",
+    "optionId":"b329cdd1-3a3c-419d-829c-67c4c31bf7f7",
+    "argument":"i feel that  java is the best language"
+}
