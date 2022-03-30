@@ -144,8 +144,7 @@ content-type:application/json
      "survey":{
             "title":"what programing language do you like the most?",
             "description":"",
-            "close":"false",
-            "period":"300000",
+            "period":"10000",
             "options":[
                             {
                                 "description":"java"
@@ -166,8 +165,11 @@ POST http://localhost:8080/submitSurveyAnswer
 content-type:application/json
 
 {
-    "studentId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
+    "studentId":"8eb3e1d9-052e-4cfd-8a12-6347182f1585",
     "surveyId":"85a2bf95-ab23-43d9-bfe5-9939ec55574d",
-    "optionId":"b329cdd1-3a3c-419d-829c-67c4c31bf7f7",
+    "optionId":"a8774148-ab24-4fc8-b6d1-7b2589b109fe",
     "argument":"i feel that  java is the best language"
 }
+
+### get the surveys of a team
+Get http://localhost:8080/surveys/50d4eefb-bc1b-4d20-908f-d1325339f454 

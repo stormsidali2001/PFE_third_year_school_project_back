@@ -77,6 +77,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSurveys(teamId) {
+        try {
+            return await this.userService.getSurveys(teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, "UserController/getSurveys");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 __decorate([
     (0, common_1.Post)('/user'),
@@ -155,6 +164,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "submitSurveyAnswer", null);
+__decorate([
+    (0, common_1.Get)('surveys/:teamId'),
+    __param(0, (0, common_1.Param)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getSurveys", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

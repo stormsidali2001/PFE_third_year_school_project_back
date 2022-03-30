@@ -25,11 +25,11 @@ __decorate([
     __metadata("design:type", String)
 ], SurveyParticipantEntity.prototype, "argument", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(type => student_entity_1.StudentEntity, student => student.participationsInSurveys),
+    (0, typeorm_1.ManyToOne)(type => student_entity_1.StudentEntity, student => student.participationsInSurveys, { primary: true }),
     __metadata("design:type", student_entity_1.StudentEntity)
 ], SurveyParticipantEntity.prototype, "student", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(type => survey_entity_1.SurveyEntity, survey => survey.participants),
+    (0, typeorm_1.ManyToOne)(type => survey_entity_1.SurveyEntity, survey => survey.participants, { primary: true }),
     __metadata("design:type", survey_entity_1.SurveyEntity)
 ], SurveyParticipantEntity.prototype, "survey", void 0);
 __decorate([

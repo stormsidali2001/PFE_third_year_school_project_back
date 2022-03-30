@@ -48,6 +48,7 @@ const core_1 = require("@nestjs/core");
 const http_error_filter_1 = require("./shared/http.error.filter");
 const logging_interceptor_1 = require("./shared/logging.interceptor");
 const user_module_1 = require("./user/user.module");
+const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -94,7 +95,7 @@ AppModule = __decorate([
                     theme_suggestion_document_entity_1.ThemeSuggestionDocumentEntity,
                     resetPasswordToken_entity_1.RestPasswordTokenEntity
                 ]
-            }), auth_module_1.Auth, user_module_1.UserModule, config_1.ConfigModule.forRoot({ isGlobal: true })],
+            }), auth_module_1.Auth, user_module_1.UserModule, config_1.ConfigModule.forRoot({ isGlobal: true }), schedule_1.ScheduleModule.forRoot()],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService,
             {

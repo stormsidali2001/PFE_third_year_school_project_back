@@ -39,6 +39,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/http.error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -88,7 +89,7 @@ import { UserModule } from './user/user.module';
 
             ]
 
-  }),Auth,UserModule,ConfigModule.forRoot({isGlobal:true})],
+  }),Auth,UserModule,ConfigModule.forRoot({isGlobal:true}),ScheduleModule.forRoot()],
   controllers: [AppController],
   providers: [AppService,
     {

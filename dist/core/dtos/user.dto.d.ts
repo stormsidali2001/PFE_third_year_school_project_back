@@ -35,7 +35,6 @@ export declare class SurveyDto {
     options: OptionsDto[];
     period: number;
     teamId: string;
-    close: boolean;
 }
 export declare class OptionsDto {
     description: string;

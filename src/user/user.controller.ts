@@ -73,6 +73,7 @@ export class UserController{
     }          
     @Post('createSurvey')
     async createSurvey(@Body('studentId') studentId:string,@Body('survey') survey:SurveyDto){
+       
         try{
             return await this.userService.createSurvey(studentId,survey);
         }catch(err){
@@ -92,6 +93,16 @@ export class UserController{
             Logger.error(err,'UsrController/submitSurveyAnswer')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Get('surveys/:teamId')
+    async getSurveys(@Param('teamId') teamId:string){
+            try{
+                return await this.userService.getSurveys(teamId);
+            }catch(err){
+                Logger.error(err,"UserController/getSurveys");
+                throw new HttpException(err,HttpStatus.BAD_REQUEST)
+            }
     }
   
 }

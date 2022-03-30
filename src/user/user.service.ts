@@ -11,8 +11,11 @@ import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entit
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { getManager } from "typeorm";
+import {SchedulerRegistry} from '@nestjs/schedule'
+import { CronJob } from "cron";
 @Injectable()
 export class UserService{
+    constructor(private schedulerRegistry: SchedulerRegistry){}
     
     async getUserInfo(userId:string){
         const manager = getManager();
@@ -391,11 +394,19 @@ async sendTeamChatMessage(studentId:string,message:string){
             survey section
 */
 async createSurvey(studentId:string ,survey:SurveyDto){
-    const {title,description,period,options,close} = survey;
-    if(period >=1 && period <=7){
-        Logger.error("period must be between 1 and 7",'UserService/createSurvey');
-        throw new HttpException("period must be between 1 and 7",HttpStatus.BAD_REQUEST);
+    const {title,description,options} = survey;
+    let {period} = survey;
+    if(Number.isNaN(period)){
+        Logger.error("period is not a number",'UserService/createSurvey')
+        throw new HttpException("period is not a number",HttpStatus.BAD_REQUEST);
     }
+    
+
+    // // if(period<1 && period >7){
+    // //     Logger.error("period must be between 1 and 7",'UserService/createSurvey');
+    // //     throw new HttpException("period must be between 1 and 7",HttpStatus.BAD_REQUEST);
+    // // }
+    // period = period*24*60*60*1000;
     
 
     try{
@@ -417,38 +428,34 @@ async createSurvey(studentId:string ,survey:SurveyDto){
         }
         const surveyRepository = manager.getRepository(SurveyEntity);
         const surveyOptionRepository = manager.getRepository(SurveyOptionEntity);
-        const survey = surveyRepository.create({title,description,period,team:student.team,close});
+        const survey = surveyRepository.create({title,description,period,team:student.team,close:false});
+        const surveyOptions:SurveyOptionEntity[] = [];
         await surveyRepository.save(survey);
             for(let key in options){
                 const {description} = options[key];
                 const surveyOption = surveyOptionRepository.create({description,survey});
-                await surveyOptionRepository.save(surveyOption);
+                surveyOptions.push(surveyOption);
             }
+            await surveyOptionRepository.save(surveyOptions);
 
         this._sendTeamNotfication(student.team.id,`a new survey has been created a survey with title: ${title}`);
+        //running the crun job
+        const surveyData = await surveyRepository.findOne({id:survey.id});
+        const job = new CronJob(new Date(surveyData.createdAt.getTime()+period),()=>{
+            Logger.warn("survey period has ended",'UserService/createSurvey');
+            surveyRepository.update({id:surveyData.id},{close:true});
+            this._sendTeamNotfication(student.team.id,`the survey with title: ${title} has ended`);
+        })
+        this.schedulerRegistry.addCronJob(`cron_Job_surveyEnd_${survey.id}`,job);
+        job.start();
         return `survey sent with success to team: ${student.team.nickName} members`;
     }catch(err){
         Logger.error(err,'UserService/createSurvey')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
-    }
+    } 
 }
-async getSurveys(teamId:string){
-    try{
-        const manager =     getManager();
-        const teamRepository =   manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId},{relations:['surveys']});
-        if(!team){
-            Logger.error("team not found",'UserService/getSurveys')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
-        return team.surveys;
-    }catch(err){
-        Logger.error(err,'UserService/getSurveys')
-        throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
-    }
-}
 async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argument:string){
     try{
         const manager = getManager();
@@ -469,22 +476,36 @@ async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argume
         }
         
         const surveyParticipantRepository = manager.getRepository(SurveyParticipantEntity);
-        const existingSurveyParticipants = await surveyParticipantRepository.createQueryBuilder('surveyParticipant')
-        .innerJoinAndSelect('surveyParticipant.survey','survey')
-        .innerJoinAndSelect('surveyParticipant.student','student')
+        
+        const existingSurveyParticipant = await surveyParticipantRepository.createQueryBuilder('surveyParticipant')
+        .innerJoin('surveyParticipant.survey','survey')
+        .innerJoin('surveyParticipant.student','student')
+        .innerJoinAndSelect('surveyParticipant.answer','answer')
         .where('student.id = :studentId',{studentId})
-        .getMany();
-      
-        if(existingSurveyParticipants.length>=1){
-            Logger.error("survey already answered",'UserService/submitSurveyAnswer')
-            throw new HttpException("survey already answered",HttpStatus.BAD_REQUEST);
-        }
-        const surveyParticipant = surveyParticipantRepository.create({survey:student.team.surveys[0],student:student,answer:student.team.surveys[0].options[0],argument});
+        .andWhere('survey.id = :surveyId',{surveyId})
+        .getOne();
 
      
-       await surveyParticipantRepository.save(surveyParticipant);
+       
+        const surveyParticipant = surveyParticipantRepository.create({survey:student.team.surveys[0],student:student,answer:student.team.surveys[0].options[0],argument});
+
+      
+      
+        if(!existingSurveyParticipant){
+            await surveyParticipantRepository.save(surveyParticipant);
+            return "survey answered succesfully"
+        }
+    
+       if(surveyParticipant.answer.id === existingSurveyParticipant.answer.id){
+        Logger.error("you've already answered to the survey using that option",'UserService/submitSurvey')
+        throw new HttpException("you've already answered to the survey using that option",HttpStatus.BAD_REQUEST);
+       }
+   
+       await surveyParticipantRepository.update({id:existingSurveyParticipant.id},surveyParticipant);
         
-       return 'survey answered succesfully';
+      return "answer updated succesfully"
+   
+        
      
     }catch(err){
         Logger.error(err,'UserService/submitSurvey')
@@ -492,6 +513,23 @@ async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argume
 
     }
        
+}
+
+async getSurveys(teamId:string){
+    try{
+        const manager =     getManager();
+        const teamRepository =   manager.getRepository(TeamEntity);
+        const team = await teamRepository.findOne({id:teamId},{relations:['surveys']});
+        if(!team){
+            Logger.error("team not found",'UserService/getSurveys')
+            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
+        }
+        return team.surveys;
+    }catch(err){
+        Logger.error(err,'UserService/getSurveys')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
 }
 
 }

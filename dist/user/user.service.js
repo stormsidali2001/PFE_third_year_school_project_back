@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
@@ -19,7 +22,12 @@ const team_chat_message_entity_1 = require("../core/entities/team.chat.message.e
 const team_entity_1 = require("../core/entities/team.entity");
 const user_entity_1 = require("../core/entities/user.entity");
 const typeorm_1 = require("typeorm");
+const schedule_1 = require("@nestjs/schedule");
+const cron_1 = require("cron");
 let UserService = class UserService {
+    constructor(schedulerRegistry) {
+        this.schedulerRegistry = schedulerRegistry;
+    }
     async getUserInfo(userId) {
         const manager = (0, typeorm_1.getManager)();
         const userRepository = manager.getRepository(user_entity_1.UserEntity);
@@ -295,10 +303,11 @@ let UserService = class UserService {
         }
     }
     async createSurvey(studentId, survey) {
-        const { title, description, period, options, close } = survey;
-        if (period >= 1 && period <= 7) {
-            common_1.Logger.error("period must be between 1 and 7", 'UserService/createSurvey');
-            throw new common_1.HttpException("period must be between 1 and 7", common_1.HttpStatus.BAD_REQUEST);
+        const { title, description, options } = survey;
+        let { period } = survey;
+        if (Number.isNaN(period)) {
+            common_1.Logger.error("period is not a number", 'UserService/createSurvey');
+            throw new common_1.HttpException("period is not a number", common_1.HttpStatus.BAD_REQUEST);
         }
         try {
             const manager = (0, typeorm_1.getManager)();
@@ -318,34 +327,28 @@ let UserService = class UserService {
             }
             const surveyRepository = manager.getRepository(survey_entity_1.SurveyEntity);
             const surveyOptionRepository = manager.getRepository(survey_option_entity_1.SurveyOptionEntity);
-            const survey = surveyRepository.create({ title, description, period, team: student.team, close });
+            const survey = surveyRepository.create({ title, description, period, team: student.team, close: false });
+            const surveyOptions = [];
             await surveyRepository.save(survey);
             for (let key in options) {
                 const { description } = options[key];
                 const surveyOption = surveyOptionRepository.create({ description, survey });
-                await surveyOptionRepository.save(surveyOption);
+                surveyOptions.push(surveyOption);
             }
+            await surveyOptionRepository.save(surveyOptions);
             this._sendTeamNotfication(student.team.id, `a new survey has been created a survey with title: ${title}`);
+            const surveyData = await surveyRepository.findOne({ id: survey.id });
+            const job = new cron_1.CronJob(new Date(surveyData.createdAt.getTime() + period), () => {
+                common_1.Logger.warn("survey period has ended", 'UserService/createSurvey');
+                surveyRepository.update({ id: surveyData.id }, { close: true });
+                this._sendTeamNotfication(student.team.id, `the survey with title: ${title} has ended`);
+            });
+            this.schedulerRegistry.addCronJob(`cron_Job_surveyEnd_${survey.id}`, job);
+            job.start();
             return `survey sent with success to team: ${student.team.nickName} members`;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createSurvey');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSurveys(teamId) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
-            const team = await teamRepository.findOne({ id: teamId }, { relations: ['surveys'] });
-            if (!team) {
-                common_1.Logger.error("team not found", 'UserService/getSurveys');
-                throw new common_1.HttpException("team not found", common_1.HttpStatus.BAD_REQUEST);
-            }
-            return team.surveys;
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserService/getSurveys');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -366,27 +369,50 @@ let UserService = class UserService {
                 throw new common_1.HttpException("survey or student or option not found", common_1.HttpStatus.BAD_REQUEST);
             }
             const surveyParticipantRepository = manager.getRepository(survey_participant_entity_1.SurveyParticipantEntity);
-            const existingSurveyParticipants = await surveyParticipantRepository.createQueryBuilder('surveyParticipant')
-                .innerJoinAndSelect('surveyParticipant.survey', 'survey')
-                .innerJoinAndSelect('surveyParticipant.student', 'student')
+            const existingSurveyParticipant = await surveyParticipantRepository.createQueryBuilder('surveyParticipant')
+                .innerJoin('surveyParticipant.survey', 'survey')
+                .innerJoin('surveyParticipant.student', 'student')
+                .innerJoinAndSelect('surveyParticipant.answer', 'answer')
                 .where('student.id = :studentId', { studentId })
-                .getMany();
-            if (existingSurveyParticipants.length >= 1) {
-                common_1.Logger.error("survey already answered", 'UserService/submitSurveyAnswer');
-                throw new common_1.HttpException("survey already answered", common_1.HttpStatus.BAD_REQUEST);
-            }
+                .andWhere('survey.id = :surveyId', { surveyId })
+                .getOne();
             const surveyParticipant = surveyParticipantRepository.create({ survey: student.team.surveys[0], student: student, answer: student.team.surveys[0].options[0], argument });
-            await surveyParticipantRepository.save(surveyParticipant);
-            return 'survey answered succesfully';
+            if (!existingSurveyParticipant) {
+                await surveyParticipantRepository.save(surveyParticipant);
+                return "survey answered succesfully";
+            }
+            if (surveyParticipant.answer.id === existingSurveyParticipant.answer.id) {
+                common_1.Logger.error("you've already answered to the survey using that option", 'UserService/submitSurvey');
+                throw new common_1.HttpException("you've already answered to the survey using that option", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await surveyParticipantRepository.update({ id: existingSurveyParticipant.id }, surveyParticipant);
+            return "answer updated succesfully";
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/submitSurvey');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSurveys(teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
+            const team = await teamRepository.findOne({ id: teamId }, { relations: ['surveys'] });
+            if (!team) {
+                common_1.Logger.error("team not found", 'UserService/getSurveys');
+                throw new common_1.HttpException("team not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            return team.surveys;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getSurveys');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 UserService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [schedule_1.SchedulerRegistry])
 ], UserService);
 exports.UserService = UserService;
 //# sourceMappingURL=user.service.js.map

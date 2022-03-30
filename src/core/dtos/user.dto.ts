@@ -1,3 +1,6 @@
+import { Transform } from "class-transformer";
+import { isInt, isNumber, IsNumberString } from "class-validator";
+
 export class UserDTO{
     email:string;
     password:string;
@@ -38,9 +41,9 @@ export class SurveyDto{
     title:string;
     description:string;
     options:OptionsDto[];
+    @Transform(({value}) => parseInt(value),{toClassOnly:true})
     period:number;
     teamId:string;
-    close:boolean;
 }
 export class OptionsDto{
     description:string;
