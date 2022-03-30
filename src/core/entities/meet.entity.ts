@@ -4,19 +4,20 @@ import { PvMeetEntity } from './pv.meet.entity';
 import { TeamEntity } from './team.entity';
 
 
-enum MeetType {
+export enum MeetType {
     URGENTE = 'urgent',
-    NORMAL = 'normal'
-    
+    NORMAL = 'normal',
 }
 @Entity('meet')
 export class MeetEntity{
    @PrimaryGeneratedColumn('uuid')
    id:string;
-
+   @Column()
+   title:string;
    @Column()
    description:string;
-
+   @Column()
+   date:Date;
    @CreateDateColumn()
    createdAt:Date;
 

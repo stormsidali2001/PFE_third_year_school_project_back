@@ -1,5 +1,6 @@
 import { Transform } from "class-transformer";
 import { isInt, isNumber, IsNumberString } from "class-validator";
+import { MeetType } from "../entities/meet.entity";
 
 export class UserDTO{
     email:string;
@@ -47,4 +48,11 @@ export class SurveyDto{
 }
 export class OptionsDto{
     description:string;
+}
+
+export class TeamMeetDto{
+    title:string;
+    description:string;
+    type:MeetType;
+    date:Date;
 }

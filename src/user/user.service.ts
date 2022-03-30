@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { SurveyDto } from "src/core/dtos/user.dto";
+import { SurveyDto, TeamMeetDto } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -13,6 +13,7 @@ import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { getManager } from "typeorm";
 import {SchedulerRegistry} from '@nestjs/schedule'
 import { CronJob } from "cron";
+import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
 @Injectable()
 export class UserService{
     constructor(private schedulerRegistry: SchedulerRegistry){}
@@ -531,5 +532,46 @@ async getSurveys(teamId:string){
 
     }
 }
+//meet
+async createMeet(studentId:string,meet:TeamMeetDto){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
+       
+        const student = await studentRepository.createQueryBuilder('student')
+        .innerJoin('student.team','team')
+        .innerJoin('team.teamLeader','teamLeader')
+        .where('student.id = :studentId',{studentId})
+        .getOne();
+        if(!student){       
+            Logger.error("not found",'UserService/createMeet')
+            throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
+        }
+      
+        const meetRepository = manager.getRepository(MeetEntity);
+        const meetEntity = meetRepository.create({...meet,team:student.team});
+        await meetRepository.save(meetEntity);
+        //crun job
+        if(meet.type === MeetType.NORMAL){
+            const job = new CronJob(new Date(meetEntity.date),async()=>{
+               
+                //before deleting the meet
+                this._sendTeamNotfication(student.team.id,`the meet with title: ${meetEntity.title} has ended`);
+                await meetRepository.delete({id:meetEntity.id});
+
+            })
+
+        }
+      
+           
+        return `meet sent with success to team: ${student.team.nickName} members`;
+    }catch(err){
+        Logger.error(err,'UserService/createMeet')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    } 
+}
+
+
 
 }
