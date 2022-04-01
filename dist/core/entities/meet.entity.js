@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MeetEntity = void 0;
+exports.MeetEntity = exports.MeetType = void 0;
 const typeorm_1 = require("typeorm");
 const meet_absent_entity_1 = require("./meet.absent.entity");
 const pv_meet_entity_1 = require("./pv.meet.entity");
@@ -18,7 +18,7 @@ var MeetType;
 (function (MeetType) {
     MeetType["URGENTE"] = "urgent";
     MeetType["NORMAL"] = "normal";
-})(MeetType || (MeetType = {}));
+})(MeetType = exports.MeetType || (exports.MeetType = {}));
 let MeetEntity = class MeetEntity {
 };
 __decorate([
@@ -28,7 +28,31 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
+], MeetEntity.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
 ], MeetEntity.prototype, "description", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", Date)
+], MeetEntity.prototype, "date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", Number)
+], MeetEntity.prototype, "weekDay", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", Number)
+], MeetEntity.prototype, "hour", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", Number)
+], MeetEntity.prototype, "minute", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: null }),
+    __metadata("design:type", Number)
+], MeetEntity.prototype, "second", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
@@ -46,10 +70,9 @@ __decorate([
     __metadata("design:type", team_entity_1.TeamEntity)
 ], MeetEntity.prototype, "team", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(type => pv_meet_entity_1.PvMeetEntity),
-    (0, typeorm_1.JoinColumn)(),
-    __metadata("design:type", pv_meet_entity_1.PvMeetEntity)
-], MeetEntity.prototype, "pvMeet", void 0);
+    (0, typeorm_1.ManyToOne)(type => pv_meet_entity_1.PvMeetEntity, pv => pv.meet),
+    __metadata("design:type", Array)
+], MeetEntity.prototype, "pvs", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(type => meet_absent_entity_1.MeetAbsentEntity, meetAbsent => meetAbsent.meet),
     __metadata("design:type", Array)

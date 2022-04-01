@@ -39,3 +39,16 @@ export declare class SurveyDto {
 export declare class OptionsDto {
     description: string;
 }
+export declare class NormalTeamMeetDto {
+    title: string;
+    description: string;
+    weekDay: number;
+    hour: number;
+    minute: number;
+    second: number;
+}
+export declare class UrgentTeamMeetDto {
+    title: string;
+    description: string;
+    date: Date;
+}

@@ -24,6 +24,7 @@ const user_entity_1 = require("../core/entities/user.entity");
 const typeorm_1 = require("typeorm");
 const schedule_1 = require("@nestjs/schedule");
 const cron_1 = require("cron");
+const meet_entity_1 = require("../core/entities/meet.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry) {
         this.schedulerRegistry = schedulerRegistry;
@@ -406,6 +407,87 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getSurveys');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createNormalTeamMeet(studentId, meet) {
+        try {
+            const { title, description, weekDay, hour, minute, second } = meet;
+            if (Number.isNaN(Number(weekDay)) || Number.isNaN(Number(hour)) || Number.isNaN(Number(minute)) || Number.isNaN(Number(second))) {
+                common_1.Logger.error("invalid time", 'UserService/createMeet');
+                throw new common_1.HttpException("invalid time", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (weekDay < 0 || weekDay > 6) {
+                common_1.Logger.error("invalid weekDay", 'UserService/createMeet');
+                throw new common_1.HttpException("invalid weekDay", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (hour < 0 || hour > 23) {
+                common_1.Logger.error("invalid hour", 'UserService/createMeet');
+                throw new common_1.HttpException("invalid hour", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (minute < 0 || minute > 59) {
+                common_1.Logger.error("invalid minute", 'UserService/createMeet');
+                throw new common_1.HttpException("invalid minute", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (second < 0 || second > 59) {
+                common_1.Logger.error("invalid second", 'UserService/createMeet');
+                throw new common_1.HttpException("invalid second", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const manager = (0, typeorm_1.getManager)();
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            const student = await studentRepository.createQueryBuilder('student')
+                .innerJoinAndSelect('student.team', 'team')
+                .innerJoin('team.teamLeader', 'teamLeader')
+                .where('student.id = :studentId', { studentId })
+                .getOne();
+            if (!student) {
+                common_1.Logger.error("not found", 'UserService/createMeet');
+                throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const meetRepository = manager.getRepository(meet_entity_1.MeetEntity);
+            const meetEntity = meetRepository.create({ title, description, weekDay, hour, minute, second, team: student.team, type: meet_entity_1.MeetType.NORMAL });
+            await meetRepository.save(meetEntity);
+            this._sendTeamNotfication(student.team.id, `new normal meet: '${title}' every week on ${weekDay} at ${hour}:${minute}:${second}`);
+            const cronExpression = `${second} ${minute} ${hour - 1} * * ${weekDay}`;
+            const job = new cron_1.CronJob(cronExpression, async () => {
+                this._sendTeamNotfication(student.team.id, `the normal meet with title: '${title}' will be starting after a hour`);
+            });
+            this.schedulerRegistry.addCronJob(`cron_Job_normal_meet_${meetEntity.id}`, job);
+            job.start();
+            return `meet sent with success to team: ${student.team.nickName} members`;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/createMeet');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createUrgentTeamMeet(studentId, meet) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            const student = await studentRepository.createQueryBuilder('student')
+                .innerJoinAndSelect('student.team', 'team')
+                .innerJoin('team.teamLeader', 'teamLeader')
+                .where('student.id = :studentId', { studentId })
+                .getOne();
+            if (!student) {
+                common_1.Logger.error("not found", 'UserService/createMeet');
+                throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const { title, description, date } = meet;
+            const meetRepository = manager.getRepository(meet_entity_1.MeetEntity);
+            const meetEntity = meetRepository.create({ title, description, date, team: student.team, type: meet_entity_1.MeetType.URGENTE });
+            await meetRepository.save(meetEntity);
+            this._sendTeamNotfication(student.team.id, `new urgent meet: '${title}' at ${date}`);
+            const job = new cron_1.CronJob(new Date(meetEntity.date.getTime() - 1 * 60 * 60 * 1000), async () => {
+                this._sendTeamNotfication(student.team.id, `the urgent meet with title: '${title}' will be starting at : ${date}`);
+            });
+            this.schedulerRegistry.addCronJob(`cron_Job_urgent_meet_${meetEntity.id}`, job);
+            job.start();
+            return "urgent meet created";
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/createMeet');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

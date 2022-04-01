@@ -50,9 +50,21 @@ export class OptionsDto{
     description:string;
 }
 
-export class TeamMeetDto{
+export class NormalTeamMeetDto{
     title:string;
     description:string;
-    type:MeetType;
+    @Transform(({value}) => parseInt(value),{toClassOnly:true})
+    weekDay:number;
+    @Transform(({value}) => parseInt(value),{toClassOnly:true})
+    hour:number;
+    @Transform(({value}) => parseInt(value),{toClassOnly:true})
+    minute:number;
+    @Transform(({value}) => {parseInt(value)},{toClassOnly:true})
+    second:number;
+}
+
+export class UrgentTeamMeetDto{
+    title:string;
+    description:string;
     date:Date;
 }

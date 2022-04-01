@@ -1,3 +1,4 @@
+import { MeetEntity } from './meet.entity';
 import { DiscusedPointEntity } from './pv.meet.descused.point.entity';
 import { TaskTodoPvMeetEntity } from './pv.meet.task.todo.entity';
 export declare class PvMeetEntity {
@@ -8,4 +9,5 @@ export declare class PvMeetEntity {
     location: string;
     discusedPoints: DiscusedPointEntity[];
     tasksTodo: TaskTodoPvMeetEntity[];
+    meet: MeetEntity;
 }

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PvMeetEntity = void 0;
 const typeorm_1 = require("typeorm");
+const meet_entity_1 = require("./meet.entity");
 const pv_meet_descused_point_entity_1 = require("./pv.meet.descused.point.entity");
 const pv_meet_task_todo_entity_1 = require("./pv.meet.task.todo.entity");
 let PvMeetEntity = class PvMeetEntity {
@@ -43,6 +44,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => pv_meet_task_todo_entity_1.TaskTodoPvMeetEntity, taskTodo => taskTodo.pvMeet),
     __metadata("design:type", Array)
 ], PvMeetEntity.prototype, "tasksTodo", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(type => meet_entity_1.MeetEntity, meet => meet.pvs),
+    __metadata("design:type", meet_entity_1.MeetEntity)
+], PvMeetEntity.prototype, "meet", void 0);
 PvMeetEntity = __decorate([
     (0, typeorm_1.Entity)('pv_meet')
 ], PvMeetEntity);

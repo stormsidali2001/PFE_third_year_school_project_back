@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OptionsDto = exports.SurveyDto = exports.EnterpriseDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
+exports.UrgentTeamMeetDto = exports.NormalTeamMeetDto = exports.OptionsDto = exports.SurveyDto = exports.EnterpriseDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
 const class_transformer_1 = require("class-transformer");
 class UserDTO {
 }
@@ -36,4 +36,26 @@ exports.SurveyDto = SurveyDto;
 class OptionsDto {
 }
 exports.OptionsDto = OptionsDto;
+class NormalTeamMeetDto {
+}
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value), { toClassOnly: true }),
+    __metadata("design:type", Number)
+], NormalTeamMeetDto.prototype, "weekDay", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value), { toClassOnly: true }),
+    __metadata("design:type", Number)
+], NormalTeamMeetDto.prototype, "hour", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => parseInt(value), { toClassOnly: true }),
+    __metadata("design:type", Number)
+], NormalTeamMeetDto.prototype, "minute", void 0);
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => { parseInt(value); }, { toClassOnly: true }),
+    __metadata("design:type", Number)
+], NormalTeamMeetDto.prototype, "second", void 0);
+exports.NormalTeamMeetDto = NormalTeamMeetDto;
+class UrgentTeamMeetDto {
+}
+exports.UrgentTeamMeetDto = UrgentTeamMeetDto;
 //# sourceMappingURL=user.dto.js.map

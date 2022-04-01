@@ -1,4 +1,4 @@
-import { SurveyDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 export declare class UserController {
     private readonly userService;
@@ -13,4 +13,6 @@ export declare class UserController {
     createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(teamId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
+    createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
+    createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
 }

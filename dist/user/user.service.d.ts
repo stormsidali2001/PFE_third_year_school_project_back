@@ -1,4 +1,4 @@
-import { SurveyDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
@@ -19,4 +19,6 @@ export declare class UserService {
     createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(teamId: string): Promise<SurveyEntity[]>;
+    createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
+    createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
 }

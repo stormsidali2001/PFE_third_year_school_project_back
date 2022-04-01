@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { SurveyDto, TeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto , UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -11,7 +11,7 @@ import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entit
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { getManager } from "typeorm";
-import {SchedulerRegistry} from '@nestjs/schedule'
+import {SchedulerRegistry,CronExpression} from '@nestjs/schedule'
 import { CronJob } from "cron";
 import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
 @Injectable()
@@ -533,13 +533,34 @@ async getSurveys(teamId:string){
     }
 }
 //meet
-async createMeet(studentId:string,meet:TeamMeetDto){
+async createNormalTeamMeet(studentId:string,meet:NormalTeamMeetDto){
     try{
+        const {title,description,weekDay,hour,minute,second} = meet;
+        if(Number.isNaN( Number(weekDay)) || Number.isNaN(Number(hour)) || Number.isNaN(Number(minute)) || Number.isNaN(Number(second))){
+            Logger.error("invalid time",'UserService/createMeet')
+            throw new HttpException("invalid time",HttpStatus.BAD_REQUEST);
+        }
+        if(weekDay < 0 || weekDay > 6){
+            Logger.error("invalid weekDay",'UserService/createMeet')
+            throw new HttpException("invalid weekDay",HttpStatus.BAD_REQUEST);
+        }
+        if(hour < 0 || hour > 23){
+            Logger.error("invalid hour",'UserService/createMeet')
+            throw new HttpException("invalid hour",HttpStatus.BAD_REQUEST);
+        }
+        if(minute < 0 || minute > 59){
+            Logger.error("invalid minute",'UserService/createMeet')
+            throw new HttpException("invalid minute",HttpStatus.BAD_REQUEST);
+        }
+        if(second < 0 || second > 59){
+            Logger.error("invalid second",'UserService/createMeet')
+            throw new HttpException("invalid second",HttpStatus.BAD_REQUEST);
+        }
         const manager = getManager();
         const studentRepository = manager.getRepository(StudentEntity);
        
         const student = await studentRepository.createQueryBuilder('student')
-        .innerJoin('student.team','team')
+        .innerJoinAndSelect('student.team','team')
         .innerJoin('team.teamLeader','teamLeader')
         .where('student.id = :studentId',{studentId})
         .getOne();
@@ -548,20 +569,24 @@ async createMeet(studentId:string,meet:TeamMeetDto){
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
       
-        const meetRepository = manager.getRepository(MeetEntity);
-        const meetEntity = meetRepository.create({...meet,team:student.team});
-        await meetRepository.save(meetEntity);
-        //crun job
-        if(meet.type === MeetType.NORMAL){
-            const job = new CronJob(new Date(meetEntity.date),async()=>{
+    
+
+    
+            const meetRepository = manager.getRepository(MeetEntity);
+            const meetEntity = meetRepository.create({title,description,weekDay,hour,minute,second,team:student.team,type:MeetType.NORMAL});
+            await meetRepository.save(meetEntity);
+
+            this._sendTeamNotfication(student.team.id,`new normal meet: '${title}' every week on ${weekDay} at ${hour}:${minute}:${second}`);
+            const cronExpression =   `${second} ${minute} ${hour-1} * * ${weekDay}`;
+            const job = new CronJob(cronExpression,async()=>{
                
-                //before deleting the meet
-                this._sendTeamNotfication(student.team.id,`the meet with title: ${meetEntity.title} has ended`);
-                await meetRepository.delete({id:meetEntity.id});
+                this._sendTeamNotfication(student.team.id,`the normal meet with title: '${title}' will be starting after a hour`);
 
             })
+            this.schedulerRegistry.addCronJob(`cron_Job_normal_meet_${meetEntity.id}`,job);
+            job.start();
 
-        }
+       
       
            
         return `meet sent with success to team: ${student.team.nickName} members`;
@@ -572,6 +597,43 @@ async createMeet(studentId:string,meet:TeamMeetDto){
     } 
 }
 
+
+async createUrgentTeamMeet(studentId:string,meet:UrgentTeamMeetDto){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
+       
+        const student = await studentRepository.createQueryBuilder('student')
+        .innerJoinAndSelect('student.team','team')
+        .innerJoin('team.teamLeader','teamLeader')
+        .where('student.id = :studentId',{studentId})
+        .getOne();
+        if(!student){       
+            Logger.error("not found",'UserService/createMeet')
+            throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
+        }
+        const {title,description,date} = meet;
+        const meetRepository = manager.getRepository(MeetEntity);
+        const meetEntity = meetRepository.create({title,description,date,team:student.team,type:MeetType.URGENTE});
+        await meetRepository.save(meetEntity);
+
+        this._sendTeamNotfication(student.team.id,`new urgent meet: '${title}' at ${date}`);
+        const job = new CronJob(new Date(meetEntity.date.getTime()-1*60*60*1000),async()=>{
+           
+        
+            this._sendTeamNotfication(student.team.id,`the urgent meet with title: '${title}' will be starting at : ${date}`);
+
+        })
+        this.schedulerRegistry.addCronJob(`cron_Job_urgent_meet_${meetEntity.id}`,job);
+        job.start();
+    
+        return "urgent meet created";
+
+    }catch(err){
+        Logger.error(err,'UserService/createMeet')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 
 
 }

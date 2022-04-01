@@ -16,8 +16,18 @@ export class MeetEntity{
    title:string;
    @Column()
    description:string;
-   @Column()
+
+   @Column({default:null})
    date:Date;
+
+   @Column({default:null})
+   weekDay:number;
+   @Column({default:null})
+    hour:number;
+    @Column({default:null})
+    minute:number;
+    @Column({default:null})
+    second:number;
    @CreateDateColumn()
    createdAt:Date;
 
@@ -34,8 +44,8 @@ export class MeetEntity{
    @ManyToOne(type=>TeamEntity,team=>team.meets)
    team:TeamEntity;
 
-   @OneToOne(type=>PvMeetEntity) @JoinColumn()
-   pvMeet:PvMeetEntity;
+   @ManyToOne(type=>PvMeetEntity,pv=>pv.meet) 
+   pvs:PvMeetEntity[];
 
    @OneToMany(type=>MeetAbsentEntity,meetAbsent=>meetAbsent.meet)
    absences:MeetAbsentEntity[];

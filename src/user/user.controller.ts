@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, Post } from "@nestjs/common";
-import { SurveyDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
 
@@ -103,6 +103,24 @@ export class UserController{
                 Logger.error(err,"UserController/getSurveys");
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)
             }
+    }
+    @Post('createUrgentTeamMeet')
+    async createUrgentTeamMeet(@Body('studentId')studentId:string,@Body('meet')meet:UrgentTeamMeetDto){
+        try{
+            return await this.userService.createUrgentTeamMeet(studentId,meet);
+        }catch(err){
+            Logger.error(err,'UserController/createUrgentTeamMeet')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Post('createNormalTeamMeet')
+    async createNormalTeamMeet(@Body('studentId')studentId:string,@Body('meet')meet:NormalTeamMeetDto){
+        try{
+            return await this.userService.createNormalTeamMeet(studentId,meet);
+        }catch(err){
+            Logger.error(err,'UserController/createNormalTeamMeet')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
     }
   
 }

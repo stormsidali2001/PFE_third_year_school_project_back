@@ -22,9 +22,9 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"a3.assoul@esi-sba.dz",
+    "email":"a6.assoul@esi-sba.dz",
     "password":"1@2@3Abc",
-    "firstName":"a3",
+    "firstName":"a6",
     "lastName":"test3",
     "dob":"2001-04-20",
     "code":"191932004015"
@@ -79,9 +79,9 @@ content-type:application/json
 
 {
    
-    "senderId":"274d1180-45fe-483d-a2ac-2b9865f6f60c",
-    "receiverId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
-    "description":"qbli inv la bghiti z3ma"
+    "senderId":"5475bf32-8853-449e-8c01-e26d4ee62909",
+    "receiverId":"e9fdd4b7-f31e-4b76-8ec7-325a1935b2cf",
+    "description":"qbel l'invitation rak sujet de test"
 
    
 }
@@ -93,8 +93,8 @@ content-type:application/json
 
 {
    
-    "invitationId":"80d4fab8-f905-470a-a465-47285649235b",
-    "recieverId":"aaeff9c6-6899-47fd-b1d5-0d68b55b0e88",
+    "invitationId":"2c8a5c26-60b2-40d8-ac29-063d7e610053",
+    "recieverId":"e9fdd4b7-f31e-4b76-8ec7-325a1935b2cf",
     "accepted":"true"
     
    
@@ -173,3 +173,29 @@ content-type:application/json
 
 ### get the surveys of a team
 Get http://localhost:8080/surveys/50d4eefb-bc1b-4d20-908f-d1325339f454 
+
+### createNormalTeamMeet
+POST http://localhost:8080/createNormalTeamMeet
+content-type:application/json
+
+{
+    "studentId":"5475bf32-8853-449e-8c01-e26d4ee62909",
+    "title":"normal meet test1",
+    "description":"...",
+    "weekDay":"5",
+    "hour":"17",
+    "minute":"55",
+    "second":"55"
+}
+### createUrgentTeamMeet
+POST http://localhost:8080/createUrgentTeamMeet
+content-type:application/json
+
+{
+    "studentId":"5475bf32-8853-449e-8c01-e26d4ee62909",
+    "meet":{
+        "title":"normal meet test1",
+        "description":"...",
+        "date":"2022-04-05"
+    }
+}

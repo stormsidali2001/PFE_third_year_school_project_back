@@ -86,6 +86,24 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async createUrgentTeamMeet(studentId, meet) {
+        try {
+            return await this.userService.createUrgentTeamMeet(studentId, meet);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/createUrgentTeamMeet');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createNormalTeamMeet(studentId, meet) {
+        try {
+            return await this.userService.createNormalTeamMeet(studentId, meet);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/createNormalTeamMeet');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 __decorate([
     (0, common_1.Post)('/user'),
@@ -171,6 +189,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getSurveys", null);
+__decorate([
+    (0, common_1.Post)('createUrgentTeamMeet'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('meet')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.UrgentTeamMeetDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createUrgentTeamMeet", null);
+__decorate([
+    (0, common_1.Post)('createNormalTeamMeet'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('meet')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.NormalTeamMeetDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createNormalTeamMeet", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

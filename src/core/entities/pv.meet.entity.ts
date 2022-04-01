@@ -1,4 +1,5 @@
-import {Entity,PrimaryGeneratedColumn,Column, OneToOne, JoinColumn, OneToMany} from 'typeorm'
+import {Entity,PrimaryGeneratedColumn,Column, OneToOne, JoinColumn, OneToMany, ManyToOne} from 'typeorm'
+import { MeetEntity } from './meet.entity';
 import { DiscusedPointEntity } from './pv.meet.descused.point.entity';
 import { TaskTodoPvMeetEntity } from './pv.meet.task.todo.entity';
 
@@ -25,5 +26,8 @@ export class PvMeetEntity{
 
     @OneToMany(type=>TaskTodoPvMeetEntity,taskTodo=>taskTodo.pvMeet)
     tasksTodo:TaskTodoPvMeetEntity[];
+
+    @ManyToOne(type=>MeetEntity,meet=>meet.pvs)
+    meet:MeetEntity;
 
 }
