@@ -46,6 +46,9 @@ export class AuthService{
     }
    
     async signupStudent(data:StudentDTO):Promise<Tokens>{
+        try{
+
+        
         const {email,password,firstName,lastName,dob,code} = data;
         let user:UserEntity = await this.userRepository.findOne({where:{email}})
         const service = email.split('@')[1].split('.')[0];
@@ -74,6 +77,10 @@ export class AuthService{
         await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
 
             return tokens;
+        }catch(err){
+            Logger.error(err,"AuthService/signupStudent")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
     }
     async signupTeacher(data:TeacherDTO){
         
@@ -188,7 +195,22 @@ export class AuthService{
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
     }
-
+  async logout(userId:string){
+    try{
+        const manager = getManager();
+        const userRepository = manager.getRepository(UserEntity);
+        const user = await userRepository.findOne({id:userId});
+        if(!user){
+            Logger.error("acces denied:user not found ","AuthService/logout")
+            throw new HttpException("acces denied",HttpStatus.FORBIDDEN)
+        }
+        await userRepository.update({id:userId},{refrechTokenHash:null})
+        return "logout success";
+    }catch(err){
+        Logger.error(err,"AuthService/logout")
+        throw new HttpException(err,HttpStatus.BAD_REQUEST)
+    }
+}
     //utility functions---------------------------
     async _getTokens(userId:string,email:string):Promise<Tokens>{
         const jwtPayload:jwtPayload = {

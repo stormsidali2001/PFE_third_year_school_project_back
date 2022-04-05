@@ -44,29 +44,35 @@ let AuthService = class AuthService {
         return tokens;
     }
     async signupStudent(data) {
-        const { email, password, firstName, lastName, dob, code } = data;
-        let user = await this.userRepository.findOne({ where: { email } });
-        const service = email.split('@')[1].split('.')[0];
-        const domain = email.split('@')[1].split('.')[1];
-        if (service !== 'esi-sba' && domain != 'dz') {
-            throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+        try {
+            const { email, password, firstName, lastName, dob, code } = data;
+            let user = await this.userRepository.findOne({ where: { email } });
+            const service = email.split('@')[1].split('.')[0];
+            const domain = email.split('@')[1].split('.')[1];
+            if (service !== 'esi-sba' && domain != 'dz') {
+                throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (user) {
+                throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+            }
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (password.match(regex) == null) {
+                throw new common_1.HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters', common_1.HttpStatus.BAD_REQUEST);
+            }
+            user = this.userRepository.create({ email, password, userType: user_entity_1.UserType.STUDENT });
+            user.password = await bcrypt.hash(user.password, 10);
+            const student = this.studentRepository.create({ firstName, lastName, dob, code });
+            student.user = user;
+            user = await this.userRepository.save(user);
+            await this.studentRepository.save(student);
+            const tokens = await this._getTokens(user.id, user.email);
+            await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
+            return tokens;
         }
-        if (user) {
-            throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/signupStudent");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
-        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (password.match(regex) == null) {
-            throw new common_1.HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters', common_1.HttpStatus.BAD_REQUEST);
-        }
-        user = this.userRepository.create({ email, password, userType: user_entity_1.UserType.STUDENT });
-        user.password = await bcrypt.hash(user.password, 10);
-        const student = this.studentRepository.create({ firstName, lastName, dob, code });
-        student.user = user;
-        user = await this.userRepository.save(user);
-        await this.studentRepository.save(student);
-        const tokens = await this._getTokens(user.id, user.email);
-        await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
-        return tokens;
     }
     async signupTeacher(data) {
     }

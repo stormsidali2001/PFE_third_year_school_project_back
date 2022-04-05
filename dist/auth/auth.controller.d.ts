@@ -9,4 +9,5 @@ export declare class AuthController {
     signupEntereprise(data: EnterpriseDTO): Promise<void>;
     forgotpassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;
+    refrechToken(userId: string, refrechtoken: string): Promise<import("./types/tokens").Tokens>;
 }

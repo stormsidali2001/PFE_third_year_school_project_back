@@ -116,10 +116,6 @@ AppModule = __decorate([
                 provide: core_1.APP_GUARD,
                 useClass: acces_token_guard_1.AccessTokenGuard,
             },
-            {
-                provide: core_1.APP_GUARD,
-                useClass: acces_token_guard_1.AccessTokenGuard
-            }
         ],
     })
 ], AppModule);

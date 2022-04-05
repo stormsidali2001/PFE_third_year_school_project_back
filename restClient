@@ -2,30 +2,29 @@ POST http://localhost:8080/signin
 content-type:application/json
 
 {
-    "email":"a123@gmail.com",
-    "password":"123456"
+    "email":"a2.assoul@esi-sba.dz",
+    "password":"1@2@3Abc"
 }
 
 ###
 
-GET http://localhost:8080/users
+POST http://localhost:8080/refrechtoken
 content-type:application/json
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMmFhOTEyNTYtNDlhMS00MDgxLThjNjgtZGFjOTRkNTIxOGU1IiwiZW1haWwiOiJhMi5hc3NvdWxAZXNpLXNiYS5keiIsImlhdCI6MTY0OTEzMzQxNSwiZXhwIjoxNjQ5NzM4MjE1fQ.94yqZEo1KNgLyiWMfyMotNz3ChGWyN10EzJOF8LBCa4
 
 {
-    "email":"a@gmail.com",
-    "password":"123456"
-}
 
+}
 ###
 
 POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"a6.assoul@esi-sba.dz",
+    "email":"a2.assoul@esi-sba.dz",
     "password":"1@2@3Abc",
-    "firstName":"a6",
-    "lastName":"test3",
+    "firstName":"a2",
+    "lastName":"a2",
     "dob":"2001-04-20",
     "code":"191932004015"
 }

@@ -107,14 +107,10 @@ import { AccessTokenGuard } from './common/guards/acces-token.guard';
       useClass:LoggingInterceptor
     },
     {
-      provide:APP_GUARD,
+      provide:APP_GUARD, // setting the accesToken guard as global so that all routes will passe through it
       useClass:AccessTokenGuard,
     },
-    {
-      provide:APP_GUARD,
-      useClass:AccessTokenGuard
-
-    }
+    
 ],
 })
 export class AppModule {}

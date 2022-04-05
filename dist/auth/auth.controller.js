@@ -14,7 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
+const get_current_user_1 = require("../common/decorators/get-current-user");
+const get_current_user_id_decorator_1 = require("../common/decorators/get-current-user-id.decorator");
 const public_decorator_1 = require("../common/decorators/public.decorator");
+const refrech_token_guard_1 = require("../common/guards/refrech-token-guard");
 const user_dto_1 = require("../core/dtos/user.dto");
 const auth_service_1 = require("./auth.service");
 let AuthController = class AuthController {
@@ -28,7 +31,7 @@ let AuthController = class AuthController {
         return this.authService.signupTeacher(data);
     }
     async signupStudent(data) {
-        return this.authService.signupStudent(data);
+        return await this.authService.signupStudent(data);
     }
     async signupEntereprise(data) {
         return this.authService.signupEnterprise(data);
@@ -39,6 +42,15 @@ let AuthController = class AuthController {
     }
     async resetPassword(password, token, userId) {
         return this.authService.resetPassword(password, token, userId);
+    }
+    async refrechToken(userId, refrechtoken) {
+        try {
+            return await this.authService.refrechToken(userId, refrechtoken);
+        }
+        catch (error) {
+            common_1.Logger.error(error.message, "AuthController/refrechToken");
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
 };
 __decorate([
@@ -91,6 +103,16 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.UseGuards)(refrech_token_guard_1.RefrechTokenGuard),
+    (0, common_1.Post)('refrechtoken'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, get_current_user_1.GetCurrentUser)('refrechToken')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refrechToken", null);
 AuthController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
