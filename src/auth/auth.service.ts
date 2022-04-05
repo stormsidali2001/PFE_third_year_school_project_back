@@ -11,6 +11,12 @@ import { RestPasswordTokenRepository } from "src/core/repositories/reset.passwor
 import {randomBytes} from "crypto";
 import { RestPasswordTokenEntity } from "src/core/entities/resetPasswordToken.entity";
 import * as nodemailer from 'nodemailer';
+import { JwtService } from "@nestjs/jwt";
+import { jwtPayload } from "./types/jwtPayload.type";
+import { Tokens } from "./types/tokens";
+import { getManager } from "typeorm";
+import * as argon from 'argon2'
+
 
 
 @Injectable()
@@ -18,9 +24,10 @@ export class AuthService{
     constructor( 
         private userRepository:UserRepository,
         private studentRepository:StudentRepository,
-        private resetPasswordTokenRepository:RestPasswordTokenRepository
+        private resetPasswordTokenRepository:RestPasswordTokenRepository,
+        private jwtService:JwtService
         ){}
-    async signin(data:UserDTO):Promise<UserRO>{
+    async signin(data:UserDTO):Promise<Tokens>{
         const {email,password} = data;
         const user = await this.userRepository.findOne({where:{email}})
         if(!user){
@@ -30,21 +37,15 @@ export class AuthService{
         if(!equal){
             throw new HttpException('Wrong Password',HttpStatus.BAD_REQUEST);
         }
-        this.userRepository.save(user);
+        await this.userRepository.save(user);
       
-          const token:string =jwt.sign({
-                                    id:user.id,email},
-                                    process.env.SECRET,
-                                    {
-                                        expiresIn:'1d'
-                                    }
-                                    )
-        
-          const responseOBj:UserRO = {id:user.id,createdAt:user.createdAt,email:user.email,token}
-        return responseOBj;
+          const tokens:Tokens = await this._getTokens(user.id,user.email);
+          await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+         
+        return tokens;
     }
    
-    async signupStudent(data:StudentDTO){
+    async signupStudent(data:StudentDTO):Promise<Tokens>{
         const {email,password,firstName,lastName,dob,code} = data;
         let user:UserEntity = await this.userRepository.findOne({where:{email}})
         const service = email.split('@')[1].split('.')[0];
@@ -69,9 +70,10 @@ export class AuthService{
         user = await this.userRepository.save(user);
         await this.studentRepository.save(student);
 
-        const responseOBj:UserRO = {id:user.id,createdAt:user.createdAt,email:user.email};
+        const tokens:Tokens = await this._getTokens(user.id,user.email);
+        await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
 
-            return responseOBj;
+            return tokens;
     }
     async signupTeacher(data:TeacherDTO){
         
@@ -160,6 +162,68 @@ export class AuthService{
         await this.userRepository.save(user);
         await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
         return `${user.email} password has been reset succesfully`;
+    }
+
+    async refrechToken(userId:string,refrechToken:string):Promise<Tokens>{
+        try{
+            const manager = getManager();
+            const userRepository = manager.getRepository(UserEntity);
+            const user = await userRepository.findOne({id:userId});
+            if(!user || !user.refrechTokenHash){
+                Logger.error("acces denied:user not found or user does not have a refresh token","AuthService/refrechToken")
+                throw new HttpException("acces denied",HttpStatus.FORBIDDEN)
+            }
+            const matches:boolean = await argon.verify(user.refrechTokenHash,refrechToken)
+            if(!matches){
+                Logger.error("acces denied: wrong refrech token","AuthService/refrechToken")
+                throw new HttpException("acces denied",HttpStatus.FORBIDDEN)
+            }
+            const tokens:Tokens = await this._getTokens(user.id,user.email);
+            await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+    
+                return tokens;
+
+        }catch(err){
+            Logger.error(err,"AuthService/refrechToken")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    //utility functions---------------------------
+    async _getTokens(userId:string,email:string):Promise<Tokens>{
+        const jwtPayload:jwtPayload = {
+            uuid:userId,
+            email
+        }
+        const [accesToken,refrechToken] = await Promise.all([
+            this.jwtService.signAsync(jwtPayload,{
+                secret:process.env.ACCESS_TOKEN_SECRET,
+                expiresIn:'15m'
+            }),
+            this.jwtService.signAsync(jwtPayload,{
+                secret:process.env.REFRECH_TOKEN_SECRET,
+                expiresIn:'7d'
+            })
+        ])
+
+        return {
+            accesToken,
+            refrechToken
+        }
+    }
+
+    async _updateRefrechTokenHash(userId:string,refrechToken:string){
+        try{
+            const manager = getManager();
+            const userRepository =  manager.getRepository(UserEntity);
+            const refrechTokenHash = await argon.hash(refrechToken)
+            await userRepository.update({id:userId},{refrechTokenHash})
+
+        }catch(err){
+            Logger.error(err,"AuthService/_updateRefrechTokenHash")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+        
     }
 
 }

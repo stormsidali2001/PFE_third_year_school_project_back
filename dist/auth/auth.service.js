@@ -14,16 +14,19 @@ const common_1 = require("@nestjs/common");
 const user_repository_1 = require("../core/repositories/user.repository");
 const user_entity_1 = require("../core/entities/user.entity");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const student_repository_1 = require("../core/repositories/student.repository");
 const reset_password_token_repository_1 = require("../core/repositories/reset.password.token.repository");
 const crypto_1 = require("crypto");
 const nodemailer = require("nodemailer");
+const jwt_1 = require("@nestjs/jwt");
+const typeorm_1 = require("typeorm");
+const argon = require("argon2");
 let AuthService = class AuthService {
-    constructor(userRepository, studentRepository, resetPasswordTokenRepository) {
+    constructor(userRepository, studentRepository, resetPasswordTokenRepository, jwtService) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.resetPasswordTokenRepository = resetPasswordTokenRepository;
+        this.jwtService = jwtService;
     }
     async signin(data) {
         const { email, password } = data;
@@ -35,14 +38,10 @@ let AuthService = class AuthService {
         if (!equal) {
             throw new common_1.HttpException('Wrong Password', common_1.HttpStatus.BAD_REQUEST);
         }
-        this.userRepository.save(user);
-        const token = jwt.sign({
-            id: user.id, email
-        }, process.env.SECRET, {
-            expiresIn: '1d'
-        });
-        const responseOBj = { id: user.id, createdAt: user.createdAt, email: user.email, token };
-        return responseOBj;
+        await this.userRepository.save(user);
+        const tokens = await this._getTokens(user.id, user.email);
+        await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
+        return tokens;
     }
     async signupStudent(data) {
         const { email, password, firstName, lastName, dob, code } = data;
@@ -65,8 +64,9 @@ let AuthService = class AuthService {
         student.user = user;
         user = await this.userRepository.save(user);
         await this.studentRepository.save(student);
-        const responseOBj = { id: user.id, createdAt: user.createdAt, email: user.email };
-        return responseOBj;
+        const tokens = await this._getTokens(user.id, user.email);
+        await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
+        return tokens;
     }
     async signupTeacher(data) {
     }
@@ -132,12 +132,68 @@ let AuthService = class AuthService {
         await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
         return `${user.email} password has been reset succesfully`;
     }
+    async refrechToken(userId, refrechToken) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const userRepository = manager.getRepository(user_entity_1.UserEntity);
+            const user = await userRepository.findOne({ id: userId });
+            if (!user || !user.refrechTokenHash) {
+                common_1.Logger.error("acces denied:user not found or user does not have a refresh token", "AuthService/refrechToken");
+                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
+            }
+            const matches = await argon.verify(user.refrechTokenHash, refrechToken);
+            if (!matches) {
+                common_1.Logger.error("acces denied: wrong refrech token", "AuthService/refrechToken");
+                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
+            }
+            const tokens = await this._getTokens(user.id, user.email);
+            await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
+            return tokens;
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/refrechToken");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async _getTokens(userId, email) {
+        const jwtPayload = {
+            uuid: userId,
+            email
+        };
+        const [accesToken, refrechToken] = await Promise.all([
+            this.jwtService.signAsync(jwtPayload, {
+                secret: process.env.ACCESS_TOKEN_SECRET,
+                expiresIn: '15m'
+            }),
+            this.jwtService.signAsync(jwtPayload, {
+                secret: process.env.REFRECH_TOKEN_SECRET,
+                expiresIn: '7d'
+            })
+        ]);
+        return {
+            accesToken,
+            refrechToken
+        };
+    }
+    async _updateRefrechTokenHash(userId, refrechToken) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const userRepository = manager.getRepository(user_entity_1.UserEntity);
+            const refrechTokenHash = await argon.hash(refrechToken);
+            await userRepository.update({ id: userId }, { refrechTokenHash });
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/_updateRefrechTokenHash");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_repository_1.UserRepository,
         student_repository_1.StudentRepository,
-        reset_password_token_repository_1.RestPasswordTokenRepository])
+        reset_password_token_repository_1.RestPasswordTokenRepository,
+        jwt_1.JwtService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

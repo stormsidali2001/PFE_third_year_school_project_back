@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
+const public_decorator_1 = require("../common/decorators/public.decorator");
 const user_dto_1 = require("../core/dtos/user.dto");
 const auth_service_1 = require("./auth.service");
 let AuthController = class AuthController {
@@ -41,6 +42,7 @@ let AuthController = class AuthController {
     }
 };
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signin'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -48,6 +50,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signin", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/teacher'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -55,6 +58,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupTeacher", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/student'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -62,6 +66,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupStudent", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/entreprise'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -69,6 +74,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupEntereprise", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('forgotpassword'),
     __param(0, (0, common_1.Body)('email')),
     __metadata("design:type", Function),
@@ -76,6 +82,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "forgotpassword", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('resetpassword'),
     __param(0, (0, common_1.Body)('password')),
     __param(1, (0, common_1.Body)('token')),

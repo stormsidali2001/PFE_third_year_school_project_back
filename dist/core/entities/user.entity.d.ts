@@ -11,5 +11,6 @@ export declare class UserEntity {
     email: string;
     password: string;
     userType: UserType;
+    refrechTokenHash: string;
     tokens: RestPasswordTokenEntity[];
 }

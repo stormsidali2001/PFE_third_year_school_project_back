@@ -1,0 +1,1 @@
+export declare const GetCurrentUser: (...dataOrPipes: (keyof import("../../auth/types/jwtPayload.type").jwtPayload | "refrechToken" | import("@nestjs/common").PipeTransform<any, any> | import("@nestjs/common").Type<import("@nestjs/common").PipeTransform<any, any>>)[]) => ParameterDecorator;

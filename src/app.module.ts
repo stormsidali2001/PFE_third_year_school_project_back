@@ -35,11 +35,12 @@ import { DiscusedPointEntity } from './core/entities/pv.meet.descused.point.enti
 import { ThemeSuggestionEntity } from './core/entities/theme.suggestion';
 import { ThemeSuggestionDocumentEntity } from './core/entities/theme.suggestion.document.entity';
 import { RestPasswordTokenEntity } from './core/entities/resetPasswordToken.entity';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/http.error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AccessTokenGuard } from './common/guards/acces-token.guard';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -89,7 +90,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 
             ]
 
-  }),Auth,UserModule,ConfigModule.forRoot({isGlobal:true}),ScheduleModule.forRoot()],
+  }),
+  Auth,
+  UserModule,
+  ConfigModule.forRoot({isGlobal:true}), 
+  ScheduleModule.forRoot(),
+],
   controllers: [AppController],
   providers: [AppService,
     {
@@ -99,6 +105,15 @@ import { ScheduleModule } from '@nestjs/schedule';
     {
       provide:APP_INTERCEPTOR,
       useClass:LoggingInterceptor
+    },
+    {
+      provide:APP_GUARD,
+      useClass:AccessTokenGuard,
+    },
+    {
+      provide:APP_GUARD,
+      useClass:AccessTokenGuard
+
     }
 ],
 })

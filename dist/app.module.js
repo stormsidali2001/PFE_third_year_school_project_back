@@ -49,6 +49,7 @@ const http_error_filter_1 = require("./shared/http.error.filter");
 const logging_interceptor_1 = require("./shared/logging.interceptor");
 const user_module_1 = require("./user/user.module");
 const schedule_1 = require("@nestjs/schedule");
+const acces_token_guard_1 = require("./common/guards/acces-token.guard");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -95,7 +96,12 @@ AppModule = __decorate([
                     theme_suggestion_document_entity_1.ThemeSuggestionDocumentEntity,
                     resetPasswordToken_entity_1.RestPasswordTokenEntity
                 ]
-            }), auth_module_1.Auth, user_module_1.UserModule, config_1.ConfigModule.forRoot({ isGlobal: true }), schedule_1.ScheduleModule.forRoot()],
+            }),
+            auth_module_1.Auth,
+            user_module_1.UserModule,
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
+            schedule_1.ScheduleModule.forRoot(),
+        ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService,
             {
@@ -105,6 +111,14 @@ AppModule = __decorate([
             {
                 provide: core_1.APP_INTERCEPTOR,
                 useClass: logging_interceptor_1.LoggingInterceptor
+            },
+            {
+                provide: core_1.APP_GUARD,
+                useClass: acces_token_guard_1.AccessTokenGuard,
+            },
+            {
+                provide: core_1.APP_GUARD,
+                useClass: acces_token_guard_1.AccessTokenGuard
             }
         ],
     })

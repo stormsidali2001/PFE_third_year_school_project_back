@@ -3,9 +3,9 @@ import { AuthService } from "./auth.service";
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
-    signin(data: UserDTO): Promise<import("../core/dtos/user.dto").UserRO>;
+    signin(data: UserDTO): Promise<import("./types/tokens").Tokens>;
     signupTeacher(data: TeacherDTO): Promise<void>;
-    signupStudent(data: StudentDTO): Promise<import("../core/dtos/user.dto").UserRO>;
+    signupStudent(data: StudentDTO): Promise<import("./types/tokens").Tokens>;
     signupEntereprise(data: EnterpriseDTO): Promise<void>;
     forgotpassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;

@@ -48,6 +48,12 @@ __decorate([
     __metadata("design:type", String)
 ], UserEntity.prototype, "userType", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        default: null
+    }),
+    __metadata("design:type", String)
+], UserEntity.prototype, "refrechTokenHash", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(type => resetPasswordToken_entity_1.RestPasswordTokenEntity, resetPasswordToken => resetPasswordToken.token),
     __metadata("design:type", Array)
 ], UserEntity.prototype, "tokens", void 0);
