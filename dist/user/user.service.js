@@ -237,14 +237,12 @@ let UserService = class UserService {
         try {
             const manager = (0, typeorm_1.getManager)();
             const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-            const student = await studentRepository.findOne({ id: studentId });
+            const student = await studentRepository.createQueryBuilder('student').leftJoinAndSelect('student.notifications', 'notifications').where('student.id = :id', { id: studentId }).getOne();
             if (!student) {
                 common_1.Logger.error("student not found", 'UserService/getNotifications');
                 throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            const notificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
-            const notifications = await notificationRepository.find({ student: student });
-            return notifications;
+            return student.notifications;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getNotifications');

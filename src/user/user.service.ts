@@ -316,15 +316,14 @@ async  getNotifications(studentId:string){
         const manager = getManager();
         //get student repository
         const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.findOne({id:studentId});
+        const student = await studentRepository.createQueryBuilder('student').leftJoinAndSelect('student.notifications','notifications').where('student.id = :id',{id:studentId}).getOne();
         if(!student){
             Logger.error("student not found",'UserService/getNotifications')
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
-        const notificationRepository = manager.getRepository(NotificationEntity);
-        const notifications = await notificationRepository.find({student:student});
+      
 
-      return notifications;
+      return student.notifications;
     }catch(err){
         Logger.error(err,'UserService/getNotifications')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

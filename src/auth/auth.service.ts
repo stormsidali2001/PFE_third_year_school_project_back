@@ -27,7 +27,8 @@ export class AuthService{
         private resetPasswordTokenRepository:RestPasswordTokenRepository,
         private jwtService:JwtService
         ){}
-    async signin(data:UserDTO):Promise<Tokens>{
+    async signin(data:UserDTO){
+        const manager = getManager();
         const {email,password} = data;
         const user = await this.userRepository.findOne({where:{email}})
         if(!user){
@@ -41,8 +42,15 @@ export class AuthService{
       
           const tokens:Tokens = await this._getTokens(user.id,user.email);
           await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+          if(user.userType === UserType.STUDENT){
+            const studentRepository = manager.getRepository(StudentEntity);
+            const student = await studentRepository.createQueryBuilder('student')
+            .where('student.userId = :userId',{userId:user.id}).getOne()
+            return {...tokens,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id};
+          }
          
-        return tokens;
+
+        
     }
    
     async signupStudent(data:StudentDTO):Promise<Tokens>{

@@ -15,6 +15,7 @@ const user_repository_1 = require("../core/repositories/user.repository");
 const user_entity_1 = require("../core/entities/user.entity");
 const bcrypt = require("bcryptjs");
 const student_repository_1 = require("../core/repositories/student.repository");
+const student_entity_1 = require("../core/entities/student.entity");
 const reset_password_token_repository_1 = require("../core/repositories/reset.password.token.repository");
 const crypto_1 = require("crypto");
 const nodemailer = require("nodemailer");
@@ -29,6 +30,7 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async signin(data) {
+        const manager = (0, typeorm_1.getManager)();
         const { email, password } = data;
         const user = await this.userRepository.findOne({ where: { email } });
         if (!user) {
@@ -41,7 +43,12 @@ let AuthService = class AuthService {
         await this.userRepository.save(user);
         const tokens = await this._getTokens(user.id, user.email);
         await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
-        return tokens;
+        if (user.userType === user_entity_1.UserType.STUDENT) {
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            const student = await studentRepository.createQueryBuilder('student')
+                .where('student.userId = :userId', { userId: user.id }).getOne();
+            return Object.assign(Object.assign({}, tokens), { uuid: user.id, email: user.email, firstName: student.firstName, lastName: student.lastName, dob: student.dob, code: student.code, studentId: student.id });
+        }
     }
     async signupStudent(data) {
         try {
@@ -158,6 +165,23 @@ let AuthService = class AuthService {
         }
         catch (err) {
             common_1.Logger.error(err, "AuthService/refrechToken");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async logout(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const userRepository = manager.getRepository(user_entity_1.UserEntity);
+            const user = await userRepository.findOne({ id: userId });
+            if (!user) {
+                common_1.Logger.error("acces denied:user not found ", "AuthService/logout");
+                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
+            }
+            await userRepository.update({ id: userId }, { refrechTokenHash: null });
+            return "logout success";
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/logout");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

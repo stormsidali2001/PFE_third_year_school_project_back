@@ -52,6 +52,15 @@ let AuthController = class AuthController {
             throw new common_1.HttpException(error.message, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async logout(userId) {
+        try {
+            return await this.authService.logout(userId);
+        }
+        catch (error) {
+            common_1.Logger.error(error.message, "AuthController/logout");
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 __decorate([
     (0, public_decorator_1.Public)(),
@@ -113,6 +122,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refrechToken", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "logout", null);
 AuthController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

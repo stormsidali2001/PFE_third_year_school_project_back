@@ -10,13 +10,24 @@ export declare class AuthService {
     private resetPasswordTokenRepository;
     private jwtService;
     constructor(userRepository: UserRepository, studentRepository: StudentRepository, resetPasswordTokenRepository: RestPasswordTokenRepository, jwtService: JwtService);
-    signin(data: UserDTO): Promise<Tokens>;
+    signin(data: UserDTO): Promise<{
+        uuid: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        dob: Date;
+        code: string;
+        studentId: string;
+        accesToken: string;
+        refrechToken: string;
+    }>;
     signupStudent(data: StudentDTO): Promise<Tokens>;
     signupTeacher(data: TeacherDTO): Promise<void>;
     signupEnterprise(data: EnterpriseDTO): Promise<void>;
     forgotPassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;
     refrechToken(userId: string, refrechToken: string): Promise<Tokens>;
+    logout(userId: string): Promise<string>;
     _getTokens(userId: string, email: string): Promise<Tokens>;
     _updateRefrechTokenHash(userId: string, refrechToken: string): Promise<void>;
 }

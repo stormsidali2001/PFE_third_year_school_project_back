@@ -198,3 +198,8 @@ content-type:application/json
         "date":"2022-04-05"
     }
 }
+
+### get notifications
+Get http://localhost:8080/notifications/bd323783-e5ee-4d59-a0a4-0c8e57d60ae0
+content-type:application/json
+
