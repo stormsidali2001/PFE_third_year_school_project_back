@@ -47,7 +47,7 @@ let AuthService = class AuthService {
             const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
             const student = await studentRepository.createQueryBuilder('student')
                 .where('student.userId = :userId', { userId: user.id }).getOne();
-            return Object.assign(Object.assign({}, tokens), { uuid: user.id, email: user.email, firstName: student.firstName, lastName: student.lastName, dob: student.dob, code: student.code, studentId: student.id });
+            return Object.assign(Object.assign({}, tokens), { userType: user.userType, uuid: user.id, email: user.email, firstName: student.firstName, lastName: student.lastName, dob: student.dob, code: student.code, studentId: student.id });
         }
     }
     async signupStudent(data) {

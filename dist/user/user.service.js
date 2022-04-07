@@ -233,16 +233,25 @@ let UserService = class UserService {
         }
         return `notification sent with success to team: ${team.nickName} members`;
     }
-    async getNotifications(studentId) {
+    async getLastNotifications(userId, number = undefined) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-            const student = await studentRepository.createQueryBuilder('student').leftJoinAndSelect('student.notifications', 'notifications').where('student.id = :id', { id: studentId }).getOne();
-            if (!student) {
-                common_1.Logger.error("student not found", 'UserService/getNotifications');
-                throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
+            const userRepository = manager.getRepository(user_entity_1.UserEntity);
+            const user = await userRepository.findOne({ id: userId });
+            if (!user) {
+                common_1.Logger.error("user not found", 'UserService/getLastNotifications');
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            return student.notifications;
+            let entity;
+            let entityName;
+            if (user.userType === user_entity_1.UserType.STUDENT) {
+                const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+                entity = await studentRepository.createQueryBuilder('student').where('student.userId = :id', { id: userId }).getOne();
+                entityName = 'student';
+            }
+            const notfificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
+            const notifications = number ? await notfificationRepository.createQueryBuilder('notification').limit(number).innerJoin(`notification.${entityName}`, entityName).where(`${entityName}.id = :id`, { id: entity.id }).getMany() : await notfificationRepository.createQueryBuilder('notification').innerJoin(`notification.${entityName}`, entityName).where(`${entityName}.id = :id`, { id: entity.id }).getMany();
+            return notifications;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getNotifications');

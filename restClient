@@ -200,6 +200,17 @@ content-type:application/json
 }
 
 ### get notifications
-Get http://localhost:8080/notifications/bd323783-e5ee-4d59-a0a4-0c8e57d60ae0
+Get http://localhost:8080/notifications/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMmFhOTEyNTYtNDlhMS00MDgxLThjNjgtZGFjOTRkNTIxOGU1IiwiZW1haWwiOiJhMi5hc3NvdWxAZXNpLXNiYS5keiIsImlhdCI6MTY0OTI1Mjk0OCwiZXhwIjoxNjQ5MjUzODQ4fQ.XkcfcSLkUbpyF6O_Cpf-2AaG6nqa5DFdUwBjHiv6a-E
+
+
+#########################################test routes#############################################
+
+### send notification
+POST http://localhost:8080/test/sendNotification
 content-type:application/json
 
+{
+    "studentId":"2e6da0b8-02c8-47d2-9a27-94b7ec95910a",
+    "description":"it's workign ya jedek"
+}

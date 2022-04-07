@@ -13,7 +13,7 @@ export declare class UserService {
     getInvitations(studentId: string): Promise<InvitationEntity[]>;
     _sendNotfication(studentId: string, description: string): Promise<string>;
     _sendTeamNotfication(teamId: string, description: string, expectStudentId?: string, expectMessage?: string): Promise<string>;
-    getNotifications(studentId: string): Promise<NotificationEntity[]>;
+    getLastNotifications(userId: string, number?: number): Promise<NotificationEntity[]>;
     createTeamAnnouncement(studentId: string, teamId: string, title: string, description: string): Promise<string>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(studentId: string, survey: SurveyDto): Promise<string>;

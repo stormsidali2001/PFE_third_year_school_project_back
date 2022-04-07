@@ -1,5 +1,6 @@
 import { UserRepository } from "src/core/repositories/user.repository";
 import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
+import { UserType } from "../core/entities/user.entity";
 import { StudentRepository } from "src/core/repositories/student.repository";
 import { RestPasswordTokenRepository } from "src/core/repositories/reset.password.token.repository";
 import { JwtService } from "@nestjs/jwt";
@@ -11,6 +12,7 @@ export declare class AuthService {
     private jwtService;
     constructor(userRepository: UserRepository, studentRepository: StudentRepository, resetPasswordTokenRepository: RestPasswordTokenRepository, jwtService: JwtService);
     signin(data: UserDTO): Promise<{
+        userType: UserType.STUDENT;
         uuid: string;
         email: string;
         firstName: string;

@@ -4,6 +4,7 @@ export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
     signin(data: UserDTO): Promise<{
+        userType: import("../core/entities/user.entity").UserType.STUDENT;
         uuid: string;
         email: string;
         firstName: string;

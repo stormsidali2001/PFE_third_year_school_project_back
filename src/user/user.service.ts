@@ -308,22 +308,33 @@ export class UserService{
      
         return `notification sent with success to team: ${team.nickName} members` ;   
     }
-async  getNotifications(studentId:string){   
+    //the number param has an undefined or number type
+async  getLastNotifications(userId:string,number:number = undefined){   
 
     try{
 
+
         // get the notification repository
         const manager = getManager();
-        //get student repository
-        const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.createQueryBuilder('student').leftJoinAndSelect('student.notifications','notifications').where('student.id = :id',{id:studentId}).getOne();
-        if(!student){
-            Logger.error("student not found",'UserService/getNotifications')
-            throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
+        const userRepository = manager.getRepository(UserEntity);
+        const user = await userRepository.findOne({id:userId});
+        if(!user){
+            Logger.error("user not found",'UserService/getLastNotifications')
+            throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
         }
-      
+        let entity;
+        let entityName;
+        if(user.userType === UserType.STUDENT){
+            const studentRepository = manager.getRepository(StudentEntity)
+            entity = await studentRepository.createQueryBuilder('student').where('student.userId = :id',{id:userId}).getOne();
+            entityName = 'student';
+        }
 
-      return student.notifications;
+        //get student repository
+        const notfificationRepository = manager.getRepository(NotificationEntity);
+        const notifications =number? await notfificationRepository.createQueryBuilder('notification').limit(number).innerJoin(`notification.${entityName}`,entityName).where(`${entityName}.id = :id`,{id:entity.id}).getMany():await notfificationRepository.createQueryBuilder('notification').innerJoin(`notification.${entityName}`,entityName).where(`${entityName}.id = :id`,{id:entity.id}).getMany();
+      
+      return notifications;
     }catch(err){
         Logger.error(err,'UserService/getNotifications')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

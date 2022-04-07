@@ -14,6 +14,8 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const get_current_user_id_decorator_1 = require("../common/decorators/get-current-user-id.decorator");
+const public_decorator_1 = require("../common/decorators/public.decorator");
 const user_dto_1 = require("../core/dtos/user.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
@@ -101,6 +103,24 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/createNormalTeamMeet');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getLastNotifications(userId, number) {
+        try {
+            return await this.userService.getLastNotifications(userId, number);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getNotifications');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async sendNotification(studentId, description) {
+        try {
+            return await this.userService._sendNotfication(studentId, description);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/sendNotifications');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -205,6 +225,23 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.NormalTeamMeetDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createNormalTeamMeet", null);
+__decorate([
+    (0, common_1.Get)('notifications/:number'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('number', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getLastNotifications", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('test/sendNotification'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __param(1, (0, common_1.Body)('description')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sendNotification", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

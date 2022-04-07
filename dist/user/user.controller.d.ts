@@ -15,4 +15,6 @@ export declare class UserController {
     getSurveys(teamId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
+    getLastNotifications(userId: string, number: number): Promise<import("../core/entities/Notification.entity").NotificationEntity[]>;
+    sendNotification(studentId: string, description: string): Promise<string>;
 }

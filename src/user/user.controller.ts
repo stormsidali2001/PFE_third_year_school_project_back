@@ -1,4 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post } from "@nestjs/common";
+import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
+import { Public } from "src/common/decorators/public.decorator";
 import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
@@ -119,6 +121,27 @@ export class UserController{
             return await this.userService.createNormalTeamMeet(studentId,meet);
         }catch(err){
             Logger.error(err,'UserController/createNormalTeamMeet')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Get('notifications/:number')
+    async getLastNotifications(@GetCurrentUserId() userId:string,   @Param('number',ParseIntPipe) number:number){
+        try{
+            return await this.userService.getLastNotifications(userId,number);
+        }catch(err){
+            Logger.error(err,'UserController/getNotifications')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    //test routes---------------------------
+    @Public()
+    @Post('test/sendNotification')
+    async sendNotification(@Body('studentId') studentId:string, @Body('description') description:string){
+        try{
+            return await this.userService._sendNotfication(studentId,description);
+        }catch(err){
+            Logger.error(err,'UserController/sendNotifications')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }

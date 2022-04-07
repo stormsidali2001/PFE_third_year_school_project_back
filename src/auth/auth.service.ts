@@ -46,7 +46,7 @@ export class AuthService{
             const studentRepository = manager.getRepository(StudentEntity);
             const student = await studentRepository.createQueryBuilder('student')
             .where('student.userId = :userId',{userId:user.id}).getOne()
-            return {...tokens,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id};
+            return {...tokens,userType:user.userType,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id};
           }
          
 
