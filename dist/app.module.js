@@ -57,7 +57,7 @@ AppModule = __decorate([
         imports: [typeorm_1.TypeOrmModule.forRoot({
                 type: "mysql",
                 host: "localhost",
-                port: 1000,
+                port: 3306,
                 database: "pfe_db",
                 username: "root",
                 password: "root",

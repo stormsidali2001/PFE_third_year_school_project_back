@@ -46,7 +46,7 @@ import { AccessTokenGuard } from './common/guards/acces-token.guard';
   imports: [TypeOrmModule.forRoot({
     type:"mysql",
     host:"localhost",
-    port:1000,
+    port:3306,
     database:"pfe_db",
     username:"root",
     password:"root",

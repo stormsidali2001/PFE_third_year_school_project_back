@@ -59,10 +59,12 @@ export class AuthService{
         
         const {email,password,firstName,lastName,dob,code} = data;
         let user:UserEntity = await this.userRepository.findOne({where:{email}})
-        const service = email.split('@')[1].split('.')[0];
-        const domain = email.split('@')[1].split('.')[1];
+        const name = email?.split('@')[0]?.split('.')[0];
+        const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+        const service = email?.split('@')[1]?.split('.')[0];
+        const domain = email?.split('@')[1]?.split('.')[1];
         
-        if(service!== 'esi-sba' && domain !='dz'){
+        if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
             throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
         }
         if(user){
@@ -154,7 +156,13 @@ export class AuthService{
           // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
           return "check you email please";
     }
+    
     async resetPassword(password:string,token:string,userId:string){
+          // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
+          const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          if(password.match(regex)==null){
+              throw new HttpException('mot de passe tres faible',HttpStatus.BAD_REQUEST); 
+          }
         const resetPasswordToken:RestPasswordTokenEntity = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId',{userId}).getOne();
        
         Logger.log(`tokenDb:${resetPasswordToken}`,"restPassword")

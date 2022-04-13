@@ -21,10 +21,10 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"a2.assoul@esi-sba.dz",
+    "email":"h.debza@esi-sba.dz",
     "password":"1@2@3Abc",
-    "firstName":"a2",
-    "lastName":"a2",
+    "firstName":"debza",
+    "lastName":"houda",
     "dob":"2001-04-20",
     "code":"191932004015"
 }
@@ -56,7 +56,9 @@ content-type:application/json
 
 {
    
-    "password":"123456six"
+    "password":"1@2@3Abc",
+    "token":"0ef03ca20506f356c12f4088f7b42fa50107abded959cb6b7229d38507a25907",
+    "userId":"f9864666-173b-4d40-80ec-a484fc021f82"
    
 }
 

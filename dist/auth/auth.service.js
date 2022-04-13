@@ -51,12 +51,15 @@ let AuthService = class AuthService {
         }
     }
     async signupStudent(data) {
+        var _a, _b, _c, _d;
         try {
             const { email, password, firstName, lastName, dob, code } = data;
             let user = await this.userRepository.findOne({ where: { email } });
-            const service = email.split('@')[1].split('.')[0];
-            const domain = email.split('@')[1].split('.')[1];
-            if (service !== 'esi-sba' && domain != 'dz') {
+            const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
+            const lastNameEmail = (_b = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _b === void 0 ? void 0 : _b.split('.')[1];
+            const service = (_c = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _c === void 0 ? void 0 : _c.split('.')[0];
+            const domain = (_d = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _d === void 0 ? void 0 : _d.split('.')[1];
+            if ((name === null || name === void 0 ? void 0 : name.length) > 0 && (lastNameEmail === null || lastNameEmail === void 0 ? void 0 : lastNameEmail.length) > 0 && service !== 'esi-sba' && domain != 'dz') {
                 throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
             }
             if (user) {
@@ -127,6 +130,10 @@ let AuthService = class AuthService {
         return "check you email please";
     }
     async resetPassword(password, token, userId) {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (password.match(regex) == null) {
+            throw new common_1.HttpException('mot de passe tres faible', common_1.HttpStatus.BAD_REQUEST);
+        }
         const resetPasswordToken = await this.resetPasswordTokenRepository.createQueryBuilder('tokens').where('tokens.userId = :userId', { userId }).getOne();
         common_1.Logger.log(`tokenDb:${resetPasswordToken}`, "restPassword");
         if (!resetPasswordToken) {
