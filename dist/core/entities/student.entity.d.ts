@@ -1,6 +1,5 @@
 import { InvitationEntity } from "./invitation.entity";
 import { MeetAbsentEntity } from "./meet.absent.entity";
-import { NotificationEntity } from "./Notification.entity";
 import { SurveyParticipantEntity } from "./survey.participant.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
@@ -20,5 +19,4 @@ export declare class StudentEntity {
     documents: TeamDocumentEntity[];
     participationsInSurveys: SurveyParticipantEntity[];
     meetAbsences: MeetAbsentEntity[];
-    notifications: NotificationEntity[];
 }

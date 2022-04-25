@@ -1,3 +1,4 @@
+import { NotificationEntity } from "./Notification.entity";
 import { RestPasswordTokenEntity } from "./resetPasswordToken.entity";
 export declare enum UserType {
     TEACHER = "teacher",
@@ -13,4 +14,5 @@ export declare class UserEntity {
     userType: UserType;
     refrechTokenHash: string;
     tokens: RestPasswordTokenEntity[];
+    notifications: NotificationEntity[];
 }

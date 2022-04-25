@@ -4,7 +4,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
-
+ 
 @Controller()
 export class UserController{
     constructor(private readonly userService:UserService) {}
@@ -16,23 +16,24 @@ export class UserController{
     }
     @Post('/sendATeamInvitation')
     async sendATeamInvitation(
-        @Body('senderId') senderId:string,
-        @Body('receiverId') receiverId:string,
+        @GetCurrentUserId() userId:string,
+        @Body('recieverId') recieverId:string,
     @Body('description') description:string
     ){
+        Logger.log({recieverId,description},'UserController/sendATeamInvitation')
 
-        return this.userService.sendATeamInvitation(senderId,receiverId,description);
+        return await this.userService.sendATeamInvitation(userId,recieverId,description);
     }
 
     @Post('/acceptRefuseTeamInvitation')
     async acceptRefuseTeamInvitation(
         @Body('invitationId') invitationId:string ,
         @Body('accepted',ParseBoolPipe) accepted:boolean,
-        @Body('recieverId') recieverId:string 
+       @GetCurrentUserId() userId:string 
         
     ){
       
-        return this.userService.acceptRefuseTeamInvitation(invitationId,recieverId,accepted);
+        return this.userService.acceptRefuseTeamInvitation(invitationId,userId,accepted);
     }
 
     @Post('/sendTeamJoinRequest')
@@ -134,6 +135,26 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+
+   
+    @Get('getStudentsWithoutTeam')
+    async getStudentsWithoutTeam(@GetCurrentUserId() userId:string){
+        try{
+            return await this.userService.getStudentsWithoutTeam(userId)
+        }catch(err){
+            Logger.error(err,'UserController/getStudentsWithoutTeam')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Get('getInvitationList')
+    async getInvitationList(@GetCurrentUserId() userId:string){
+        try{
+            return await  this.userService.getInvitationList(userId);
+        }catch(err){
+            Logger.error(err,'UserController/getInvitationList')
+        }
+    }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
@@ -146,4 +167,5 @@ export class UserController{
         }
     }
   
+
 }

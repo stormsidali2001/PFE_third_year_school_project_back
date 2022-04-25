@@ -4,4 +4,5 @@ export declare class InvitationEntity {
     description: string;
     sender: StudentEntity;
     reciever: StudentEntity;
+    createdAt: Date;
 }

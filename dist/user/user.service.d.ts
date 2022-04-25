@@ -1,19 +1,23 @@
 import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
+import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 export declare class UserService {
     private schedulerRegistry;
     constructor(schedulerRegistry: SchedulerRegistry);
     getUserInfo(userId: string): Promise<any>;
-    sendATeamInvitation(senderId: string, recieverId: string, description: string): Promise<string>;
-    acceptRefuseTeamInvitation(invitationId: string, receiverId: string, accepted: boolean): Promise<string>;
+    sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
+    acceptRefuseTeamInvitation(invitationId: string, userId: string, accepted: boolean): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
     getInvitations(studentId: string): Promise<InvitationEntity[]>;
     _sendNotfication(studentId: string, description: string): Promise<string>;
     _sendTeamNotfication(teamId: string, description: string, expectStudentId?: string, expectMessage?: string): Promise<string>;
-    getLastNotifications(userId: string, number?: number): Promise<NotificationEntity[]>;
+    getLastNotifications(userId: string, number?: number): Promise<{
+        notifications: NotificationEntity[];
+        totalNotificationCount: number;
+    }>;
     createTeamAnnouncement(studentId: string, teamId: string, title: string, description: string): Promise<string>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
@@ -21,4 +25,18 @@ export declare class UserService {
     getSurveys(teamId: string): Promise<SurveyEntity[]>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
+    getStudentsWithoutTeam(userId: string): Promise<StudentEntity[]>;
+    getInvitationList(userId: string): Promise<{
+        id: string;
+        description: string;
+        senderTeam: {
+            id: string;
+            nickname: string;
+            teamLeader: {
+                id: string;
+                firstname: string;
+                lastName: string;
+            };
+        };
+    }[]>;
 }

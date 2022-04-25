@@ -18,7 +18,6 @@ export class EntrepriseEntity{
     @OneToOne(type=>UserEntity) @JoinColumn()
     user:UserEntity;
 
-    @OneToMany(type=>NotificationEntity,notification=>notification.entreprise)
-    notifications:NotificationEntity[];
+  
 
 }

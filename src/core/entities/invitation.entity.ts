@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { StudentEntity } from "./student.entity";
 
 @Entity('invitation')
@@ -16,4 +16,7 @@ export class InvitationEntity{
 
     @ManyToOne(type=>StudentEntity,student=>student.receivedInvitations)
     reciever:StudentEntity;
+
+    @CreateDateColumn()
+    createdAt:Date;
 }

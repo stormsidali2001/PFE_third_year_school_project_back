@@ -11,7 +11,7 @@ import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entit
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { getManager } from "typeorm";
-import {SchedulerRegistry,CronExpression} from '@nestjs/schedule'
+import {SchedulerRegistry} from '@nestjs/schedule'
 import { CronJob } from "cron";
 import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
 @Injectable()
@@ -70,39 +70,58 @@ export class UserService{
      * team leader/student sends an invitation  to a student without a team
      * 
      */
-    async sendATeamInvitation(senderId:string,recieverId:string,description:string){
-
-        if(senderId === recieverId){
-            Logger.error("you can't send a team invitation to your self !!",'UserService/sendATeamInvitation')
-            throw new HttpException("you can't send a team invitation to your self !!",HttpStatus.BAD_REQUEST);
-        }
-        const manager = getManager();
+    async sendATeamInvitation(userId:string,recieverId:string,description:string){
         try{
-            const sender = await manager.getRepository(StudentEntity).findOne({id:senderId},{relations:['team','sentInvitations']})
+            const manager = getManager();
+            const studentRepository = manager.getRepository(StudentEntity);
+            const sender =
+            await manager.getRepository(StudentEntity)
+            .createQueryBuilder('student')
+            .where('student.userId = :userId',{userId})
+            .innerJoin('student.team','team')
+            .innerJoin('team.teamLeader','leader')
+            .getOne()
+            
+         
+           
+            
             if(!sender){
                 Logger.error("sender not found",'UserService/sendATeamInvitation')
                 throw new HttpException("sender not found",HttpStatus.BAD_REQUEST);
             }
+            
 
-            const reciever =  await manager.getRepository(StudentEntity).findOne({id:recieverId},{relations:['team','sentInvitations']});
+
+            const reciever =  await manager.getRepository(StudentEntity)
+            .createQueryBuilder('student')
+            .where('student.teamId IS  NULL')
+            .andWhere('student.id = :recieverId',{recieverId})
+            .getOne()
+
             if(!reciever){
                 Logger.error("reciever not found",'UserService/sendATeamInvitation')
                 throw new HttpException("receiver not found",HttpStatus.BAD_REQUEST);
             }
 
-            if(reciever.team ){
-                Logger.error("le destinataire doit etre sans equipe.",'UserService/sendATeamInvitation')
-                throw new HttpException("le destinataire doit etre sans equipe.",HttpStatus.BAD_REQUEST)
-            }
+            const sentInvitationCount= await manager.getRepository(InvitationEntity)
+            .createQueryBuilder('invitation')
+            .where('invitation.senderId = :senderId',{senderId:sender.id})
+            .andWhere('invitation.recieverId = :recieverId',{recieverId})
+            .getCount()
 
+            if(sentInvitationCount!==0){
+                Logger.error("you v'e already send an invitation to that particular user",'UserService/sendATeamInvitation')
+                throw new HttpException("you v'e already send an invitation to that particular user",HttpStatus.BAD_REQUEST);
+            }
             const invitationsRepository = manager.getRepository(InvitationEntity);
             const invitation:InvitationEntity = invitationsRepository.create({description,sender,reciever});
             await invitationsRepository.save(invitation);
-            return JSON.stringify({sender,reciever,description}) ;
+            return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName}`;
         }catch(err){
             Logger.error(err,'UserService/sendATeamInvitation')
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
+
 
 
      
@@ -113,7 +132,7 @@ export class UserService{
          * the receiver of the invitation
          * 
          */
-    async acceptRefuseTeamInvitation(invitationId:string,receiverId:string,accepted:boolean){
+    async acceptRefuseTeamInvitation(invitationId:string,userId:string,accepted:boolean){
      
       
      
@@ -122,18 +141,22 @@ export class UserService{
         const invitationsRepository = manager.getRepository(InvitationEntity);
         let invitation:InvitationEntity;
         try{
-             invitation = await invitationsRepository.findOne({id:invitationId},{
-                 relations:['reciever','sender','sender.team','reciever.team']
-             });
-     
+             invitation = await invitationsRepository
+             .createQueryBuilder('invitation')
+             .leftJoinAndSelect('invitation.sender','sender')
+             .leftJoinAndSelect('invitation.reciever','reciever')
+             .leftJoinAndSelect('sender.team','steam')
+             .leftJoinAndSelect('reciever.team','rteam')
+             .where('invitation.id = :invitationId',{invitationId})
+             .andWhere('reciever.userId = :userId',{userId})
+             .getOne()
+             
+         
         if(!invitation){
             Logger.error("invitation not found",'UserService/getAcceptRefuseTeamInvitation')
-            throw new HttpException("invitation not found",HttpStatus.BAD_REQUEST);
+            throw new HttpException("invitation not found",HttpStatus.FORBIDDEN);
         }
-        if(invitation.reciever.id!= receiverId){
-            Logger.error("you are not the right reciever",'UserService/getAcceptRefuseTeamInvitation')
-            throw new HttpException("invitation not found",HttpStatus.BAD_REQUEST);
-        }
+      
       
       if(!accepted){
           /*
@@ -165,8 +188,6 @@ export class UserService{
         }else{
             invitation.reciever.team = invitation.sender.team;
             await studentRepository.save(invitation.reciever)
-           
-           
         }
         await invitationsRepository.delete({id:invitation.id})
         let outputMessage = `invitation has been accepted`;
@@ -272,13 +293,17 @@ export class UserService{
          const manager = getManager();
             //get student repository    
             const studentRepository = manager.getRepository(StudentEntity);
-            const student = await studentRepository.findOne({id:studentId});
+            const student = await studentRepository.createQueryBuilder('student')
+            .where('student.id = :studentId',{studentId})
+            .leftJoinAndSelect('student.user','user')
+            .getOne()
+        
             if(!student){
                 Logger.error("student not found",'UserService/sendNotfication') 
                 throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
             }
             const notificationRepository = manager.getRepository(NotificationEntity);
-            const notification = notificationRepository.create({description,student,seen:false});
+            const notification = notificationRepository.create({description,user:student.user,seen:false});
             await notificationRepository.save(notification);
             return `notification sent with success to: ${student.firstName+' '+student.lastName}`;
             
@@ -286,26 +311,35 @@ export class UserService{
     async _sendTeamNotfication(teamId:string,description:string,expectStudentId?:string,expectMessage?:string){    
         const manager = getManager();
         const teamRepository = manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId  },  {relations:['students']});
+        const team = await teamRepository.createQueryBuilder('team')
+        .where('team.id = :teamId',{teamId})
+        .leftJoinAndSelect('team.students','student')
+        .leftJoinAndSelect('student.user','user')
+        .getOne();
+        
         if(!team){
             Logger.error("the student is not a member in a team",'UserService/sendTeamNotfication')
             throw new HttpException("the student is not a member in a team",HttpStatus.BAD_REQUEST);
         }
         const notificationRepository = manager.getRepository(NotificationEntity);
+
+        const notifications:NotificationEntity[] = [];
         for(let student of team.students){
             if(expectStudentId && student.id === expectStudentId){   
 
                 if(expectMessage){  
-                    const notification = notificationRepository.create({description:expectMessage,student,seen:false});
-                    await notificationRepository.save(notification);
+                    const notification = notificationRepository.create({description:expectMessage,user:student.user,seen:false});
+                    notifications.push(notification);
+                   
                 }
                 continue;   
             }
 
-            const notification = notificationRepository.create({description,student,seen:false});
-            await notificationRepository.save(notification);
+            const notification = notificationRepository.create({description,user:student.user,seen:false});
+            notifications.push(notification);
+          
         }
-     
+        await notificationRepository.save(notifications)
         return `notification sent with success to team: ${team.nickName} members` ;   
     }
     //the number param has an undefined or number type
@@ -316,25 +350,24 @@ async  getLastNotifications(userId:string,number:number = undefined){
 
         // get the notification repository
         const manager = getManager();
-        const userRepository = manager.getRepository(UserEntity);
-        const user = await userRepository.findOne({id:userId});
-        if(!user){
-            Logger.error("user not found",'UserService/getLastNotifications')
-            throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
-        }
-        let entity;
-        let entityName;
-        if(user.userType === UserType.STUDENT){
-            const studentRepository = manager.getRepository(StudentEntity)
-            entity = await studentRepository.createQueryBuilder('student').where('student.userId = :id',{id:userId}).getOne();
-            entityName = 'student';
-        }
+     
+       
 
         //get student repository
-        const notfificationRepository = manager.getRepository(NotificationEntity);
-        const notifications =number? await notfificationRepository.createQueryBuilder('notification').limit(number).innerJoin(`notification.${entityName}`,entityName).where(`${entityName}.id = :id`,{id:entity.id}).getMany():await notfificationRepository.createQueryBuilder('notification').innerJoin(`notification.${entityName}`,entityName).where(`${entityName}.id = :id`,{id:entity.id}).getMany();
+        const notificationRepository = manager.getRepository(NotificationEntity);
+      const notifications = await   notificationRepository.createQueryBuilder('notification')
+        .innerJoin('notification.user','user')
+        .where('user.id = :userId',{userId})
+        .orderBy('notification.createdAt',"DESC")
+        .getMany();
+     const totalNotificationCount = await notificationRepository.createQueryBuilder('notification')
+     .innerJoin('notification.user','user')
+     .where('user.id = :userId',{userId})
+     .getCount();
+    
       
-      return notifications;
+      Logger.log('notifications:'+JSON.stringify(notifications))
+      return {notifications,totalNotificationCount};
     }catch(err){
         Logger.error(err,'UserService/getNotifications')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -643,6 +676,66 @@ async createUrgentTeamMeet(studentId:string,meet:UrgentTeamMeetDto){
         Logger.error(err,'UserService/createMeet')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
+}
+
+
+async getStudentsWithoutTeam(userId:string){
+    const manager = getManager();
+    try{
+        
+        const studentRepository = manager.getRepository(StudentEntity);
+      
+        const student =  await 
+                studentRepository
+                .createQueryBuilder('student')
+                .where('student.userId = :userId',{userId})
+                .innerJoin('student.team','team')
+                .innerJoin('team.teamLeader','leader')
+                .getOne()
+
+         if(!student){
+            Logger.error("operation allowed only for teamLeader",'UserService/getStudentsWithoutTeam')
+            throw new HttpException("operation allowed only for teamLeader",HttpStatus.BAD_REQUEST);
+         }
+      return await  studentRepository.createQueryBuilder('student')
+        .andWhere('student.teamId IS NULL')
+        .getMany()
+        
+       
+    }catch(err){
+        Logger.error(err,'UserService/getStudentsWithoutTeam')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+async getInvitationList(userId:string){
+    const manager = getManager();
+    const invitationsRepository = manager.getRepository(InvitationEntity);
+
+    const invitations = await invitationsRepository
+    .createQueryBuilder('invitation')
+    .leftJoinAndSelect('invitation.reciever','reciever')
+    .where('reciever.userId = :userId',{userId})
+    .leftJoinAndSelect('invitation.sender','sender')
+    .leftJoinAndSelect('sender.team','team')
+    .getMany()
+
+    const reponses = invitations.map(inv=>{
+        const {id,description,sender} = inv;
+        return {
+            id,
+            description,
+            senderTeam:{
+                id:sender.team.id,nickname:sender.team.nickName,
+                teamLeader:{
+                    id:sender.id,
+                    firstname:sender.firstName,lastName:sender.lastName
+                }
+            }
+        }
+    })
+
+    return reponses;
 }
 
 

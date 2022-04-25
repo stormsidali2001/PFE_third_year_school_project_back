@@ -115,7 +115,7 @@ __decorate([
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.UseGuards)(refrech_token_guard_1.RefrechTokenGuard),
-    (0, common_1.Post)('refrechtoken'),
+    (0, common_1.Get)('refrechtoken'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __param(1, (0, get_current_user_1.GetCurrentUser)('refrechToken')),
     __metadata("design:type", Function),

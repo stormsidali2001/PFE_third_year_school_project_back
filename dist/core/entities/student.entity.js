@@ -13,7 +13,6 @@ exports.StudentEntity = void 0;
 const typeorm_1 = require("typeorm");
 const invitation_entity_1 = require("./invitation.entity");
 const meet_absent_entity_1 = require("./meet.absent.entity");
-const Notification_entity_1 = require("./Notification.entity");
 const survey_participant_entity_1 = require("./survey.participant.entity");
 const team_chat_message_entity_1 = require("./team.chat.message.entity");
 const team_document_entity_1 = require("./team.document.entity");
@@ -74,10 +73,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => meet_absent_entity_1.MeetAbsentEntity, meetAbsent => meetAbsent.student),
     __metadata("design:type", Array)
 ], StudentEntity.prototype, "meetAbsences", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(type => Notification_entity_1.NotificationEntity, notification => notification.student),
-    __metadata("design:type", Array)
-], StudentEntity.prototype, "notifications", void 0);
 StudentEntity = __decorate([
     (0, typeorm_1.Entity)('student')
 ], StudentEntity);

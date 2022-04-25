@@ -2,8 +2,8 @@ POST http://localhost:8080/signin
 content-type:application/json
 
 {
-    "email":"a2.assoul@esi-sba.dz",
-    "password":"1@2@3Abc"
+    "email":"s.assoul@esi-sba.dz",
+    "password":"1@2@3@abC"
 }
 
 ###
@@ -21,10 +21,10 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"h.debza@esi-sba.dz",
-    "password":"1@2@3Abc",
-    "firstName":"debza",
-    "lastName":"houda",
+    "email":"h.debza4@esi-sba.dz",
+    "password":"1@2@4@abC",
+    "firstName":"debza4",
+    "lastName":"houda4",
     "dob":"2001-04-20",
     "code":"191932004015"
 }
@@ -44,8 +44,8 @@ POST http://localhost:8080/signin
 content-type:application/json
 
 {
-    "email":"sidalihouda.computerscience@gmail.com",
-    "password":"123456six"
+    "email":"s.assoul@esi-sba.dz",
+    "password":"1@2@3@abC"
    
 }
 
@@ -77,11 +77,11 @@ content-type:application/json
 ###
 POST http://localhost:8080/sendATeamInvitation
 content-type:application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiYWIxMWIzOGUtY2M5Yy00MGNkLTg4NGQtNjVlOWYwMzE4NDExIiwiZW1haWwiOiJzLmFzc291bEBlc2ktc2JhLmR6IiwiaWF0IjoxNjUwODI5NzYwLCJleHAiOjE2NTA4MzA2NjB9.O9oru9r0JXKMoUPvwYdTDWFw_TVw77UO0FGI5ingrDc
 
 {
    
-    "senderId":"5475bf32-8853-449e-8c01-e26d4ee62909",
-    "receiverId":"e9fdd4b7-f31e-4b76-8ec7-325a1935b2cf",
+    "receiverId":"b1badb37-213a-4f39-a9d6-996a4488640b",
     "description":"qbel l'invitation rak sujet de test"
 
    
@@ -91,11 +91,11 @@ content-type:application/json
 ###
 POST http://localhost:8080/acceptRefuseTeamInvitation
 content-type:application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiZjVhNmU2ZTQtMGNiYS00NTc1LWEzODMtZDExYmFlOWM2YjlhIiwiZW1haWwiOiJoLmRlYnphQGVzaS1zYmEuZHoiLCJpYXQiOjE2NTA4MDAyNTQsImV4cCI6MTY1MDgwMTE1NH0.w6DdR_lbvbV_23r3tDxIRedCXc5gT1OItxevFIDG-zM
 
 {
    
-    "invitationId":"2c8a5c26-60b2-40d8-ac29-063d7e610053",
-    "recieverId":"e9fdd4b7-f31e-4b76-8ec7-325a1935b2cf",
+    "invitationId":"77ad0cf8-ca8d-49db-a9ae-a320f80e6446",
     "accepted":"true"
     
    
@@ -203,9 +203,16 @@ content-type:application/json
 
 ### get notifications
 Get http://localhost:8080/notifications/3
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMmFhOTEyNTYtNDlhMS00MDgxLThjNjgtZGFjOTRkNTIxOGU1IiwiZW1haWwiOiJhMi5hc3NvdWxAZXNpLXNiYS5keiIsImlhdCI6MTY0OTI1Mjk0OCwiZXhwIjoxNjQ5MjUzODQ4fQ.XkcfcSLkUbpyF6O_Cpf-2AaG6nqa5DFdUwBjHiv6a-E
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiOWYwODI4ODctYzE5Ny00NDE0LWI5ZDctZTU5YzJmOWY0OWE5IiwiZW1haWwiOiJzLmFzc291bEBlc2ktc2JhLmR6IiwiaWF0IjoxNjUwNzg2NjQ4LCJleHAiOjE2NTA3ODc1NDh9.EmePhsX4iInGAbNE6LZRKKsO1zNjueWQob9256xattc
 
+### getStudentWithoutTeam
+GET http://localhost:8080/getStudentsWithoutTeam
+content-type:application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiYWIxMWIzOGUtY2M5Yy00MGNkLTg4NGQtNjVlOWYwMzE4NDExIiwiZW1haWwiOiJzLmFzc291bEBlc2ktc2JhLmR6IiwiaWF0IjoxNjUwODExNzk2LCJleHAiOjE2NTE0MTY1OTZ9.0F2-YA-P8_0-a97Pe0OmsMQfGKawI4ZCpJkl2JWXdtk
 
+{
+   
+}
 #########################################test routes#############################################
 
 ### send notification
@@ -213,6 +220,11 @@ POST http://localhost:8080/test/sendNotification
 content-type:application/json
 
 {
-    "studentId":"2e6da0b8-02c8-47d2-9a27-94b7ec95910a",
-    "description":"it's workign ya jedek"
+    "studentId":"e378cfdb-77eb-492c-ad4c-ad724569a0cb",
+    "description":"123"
 }
+
+
+### get invitation list
+GET http://localhost:8080/getInvitationList
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMDc4OGZlOTMtMTEwZC00OGM4LWE5ZDEtOGI2Mjk1Y2Y5ZjQwIiwiZW1haWwiOiJoLmRlYnphMkBlc2ktc2JhLmR6IiwiaWF0IjoxNjUwODc3MzE1LCJleHAiOjE2NTA4NzgyMTV9.0OH_C1kfT6nN7A9eFf2IqYdaBXTE1UboCDhGT1FY4ok

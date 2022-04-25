@@ -47,7 +47,7 @@ export class AuthController{
      }
      @Public()
      @UseGuards(RefrechTokenGuard)
-    @Post('refrechtoken')
+    @Get('refrechtoken')
     async refrechToken(@GetCurrentUserId() userId:string,@GetCurrentUser('refrechToken') refrechtoken:string){
         try{
 

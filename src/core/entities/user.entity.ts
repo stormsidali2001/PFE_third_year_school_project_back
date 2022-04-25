@@ -1,4 +1,5 @@
 import {  Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { NotificationEntity } from "./Notification.entity";
 import { RestPasswordTokenEntity } from "./resetPasswordToken.entity";
 
 export enum UserType {
@@ -39,5 +40,8 @@ export class UserEntity{
     //relations
     @OneToMany(type=>RestPasswordTokenEntity,resetPasswordToken=>resetPasswordToken.token)
     tokens:RestPasswordTokenEntity[];
+
+    @OneToMany(type=>NotificationEntity,notif=>notif.user)
+    notifications:NotificationEntity[];
    
 }

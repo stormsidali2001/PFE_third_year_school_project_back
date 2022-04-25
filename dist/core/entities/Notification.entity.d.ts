@@ -1,13 +1,8 @@
-import { AdminEntity } from "./admin.entity";
-import { EntrepriseEntity } from "./entreprise.entity";
-import { StudentEntity } from "./student.entity";
-import { TeacherEntity } from "./teacher.entity";
+import { UserEntity } from "./user.entity";
 export declare class NotificationEntity {
     id: string;
     description: string;
     seen: boolean;
-    teacher: TeacherEntity;
-    student: StudentEntity;
-    admin: AdminEntity;
-    entreprise: EntrepriseEntity;
+    createdAt: Date;
+    user: UserEntity;
 }

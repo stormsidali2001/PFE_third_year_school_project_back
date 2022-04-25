@@ -32,20 +32,26 @@ export class AuthService{
         const {email,password} = data;
         const user = await this.userRepository.findOne({where:{email}})
         if(!user){
+            Logger.error("Email does not exists",'signin/AuthService')
             throw new HttpException('Email does not exists',HttpStatus.BAD_REQUEST);
         }
         const equal:boolean = await bcrypt.compare(password,user.password);
         if(!equal){
+            Logger.error("Wrong Password",'signin/AuthService')
             throw new HttpException('Wrong Password',HttpStatus.BAD_REQUEST);
         }
-        await this.userRepository.save(user);
+      
       
           const tokens:Tokens = await this._getTokens(user.id,user.email);
           await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
           if(user.userType === UserType.STUDENT){
             const studentRepository = manager.getRepository(StudentEntity);
             const student = await studentRepository.createQueryBuilder('student')
-            .where('student.userId = :userId',{userId:user.id}).getOne()
+            .where('student.userId = :userId',{userId:user.id})
+            .leftJoinAndSelect('student.team','team')
+            .leftJoinAndSelect('team.teamLeader','teamLaeder')
+            .getOne()
+            Logger.log( `login success\n ${JSON.stringify({...tokens,userType:user.userType,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id}) }`,'signin/AuthService')
             return {...tokens,userType:user.userType,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id};
           }
          

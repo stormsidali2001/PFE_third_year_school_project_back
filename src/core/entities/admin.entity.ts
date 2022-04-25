@@ -18,7 +18,6 @@ export class AdminEntity{
     @OneToOne(type=>UserEntity) @JoinColumn()
     user:UserEntity
 
-    @OneToMany(type=>NotificationEntity,notification=>notification.admin)
-    notifications:NotificationEntity[];
+   
 
 }

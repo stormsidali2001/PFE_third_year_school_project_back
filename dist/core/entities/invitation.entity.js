@@ -30,6 +30,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => student_entity_1.StudentEntity, student => student.receivedInvitations),
     __metadata("design:type", student_entity_1.StudentEntity)
 ], InvitationEntity.prototype, "reciever", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], InvitationEntity.prototype, "createdAt", void 0);
 InvitationEntity = __decorate([
     (0, typeorm_1.Entity)('invitation')
 ], InvitationEntity);

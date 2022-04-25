@@ -61,52 +61,65 @@ let UserService = class UserService {
                 break;
         }
     }
-    async sendATeamInvitation(senderId, recieverId, description) {
-        if (senderId === recieverId) {
-            common_1.Logger.error("you can't send a team invitation to your self !!", 'UserService/sendATeamInvitation');
-            throw new common_1.HttpException("you can't send a team invitation to your self !!", common_1.HttpStatus.BAD_REQUEST);
-        }
-        const manager = (0, typeorm_1.getManager)();
+    async sendATeamInvitation(userId, recieverId, description) {
         try {
-            const sender = await manager.getRepository(student_entity_1.StudentEntity).findOne({ id: senderId }, { relations: ['team', 'sentInvitations'] });
+            const manager = (0, typeorm_1.getManager)();
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            const sender = await manager.getRepository(student_entity_1.StudentEntity)
+                .createQueryBuilder('student')
+                .where('student.userId = :userId', { userId })
+                .innerJoin('student.team', 'team')
+                .innerJoin('team.teamLeader', 'leader')
+                .getOne();
             if (!sender) {
                 common_1.Logger.error("sender not found", 'UserService/sendATeamInvitation');
                 throw new common_1.HttpException("sender not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            const reciever = await manager.getRepository(student_entity_1.StudentEntity).findOne({ id: recieverId }, { relations: ['team', 'sentInvitations'] });
+            const reciever = await manager.getRepository(student_entity_1.StudentEntity)
+                .createQueryBuilder('student')
+                .where('student.teamId IS  NULL')
+                .andWhere('student.id = :recieverId', { recieverId })
+                .getOne();
             if (!reciever) {
                 common_1.Logger.error("reciever not found", 'UserService/sendATeamInvitation');
                 throw new common_1.HttpException("receiver not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            if (reciever.team) {
-                common_1.Logger.error("le destinataire doit etre sans equipe.", 'UserService/sendATeamInvitation');
-                throw new common_1.HttpException("le destinataire doit etre sans equipe.", common_1.HttpStatus.BAD_REQUEST);
+            const sentInvitationCount = await manager.getRepository(invitation_entity_1.InvitationEntity)
+                .createQueryBuilder('invitation')
+                .where('invitation.senderId = :senderId', { senderId: sender.id })
+                .andWhere('invitation.recieverId = :recieverId', { recieverId })
+                .getCount();
+            if (sentInvitationCount !== 0) {
+                common_1.Logger.error("you v'e already send an invitation to that particular user", 'UserService/sendATeamInvitation');
+                throw new common_1.HttpException("you v'e already send an invitation to that particular user", common_1.HttpStatus.BAD_REQUEST);
             }
             const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
             const invitation = invitationsRepository.create({ description, sender, reciever });
             await invitationsRepository.save(invitation);
-            return JSON.stringify({ sender, reciever, description });
+            return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName}`;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/sendATeamInvitation');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async acceptRefuseTeamInvitation(invitationId, receiverId, accepted) {
+    async acceptRefuseTeamInvitation(invitationId, userId, accepted) {
         const manager = (0, typeorm_1.getManager)();
         const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
         let invitation;
         try {
-            invitation = await invitationsRepository.findOne({ id: invitationId }, {
-                relations: ['reciever', 'sender', 'sender.team', 'reciever.team']
-            });
+            invitation = await invitationsRepository
+                .createQueryBuilder('invitation')
+                .leftJoinAndSelect('invitation.sender', 'sender')
+                .leftJoinAndSelect('invitation.reciever', 'reciever')
+                .leftJoinAndSelect('sender.team', 'steam')
+                .leftJoinAndSelect('reciever.team', 'rteam')
+                .where('invitation.id = :invitationId', { invitationId })
+                .andWhere('reciever.userId = :userId', { userId })
+                .getOne();
             if (!invitation) {
                 common_1.Logger.error("invitation not found", 'UserService/getAcceptRefuseTeamInvitation');
-                throw new common_1.HttpException("invitation not found", common_1.HttpStatus.BAD_REQUEST);
-            }
-            if (invitation.reciever.id != receiverId) {
-                common_1.Logger.error("you are not the right reciever", 'UserService/getAcceptRefuseTeamInvitation');
-                throw new common_1.HttpException("invitation not found", common_1.HttpStatus.BAD_REQUEST);
+                throw new common_1.HttpException("invitation not found", common_1.HttpStatus.FORBIDDEN);
             }
             if (!accepted) {
                 await invitationsRepository.delete({ id: invitation.id });
@@ -201,57 +214,62 @@ let UserService = class UserService {
     async _sendNotfication(studentId, description) {
         const manager = (0, typeorm_1.getManager)();
         const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-        const student = await studentRepository.findOne({ id: studentId });
+        const student = await studentRepository.createQueryBuilder('student')
+            .where('student.id = :studentId', { studentId })
+            .leftJoinAndSelect('student.user', 'user')
+            .getOne();
         if (!student) {
             common_1.Logger.error("student not found", 'UserService/sendNotfication');
             throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
         }
         const notificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
-        const notification = notificationRepository.create({ description, student, seen: false });
+        const notification = notificationRepository.create({ description, user: student.user, seen: false });
         await notificationRepository.save(notification);
         return `notification sent with success to: ${student.firstName + ' ' + student.lastName}`;
     }
     async _sendTeamNotfication(teamId, description, expectStudentId, expectMessage) {
         const manager = (0, typeorm_1.getManager)();
         const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
-        const team = await teamRepository.findOne({ id: teamId }, { relations: ['students'] });
+        const team = await teamRepository.createQueryBuilder('team')
+            .where('team.id = :teamId', { teamId })
+            .leftJoinAndSelect('team.students', 'student')
+            .leftJoinAndSelect('student.user', 'user')
+            .getOne();
         if (!team) {
             common_1.Logger.error("the student is not a member in a team", 'UserService/sendTeamNotfication');
             throw new common_1.HttpException("the student is not a member in a team", common_1.HttpStatus.BAD_REQUEST);
         }
         const notificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
+        const notifications = [];
         for (let student of team.students) {
             if (expectStudentId && student.id === expectStudentId) {
                 if (expectMessage) {
-                    const notification = notificationRepository.create({ description: expectMessage, student, seen: false });
-                    await notificationRepository.save(notification);
+                    const notification = notificationRepository.create({ description: expectMessage, user: student.user, seen: false });
+                    notifications.push(notification);
                 }
                 continue;
             }
-            const notification = notificationRepository.create({ description, student, seen: false });
-            await notificationRepository.save(notification);
+            const notification = notificationRepository.create({ description, user: student.user, seen: false });
+            notifications.push(notification);
         }
+        await notificationRepository.save(notifications);
         return `notification sent with success to team: ${team.nickName} members`;
     }
     async getLastNotifications(userId, number = undefined) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            const userRepository = manager.getRepository(user_entity_1.UserEntity);
-            const user = await userRepository.findOne({ id: userId });
-            if (!user) {
-                common_1.Logger.error("user not found", 'UserService/getLastNotifications');
-                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
-            }
-            let entity;
-            let entityName;
-            if (user.userType === user_entity_1.UserType.STUDENT) {
-                const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-                entity = await studentRepository.createQueryBuilder('student').where('student.userId = :id', { id: userId }).getOne();
-                entityName = 'student';
-            }
-            const notfificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
-            const notifications = number ? await notfificationRepository.createQueryBuilder('notification').limit(number).innerJoin(`notification.${entityName}`, entityName).where(`${entityName}.id = :id`, { id: entity.id }).getMany() : await notfificationRepository.createQueryBuilder('notification').innerJoin(`notification.${entityName}`, entityName).where(`${entityName}.id = :id`, { id: entity.id }).getMany();
-            return notifications;
+            const notificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
+            const notifications = await notificationRepository.createQueryBuilder('notification')
+                .innerJoin('notification.user', 'user')
+                .where('user.id = :userId', { userId })
+                .orderBy('notification.createdAt', "DESC")
+                .getMany();
+            const totalNotificationCount = await notificationRepository.createQueryBuilder('notification')
+                .innerJoin('notification.user', 'user')
+                .where('user.id = :userId', { userId })
+                .getCount();
+            common_1.Logger.log('notifications:' + JSON.stringify(notifications));
+            return { notifications, totalNotificationCount };
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getNotifications');
@@ -497,6 +515,55 @@ let UserService = class UserService {
             common_1.Logger.error(err, 'UserService/createMeet');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
+    }
+    async getStudentsWithoutTeam(userId) {
+        const manager = (0, typeorm_1.getManager)();
+        try {
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            const student = await studentRepository
+                .createQueryBuilder('student')
+                .where('student.userId = :userId', { userId })
+                .innerJoin('student.team', 'team')
+                .innerJoin('team.teamLeader', 'leader')
+                .getOne();
+            if (!student) {
+                common_1.Logger.error("operation allowed only for teamLeader", 'UserService/getStudentsWithoutTeam');
+                throw new common_1.HttpException("operation allowed only for teamLeader", common_1.HttpStatus.BAD_REQUEST);
+            }
+            return await studentRepository.createQueryBuilder('student')
+                .andWhere('student.teamId IS NULL')
+                .getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getStudentsWithoutTeam');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getInvitationList(userId) {
+        const manager = (0, typeorm_1.getManager)();
+        const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
+        const invitations = await invitationsRepository
+            .createQueryBuilder('invitation')
+            .leftJoinAndSelect('invitation.reciever', 'reciever')
+            .where('reciever.userId = :userId', { userId })
+            .leftJoinAndSelect('invitation.sender', 'sender')
+            .leftJoinAndSelect('sender.team', 'team')
+            .getMany();
+        const reponses = invitations.map(inv => {
+            const { id, description, sender } = inv;
+            return {
+                id,
+                description,
+                senderTeam: {
+                    id: sender.team.id, nickname: sender.team.nickName,
+                    teamLeader: {
+                        id: sender.id,
+                        firstname: sender.firstName, lastName: sender.lastName
+                    }
+                }
+            };
+        });
+        return reponses;
     }
 };
 UserService = __decorate([

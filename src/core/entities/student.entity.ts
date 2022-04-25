@@ -56,9 +56,7 @@ export class StudentEntity{
     @OneToMany(type=>MeetAbsentEntity,meetAbsent=>meetAbsent.student)
     meetAbsences:MeetAbsentEntity[];
 
-    //to notification
-    @OneToMany(type=>NotificationEntity,notification=>notification.student)
-    notifications:NotificationEntity[];
+  
 
     
 }

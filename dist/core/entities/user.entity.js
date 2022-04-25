@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserEntity = exports.UserType = void 0;
 const typeorm_1 = require("typeorm");
+const Notification_entity_1 = require("./Notification.entity");
 const resetPasswordToken_entity_1 = require("./resetPasswordToken.entity");
 var UserType;
 (function (UserType) {
@@ -57,6 +58,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => resetPasswordToken_entity_1.RestPasswordTokenEntity, resetPasswordToken => resetPasswordToken.token),
     __metadata("design:type", Array)
 ], UserEntity.prototype, "tokens", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => Notification_entity_1.NotificationEntity, notif => notif.user),
+    __metadata("design:type", Array)
+], UserEntity.prototype, "notifications", void 0);
 UserEntity = __decorate([
     (0, typeorm_1.Entity)('user')
 ], UserEntity);

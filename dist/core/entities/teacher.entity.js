@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeacherEntity = void 0;
 const typeorm_1 = require("typeorm");
 const encadrement_entity_1 = require("./encadrement.entity");
-const Notification_entity_1 = require("./Notification.entity");
 const team_commit_review_entity_1 = require("./team.commit.review.entity");
 const team_teacher_message_entity_1 = require("./team.teacher.message.entity");
 const theme_suggestion_1 = require("./theme.suggestion");
@@ -56,10 +55,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => team_commit_review_entity_1.TeamCommitReviewEntity, teamCommitReview => teamCommitReview.teacher),
     __metadata("design:type", Array)
 ], TeacherEntity.prototype, "commitReviews", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(type => Notification_entity_1.NotificationEntity, notification => notification.teacher),
-    __metadata("design:type", Array)
-], TeacherEntity.prototype, "notifications", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(type => theme_suggestion_1.ThemeSuggestionEntity, themeSuggestion => themeSuggestion.teacher),
     __metadata("design:type", Array)
