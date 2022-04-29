@@ -48,8 +48,8 @@ let UserController = class UserController {
         }
     }
     async createTeamAnnouncement(userId, title, description, documents) {
+        common_1.Logger.error(documents, "*****555****");
         try {
-            common_1.Logger.error(title, "*****555****");
             return await this.userService.createTeamAnnouncement(userId, title, description, documents);
         }
         catch (err) {
@@ -69,6 +69,15 @@ let UserController = class UserController {
     async createSurvey(userId, survey) {
         try {
             return await this.userService.createSurvey(userId, survey);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/createSurvey');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getAnnouncement(userId) {
+        try {
+            return await this.userService.getAnnouncement(userId);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/createSurvey');
@@ -146,6 +155,9 @@ let UserController = class UserController {
         return response;
     }
     seeUploadedFile(path, res) {
+        res.set({
+            'Content-Disposition': 'attachment; filename="package.json"',
+        });
         return res.sendFile(path, { root: './files' });
     }
     async uploadFiles(files) {
@@ -238,6 +250,13 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createSurvey", null);
+__decorate([
+    (0, common_1.Get)('getAnnouncement'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAnnouncement", null);
 __decorate([
     (0, common_1.Post)('submitSurveyAnswer'),
     __param(0, (0, common_1.Body)('studentId')),

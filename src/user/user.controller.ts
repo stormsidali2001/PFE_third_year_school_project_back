@@ -60,9 +60,11 @@ export class UserController{
                                 @Body('title') title:string,
                                 @Body('description') description:string,
                                 @Body('documents') documents:TeamAnnoncementDocDto[]
+                              
+                                
                                 ){        
+                                    Logger.error(documents,"*****555****")
         try{
-            Logger.error(title,"*****555****")
             return await this.userService.createTeamAnnouncement(userId,title,description,documents);
         }catch(err){
             Logger.error(err,'UsrController/createTeamAnnouncement')
@@ -84,6 +86,15 @@ export class UserController{
        
         try{
             return await this.userService.createSurvey(userId,survey);
+        }catch(err){
+            Logger.error(err,'UsrController/createSurvey')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Get('getAnnouncement')
+    async getAnnouncement(@GetCurrentUserId() userId:string){
+        try{
+            return await this.userService.getAnnouncement(userId)
         }catch(err){
             Logger.error(err,'UsrController/createSurvey')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -182,6 +193,10 @@ export class UserController{
     
     @Get('getFile/:path')
     seeUploadedFile(@Param('path') path, @Res() res) {
+        res.set({
+           
+            'Content-Disposition': 'attachment; filename="package.json"',
+          });
         return res.sendFile(path, { root: './files' });
     }
 

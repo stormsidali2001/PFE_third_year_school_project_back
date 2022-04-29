@@ -70,7 +70,6 @@ export class UrgentTeamMeetDto{
 }
 
 export class TeamAnnoncementDocDto{
-    id:string;
     url:string;
     name:string;
 }

@@ -1,0 +1,34 @@
+<!-- <?xml:styleSheet type ='text/xsl' href='stocks.xsl' version = '1.0' encoding = 'UTF-8'?>
+
+<portfolio xmlns='http://toto.org'>
+    <stock symbole='SUNW' name='Sun Microsystems' price = '17.1'/>
+    <stock symbole='AOL' name ='America Online' price=51.05/>
+    <stock symbole='IBM' name = 'International Business Machines' price = '116.10' />
+    <stock symbole='MOT' name = 'MOTOROLA' price = '15.20' />
+</portfolio> -->
+<?xml version = '1.0' ?>
+<portfolio xmlns='http://toto.org'>
+    <stock id='0'>
+        <symbole>SUNW</symbole>
+        <name>Sun Microsystems</name>
+        <price>17.1</price>
+    </stock id='1'>
+    <stock>
+        <symbole>AOL</symbole>
+        <name>America Online</name>
+        <price>51.05</price>
+    </stock>
+    <stock id='2'>
+        <symbole>IBM</symbole>
+        <name>International Business Machines</name>
+        <price>116.10</price>
+    </stock>
+    <stock id='3'>
+        <symbole>MOT</symbole>
+        <name>MOTOROLA</name>
+        <price>15.20</price>
+    </stock>
+
+  
+  
+</portfolio>

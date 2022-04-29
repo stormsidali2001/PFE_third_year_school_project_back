@@ -5,6 +5,7 @@ import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
+import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -21,6 +22,12 @@ export declare class UserService {
         totalNotificationCount: number;
     }>;
     createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
+    getAnnouncement(userId: string): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        documents: AnnouncementDocumentEntity[];
+    }[]>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;

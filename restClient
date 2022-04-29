@@ -223,4 +223,8 @@ content-type:application/json
 GET http://localhost:8080/getFile/exo1-dd33.xml
 ### get invitation list
 GET http://localhost:8080/getInvitationList
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMDc4OGZlOTMtMTEwZC00OGM4LWE5ZDEtOGI2Mjk1Y2Y5ZjQwIiwiZW1haWwiOiJoLmRlYnphMkBlc2ktc2JhLmR6IiwiaWF0IjoxNjUwODc3MzE1LCJleHAiOjE2NTA4NzgyMTV9.0OH_C1kfT6nN7A9eFf2IqYdaBXTE1UboCDhGT1FY4ok
+
+
+
+### getAnnouncement
+GET http://localhost:8080/getAnnouncement

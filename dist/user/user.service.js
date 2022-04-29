@@ -274,7 +274,6 @@ let UserService = class UserService {
                 .innerJoin('notification.user', 'user')
                 .where('user.id = :userId', { userId })
                 .getCount();
-            common_1.Logger.log('notifications:' + JSON.stringify(notifications));
             return { notifications, totalNotificationCount };
         }
         catch (err) {
@@ -316,6 +315,31 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createTeamAnnouncement');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getAnnouncement(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const Announcements = await manager.getRepository(announcement_entity_1.AnnouncementEntity)
+                .createQueryBuilder('announcement')
+                .innerJoinAndSelect('announcement.team', 'team')
+                .innerJoinAndSelect('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .leftJoinAndSelect('announcement.documents', 'documents')
+                .getMany();
+            const response = Announcements.map(({ id, title, description, documents }) => {
+                return {
+                    id,
+                    title,
+                    description,
+                    documents
+                };
+            });
+            return response;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getAnnouncement');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

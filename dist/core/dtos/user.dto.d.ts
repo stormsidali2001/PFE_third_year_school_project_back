@@ -53,7 +53,6 @@ export declare class UrgentTeamMeetDto {
     date: Date;
 }
 export declare class TeamAnnoncementDocDto {
-    id: string;
     url: string;
     name: string;
 }

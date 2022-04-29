@@ -372,7 +372,7 @@ async  getLastNotifications(userId:string,number:number = undefined){
      .getCount();
     
       
-      Logger.log('notifications:'+JSON.stringify(notifications))
+    //   Logger.log('notifications:'+JSON.stringify(notifications))
       return {notifications,totalNotificationCount};
     }catch(err){
         Logger.error(err,'UserService/getNotifications')
@@ -427,6 +427,32 @@ async createTeamAnnouncement(userId:string,title:string,description:string,docum
 
     }
 
+}
+async getAnnouncement(userId:string){
+    try{
+        const manager = getManager();
+        const Announcements = await manager.getRepository(AnnouncementEntity)
+        .createQueryBuilder('announcement')
+        .innerJoinAndSelect('announcement.team','team')
+        .innerJoinAndSelect('team.students','student')
+        .where('student.userId = :userId',{userId})
+        .leftJoinAndSelect('announcement.documents','documents')
+        .getMany()
+
+        const response = Announcements.map(({id,title,description,documents})=>{
+            return {
+              id,
+              title,
+              description,
+              documents
+            }
+        })
+
+        return response ;
+    }catch(err){
+        Logger.error(err,'UserService/getAnnouncement')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
 }
 async sendTeamChatMessage(studentId:string,message:string){
 

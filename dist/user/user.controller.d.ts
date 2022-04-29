@@ -12,6 +12,12 @@ export declare class UserController {
     createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(userId: string, survey: SurveyDto): Promise<string>;
+    getAnnouncement(userId: string): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        documents: import("../core/entities/announcement.document.entity").AnnouncementDocumentEntity[];
+    }[]>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(teamId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
