@@ -41,9 +41,14 @@ import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AccessTokenGuard } from './common/guards/acces-token.guard';
+import { AuthenticatedGuard } from './common/guards/authentificatedGuard';
+import { MessageModule } from './message/message.module';
+import { SocketModule } from './socket/socket.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
+  imports: [
+    TypeOrmModule.forRoot({
     type:"mysql",
     host:"localhost",
     port:3306,
@@ -93,8 +98,14 @@ import { AccessTokenGuard } from './common/guards/acces-token.guard';
   }),
   Auth,
   UserModule,
+  MessageModule,
+  SocketModule
+  ,
   ConfigModule.forRoot({isGlobal:true}), 
   ScheduleModule.forRoot(),
+  MulterModule.register({
+    dest: './upload',
+  })
 ],
   controllers: [AppController],
   providers: [AppService,
@@ -106,10 +117,14 @@ import { AccessTokenGuard } from './common/guards/acces-token.guard';
       provide:APP_INTERCEPTOR,
       useClass:LoggingInterceptor
     },
+    // {
+    //   provide:APP_GUARD, // setting the accesToken guard as global so that all routes will passe through it
+    //   useClass:AccessTokenGuard,
+    // },
     {
-      provide:APP_GUARD, // setting the accesToken guard as global so that all routes will passe through it
-      useClass:AccessTokenGuard,
-    },
+      provide:APP_GUARD,
+      useClass:AuthenticatedGuard
+    }
     
 ],
 })

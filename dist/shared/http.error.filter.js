@@ -21,7 +21,7 @@ let HttpErrorFilter = class HttpErrorFilter {
             method: request.method,
             message: exception.message,
         };
-        common_1.Logger.error(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionErrorFilter');
+        common_1.Logger.error(`${request.method} ${request.url} ${exception.message}`, JSON.stringify(errorResponse), 'ExceptionErrorFilter');
         response.status(status).json(errorResponse);
     }
 };

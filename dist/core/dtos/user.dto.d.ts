@@ -52,3 +52,8 @@ export declare class UrgentTeamMeetDto {
     description: string;
     date: Date;
 }
+export declare class TeamAnnoncementDocDto {
+    id: string;
+    url: string;
+    name: string;
+}

@@ -9,6 +9,7 @@ export declare enum UserType {
 export declare class UserEntity {
     id: string;
     createdAt: Date;
+    updatedAt: Date;
     email: string;
     password: string;
     userType: UserType;

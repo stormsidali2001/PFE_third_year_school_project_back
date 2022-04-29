@@ -16,6 +16,7 @@ import { jwtPayload } from "./types/jwtPayload.type";
 import { Tokens } from "./types/tokens";
 import { getManager } from "typeorm";
 import * as argon from 'argon2'
+import { SocketService } from "src/socket/socket.service";
 
 
 
@@ -25,13 +26,16 @@ export class AuthService{
         private userRepository:UserRepository,
         private studentRepository:StudentRepository,
         private resetPasswordTokenRepository:RestPasswordTokenRepository,
-        private jwtService:JwtService
+        private jwtService:JwtService,
+        private socketService:SocketService
         ){}
     async signin(data:UserDTO){
+        
         const manager = getManager();
         const {email,password} = data;
         const user = await this.userRepository.findOne({where:{email}})
         if(!user){
+            
             Logger.error("Email does not exists",'signin/AuthService')
             throw new HttpException('Email does not exists',HttpStatus.BAD_REQUEST);
         }
@@ -41,19 +45,19 @@ export class AuthService{
             throw new HttpException('Wrong Password',HttpStatus.BAD_REQUEST);
         }
       
-      
-          const tokens:Tokens = await this._getTokens(user.id,user.email);
-          await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
-          if(user.userType === UserType.STUDENT){
-            const studentRepository = manager.getRepository(StudentEntity);
-            const student = await studentRepository.createQueryBuilder('student')
-            .where('student.userId = :userId',{userId:user.id})
-            .leftJoinAndSelect('student.team','team')
-            .leftJoinAndSelect('team.teamLeader','teamLaeder')
-            .getOne()
-            Logger.log( `login success\n ${JSON.stringify({...tokens,userType:user.userType,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id}) }`,'signin/AuthService')
-            return {...tokens,userType:user.userType,uuid:user.id,email:user.email,firstName:student.firstName,lastName:student.lastName,dob:student.dob,code:student.code,studentId:student.id};
-          }
+        /**
+         * for jwt 
+         */
+        //   const tokens:Tokens = await this._getTokens(user.id,user.email);
+        //   await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+         /**
+         * for jwt  x
+         */
+       return {id:user.id}
+             
+        
+
+         
          
 
         
@@ -148,10 +152,10 @@ export class AuthService{
           });
 
           let info = await transporter.sendMail({
-            from: '"It experts👻" <assoulsidali@gmail.com>', // sender address
+            from: '"It experts" <assoulsidali@gmail.com>', // sender address
             to: email, // list of receivers separated by ,
-            subject: "Hello ✔", // Subject line
-            html: `<b>vous avez envoyer une demmande de reincialisation de mot de passe presser sur le lien si il s'agit bien de vous </b><br/> le lien:  http://localhost:3000/resetpassword/${token}?uid=${user.id}`, // html body
+            subject: "Mot de pasee oublié", // Subject line
+            html: `<b>vous avez envoyer une demmande de réinitialisation de mot de passe.</b><br/> presser sur le lien si il s'agit bien de vous </b><br/> le lien:  http://localhost:3000/resetpassword/${token}?uid=${user.id}`, // html body
           });
         
           console.log("Message sent: %s", info.messageId);

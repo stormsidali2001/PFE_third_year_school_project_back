@@ -49,12 +49,16 @@ const http_error_filter_1 = require("./shared/http.error.filter");
 const logging_interceptor_1 = require("./shared/logging.interceptor");
 const user_module_1 = require("./user/user.module");
 const schedule_1 = require("@nestjs/schedule");
-const acces_token_guard_1 = require("./common/guards/acces-token.guard");
+const authentificatedGuard_1 = require("./common/guards/authentificatedGuard");
+const message_module_1 = require("./message/message.module");
+const socket_module_1 = require("./socket/socket.module");
+const platform_express_1 = require("@nestjs/platform-express");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forRoot({
+        imports: [
+            typeorm_1.TypeOrmModule.forRoot({
                 type: "mysql",
                 host: "localhost",
                 port: 3306,
@@ -99,8 +103,13 @@ AppModule = __decorate([
             }),
             auth_module_1.Auth,
             user_module_1.UserModule,
+            message_module_1.MessageModule,
+            socket_module_1.SocketModule,
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             schedule_1.ScheduleModule.forRoot(),
+            platform_express_1.MulterModule.register({
+                dest: './upload',
+            })
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService,
@@ -114,8 +123,8 @@ AppModule = __decorate([
             },
             {
                 provide: core_1.APP_GUARD,
-                useClass: acces_token_guard_1.AccessTokenGuard,
-            },
+                useClass: authentificatedGuard_1.AuthenticatedGuard
+            }
         ],
     })
 ], AppModule);

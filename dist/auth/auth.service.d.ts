@@ -1,27 +1,19 @@
 import { UserRepository } from "src/core/repositories/user.repository";
 import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
-import { UserType } from "../core/entities/user.entity";
 import { StudentRepository } from "src/core/repositories/student.repository";
 import { RestPasswordTokenRepository } from "src/core/repositories/reset.password.token.repository";
 import { JwtService } from "@nestjs/jwt";
 import { Tokens } from "./types/tokens";
+import { SocketService } from "src/socket/socket.service";
 export declare class AuthService {
     private userRepository;
     private studentRepository;
     private resetPasswordTokenRepository;
     private jwtService;
-    constructor(userRepository: UserRepository, studentRepository: StudentRepository, resetPasswordTokenRepository: RestPasswordTokenRepository, jwtService: JwtService);
+    private socketService;
+    constructor(userRepository: UserRepository, studentRepository: StudentRepository, resetPasswordTokenRepository: RestPasswordTokenRepository, jwtService: JwtService, socketService: SocketService);
     signin(data: UserDTO): Promise<{
-        userType: UserType.STUDENT;
-        uuid: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        dob: Date;
-        code: string;
-        studentId: string;
-        accesToken: string;
-        refrechToken: string;
+        id: string;
     }>;
     signupStudent(data: StudentDTO): Promise<Tokens>;
     signupTeacher(data: TeacherDTO): Promise<void>;

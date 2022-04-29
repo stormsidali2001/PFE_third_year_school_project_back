@@ -1,7 +1,10 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post, Res, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
-import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { editFileName } from "src/common/utils/files-middalewares";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
  
@@ -14,6 +17,7 @@ export class UserController{
 
         return this.userService.getUserInfo(id);
     }
+
     @Post('/sendATeamInvitation')
     async sendATeamInvitation(
         @GetCurrentUserId() userId:string,
@@ -52,13 +56,14 @@ export class UserController{
 
     }
     @Post('/createTeamAnnouncement')
-    async createTeamAnnouncement(@Body('studentId') studentId:string,
-                                @Body('teamId') teamId:string,
+    async createTeamAnnouncement(@GetCurrentUserId() userId:string,
                                 @Body('title') title:string,
-                                @Body('description') description:string
+                                @Body('description') description:string,
+                                @Body('documents') documents:TeamAnnoncementDocDto[]
                                 ){        
         try{
-            return await this.userService.createTeamAnnouncement(studentId,teamId,title,description);
+            Logger.error(title,"*****555****")
+            return await this.userService.createTeamAnnouncement(userId,title,description,documents);
         }catch(err){
             Logger.error(err,'UsrController/createTeamAnnouncement')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -75,10 +80,10 @@ export class UserController{
         }
     }          
     @Post('createSurvey')
-    async createSurvey(@Body('studentId') studentId:string,@Body('survey') survey:SurveyDto){
+    async createSurvey(@GetCurrentUserId() userId:string,@Body('survey') survey:SurveyDto){
        
         try{
-            return await this.userService.createSurvey(studentId,survey);
+            return await this.userService.createSurvey(userId,survey);
         }catch(err){
             Logger.error(err,'UsrController/createSurvey')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -155,6 +160,57 @@ export class UserController{
             Logger.error(err,'UserController/getInvitationList')
         }
     }
+
+
+    @Post('uploadFile')
+    @UseInterceptors(FileInterceptor('file',{
+        storage: diskStorage({
+            destination: './files',
+            filename: editFileName,
+           
+          }),
+    }))
+    async uploadFile(@UploadedFile() file:Express.Multer.File){
+      
+        const response = {
+            originalname: file.originalname,
+            filename: file.filename,
+        };
+        Logger.warn("file uploaded",response);
+        return response;
+    }
+    
+    @Get('getFile/:path')
+    seeUploadedFile(@Param('path') path, @Res() res) {
+        return res.sendFile(path, { root: './files' });
+    }
+
+
+  
+    @Post('uploadFiles')
+    @UseInterceptors(FilesInterceptor('files',10,{
+        storage: diskStorage({
+            destination: './files',
+            filename: editFileName,
+           
+          }),
+    }))
+    async uploadFiles(@UploadedFiles() files:Express.Multer.File[]){
+        const response = [];
+      
+        files.forEach(file => {
+          const fileReponse = {
+            originalname: file.originalname,
+            filename: file.filename,
+            destination:file.destination
+          };
+          response.push(fileReponse);
+        });
+        Logger.warn("files uploaded",response);
+        return response;
+    }
+
+
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
@@ -166,6 +222,7 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+
   
 
 }

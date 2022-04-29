@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { NormalTeamMeetDto, SurveyDto , UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto , TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -14,9 +14,13 @@ import { getManager } from "typeorm";
 import {SchedulerRegistry} from '@nestjs/schedule'
 import { CronJob } from "cron";
 import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
+import { SocketService } from "src/socket/socket.service";
+import { Server } from 'ws';
+import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
 @Injectable()
 export class UserService{
-    constructor(private schedulerRegistry: SchedulerRegistry){}
+    constructor(private schedulerRegistry: SchedulerRegistry,
+                private socketService:SocketService){}
     
     async getUserInfo(userId:string){
         const manager = getManager();
@@ -305,6 +309,8 @@ export class UserService{
             const notificationRepository = manager.getRepository(NotificationEntity);
             const notification = notificationRepository.create({description,user:student.user,seen:false});
             await notificationRepository.save(notification);
+            const socket = this.socketService.socket as Server;
+            socket.emit("test","dsgggddgdgdsgjhdgskhdsghkgdhgdh")
             return `notification sent with success to: ${student.firstName+' '+student.lastName}`;
             
 }  
@@ -352,7 +358,7 @@ async  getLastNotifications(userId:string,number:number = undefined){
         const manager = getManager();
      
        
-
+        Logger.error(`notifications ${userId}`,'UserService/getNotifications')
         //get student repository
         const notificationRepository = manager.getRepository(NotificationEntity);
       const notifications = await   notificationRepository.createQueryBuilder('notification')
@@ -375,30 +381,46 @@ async  getLastNotifications(userId:string,number:number = undefined){
     }
 }
 
-async createTeamAnnouncement(studentId:string,teamId:string,title:string,description:string){
+async createTeamAnnouncement(userId:string,title:string,description:string,documents:TeamAnnoncementDocDto[]){
 
     try{
-        const manager = getManager();
-        const teamRepository = manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId},  {relations:['teamLeader']});
-        if(!team){
-            Logger.error("team not found",'UserService/createTeamAnnouncement')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
-        const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.findOne({id:studentId});
-        if(!student){           
+        const manager = getManager()
+        const student = await manager.getRepository(StudentEntity)
+        .createQueryBuilder('student')
+        .where('student.userId = :userId',{userId})
+        .innerJoinAndSelect('student.team','team')
+        .innerJoinAndSelect('team.teamLeader','teamLeader')
+        .getOne();
+
+        if(!student){
             Logger.error("student not found",'UserService/createTeamAnnouncement')
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
-        if(team.teamLeader.id !== student.id){      
-            Logger.error("student is not the team leader",'UserService/createTeamAnnouncement')
-            throw new HttpException("student is not the team leader",HttpStatus.BAD_REQUEST);
-        }
-        const announcementRepository = manager.getRepository(AnnouncementEntity);
-        const announcement = announcementRepository.create({title,description,team});
-        await announcementRepository.save(announcement);
-        return `announcement sent with success to team: ${team.nickName} members`;
+        Logger.error(title,"*********")
+        const announcementRepository = manager.getRepository(AnnouncementEntity)
+        const announcement = announcementRepository.create({title,description,team:student.team})
+         await announcementRepository
+        .createQueryBuilder('announcement')
+        .insert()
+        .values(announcement)
+        .execute();
+
+        
+
+        const announcementDocumentRepository =  manager.getRepository(AnnouncementDocumentEntity);
+        const announcementDocs:TeamAnnoncementDocDto[] = [];
+        documents.forEach(doc=>{
+            const announcementDoc = announcementDocumentRepository.create({name:doc.name,url:doc.url,announcement});
+            announcementDocs.push(announcementDoc)
+        })
+       
+       await manager.getRepository(AnnouncementDocumentEntity).createQueryBuilder('docs')
+        .insert()
+        .values(announcementDocs)
+        .execute();
+
+      
+       
     }catch(err){
         Logger.error(err,'UserService/createTeamAnnouncement')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -437,7 +459,7 @@ async sendTeamChatMessage(studentId:string,message:string){
 /*
             survey section
 */
-async createSurvey(studentId:string ,survey:SurveyDto){
+async createSurvey(userId:string ,survey:SurveyDto){
     const {title,description,options} = survey;
     let {period} = survey;
     if(Number.isNaN(period)){
@@ -456,24 +478,25 @@ async createSurvey(studentId:string ,survey:SurveyDto){
     try{
         const manager = getManager();
         const studentRepository = manager.getRepository(StudentEntity);
-        const student = await studentRepository.findOne({id:studentId},{relations:['team','team.teamLeader']});
+        const student = await studentRepository.
+        createQueryBuilder('student')
+        .where('student.userId = :userId',{userId})
+        .innerJoinAndSelect('student.team','team')
+        .innerJoinAndSelect('team.teamLeader','teamLeader')
+        .getOne()
+        
+      
         if(!student){       
-            Logger.error("student not found",'UserService/createSurvey')
+            Logger.error("student | team   not found | student is not the teamLeader",'UserService/createSurvey')
             throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
         }
    
-        if(!student.team){
-            Logger.error("team not found",'UserService/createSurvey')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
-        if(student.team.teamLeader.id !== student.id){  
-            Logger.error("student is not the team leader",'UserService/createSurvey')
-            throw new HttpException("student is not the team leader",HttpStatus.BAD_REQUEST);
-        }
+      
         const surveyRepository = manager.getRepository(SurveyEntity);
         const surveyOptionRepository = manager.getRepository(SurveyOptionEntity);
         const survey = surveyRepository.create({title,description,period,team:student.team,close:false});
         const surveyOptions:SurveyOptionEntity[] = [];
+        
         await surveyRepository.save(survey);
             for(let key in options){
                 const {description} = options[key];
@@ -481,16 +504,17 @@ async createSurvey(studentId:string ,survey:SurveyDto){
                 surveyOptions.push(surveyOption);
             }
             await surveyOptionRepository.save(surveyOptions);
+            const surveyData = await surveyRepository.findOne({id:survey.id});
 
         this._sendTeamNotfication(student.team.id,`a new survey has been created a survey with title: ${title}`);
         //running the crun job
-        const surveyData = await surveyRepository.findOne({id:survey.id});
+      
         const job = new CronJob(new Date(surveyData.createdAt.getTime()+period),()=>{
             Logger.warn("survey period has ended",'UserService/createSurvey');
             surveyRepository.update({id:surveyData.id},{close:true});
-            this._sendTeamNotfication(student.team.id,`the survey with title: ${title} has ended`);
+            this._sendTeamNotfication(student.team.id,`the survey with title: ${title}  ended`);
         })
-        this.schedulerRegistry.addCronJob(`cron_Job_surveyEnd_${survey.id}`,job);
+        this.schedulerRegistry.addCronJob(`cron_Job_surveyEnd_${surveyData.id}`,job);
         job.start();
         return `survey sent with success to team: ${student.team.nickName} members`;
     }catch(err){

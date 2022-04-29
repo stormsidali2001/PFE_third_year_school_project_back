@@ -1,4 +1,5 @@
-import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+/// <reference types="multer" />
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 export declare class UserController {
     private readonly userService;
@@ -8,9 +9,9 @@ export declare class UserController {
     acceptRefuseTeamInvitation(invitationId: string, accepted: boolean, userId: string): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
     getInvitations(studentId: string): Promise<import("../core/entities/invitation.entity").InvitationEntity[]>;
-    createTeamAnnouncement(studentId: string, teamId: string, title: string, description: string): Promise<string>;
+    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
-    createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
+    createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(teamId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
@@ -33,5 +34,11 @@ export declare class UserController {
             };
         };
     }[]>;
+    uploadFile(file: Express.Multer.File): Promise<{
+        originalname: string;
+        filename: string;
+    }>;
+    seeUploadedFile(path: any, res: any): any;
+    uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
     sendNotification(studentId: string, description: string): Promise<string>;
 }

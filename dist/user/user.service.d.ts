@@ -1,12 +1,14 @@
-import { NormalTeamMeetDto, SurveyDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { SocketService } from "src/socket/socket.service";
 export declare class UserService {
     private schedulerRegistry;
-    constructor(schedulerRegistry: SchedulerRegistry);
+    private socketService;
+    constructor(schedulerRegistry: SchedulerRegistry, socketService: SocketService);
     getUserInfo(userId: string): Promise<any>;
     sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
     acceptRefuseTeamInvitation(invitationId: string, userId: string, accepted: boolean): Promise<string>;
@@ -18,9 +20,9 @@ export declare class UserService {
         notifications: NotificationEntity[];
         totalNotificationCount: number;
     }>;
-    createTeamAnnouncement(studentId: string, teamId: string, title: string, description: string): Promise<string>;
+    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
-    createSurvey(studentId: string, survey: SurveyDto): Promise<string>;
+    createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(teamId: string): Promise<SurveyEntity[]>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;

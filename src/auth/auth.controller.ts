@@ -1,7 +1,9 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post, Req, Request, UseGuards } from "@nestjs/common";
 import { GetCurrentUser } from "src/common/decorators/get-current-user";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
+import { AuthenticatedGuard } from "src/common/guards/authentificatedGuard";
+import { LocalAuthGuard } from "src/common/guards/local-auth.guard";
 import { RefrechTokenGuard } from "src/common/guards/refrech-token-guard";
 import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
 import { AuthService } from "./auth.service";
@@ -10,9 +12,11 @@ import { AuthService } from "./auth.service";
 export class AuthController{
     constructor(private authService:AuthService){}
    @Public()
+   @UseGuards(LocalAuthGuard)
    @Post('signin')
-   async signin(@Body() data:UserDTO){
-       return this.authService.signin(data);
+    
+   async signin(@Request() req){
+        return req.user;
    }
    @Public()
    @Post('signup/teacher')
@@ -45,27 +49,21 @@ export class AuthController{
                         @Body('userId') userId:string){
         return this.authService.resetPassword(password,token,userId);
      }
-     @Public()
-     @UseGuards(RefrechTokenGuard)
-    @Get('refrechtoken')
-    async refrechToken(@GetCurrentUserId() userId:string,@GetCurrentUser('refrechToken') refrechtoken:string){
-        try{
-
-            return await this.authService.refrechToken(userId,refrechtoken);
-        } catch(error){
-            Logger.error(error.message,"AuthController/refrechToken");
-            throw new HttpException(error.message,HttpStatus.BAD_REQUEST);
-        }
-    }
+    
 
     @Post('logout')
-    async logout(@GetCurrentUserId() userId:string){
-        try{
-            return await this.authService.logout(userId);
-        }catch(error){
-            Logger.error(error.message,"AuthController/logout");
-            throw new HttpException(error.message,HttpStatus.BAD_REQUEST);
-        }
+    async logout(@Request() request){
+         request.logOut();
+        request.session.cookie.maxAge = 0;
+
+        return "logedout!!"
     }
+    // test
+    
+    @Get('getUserInfo')
+    async getUser(@Request() request){
+        return request.user;
+    }
+
      
 }

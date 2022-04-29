@@ -68,3 +68,9 @@ export class UrgentTeamMeetDto{
     description:string;
     date:Date;
 }
+
+export class TeamAnnoncementDocDto{
+    id:string;
+    url:string;
+    name:string;
+}

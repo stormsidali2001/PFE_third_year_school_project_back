@@ -1,4 +1,4 @@
-import {  Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {  Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { NotificationEntity } from "./Notification.entity";
 import { RestPasswordTokenEntity } from "./resetPasswordToken.entity";
 
@@ -15,6 +15,9 @@ export class UserEntity{
 
     @CreateDateColumn()
     createdAt:Date;
+
+    @UpdateDateColumn()
+    updatedAt:Date;
 
     @Column({
         unique:true,

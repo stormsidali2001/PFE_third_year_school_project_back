@@ -11,11 +11,19 @@ import { RestPasswordTokenRepository } from "src/core/repositories/reset.passwor
 import { JwtModule } from "@nestjs/jwt";
 import { RefrechTokenStrategy } from "./strategies/refrech.token.strategy";
 import { AccessTokenStrategy } from "./strategies/access.token.strategy";
+import { LocalStrategy } from "./strategies/local.startegy";
+import { PassportModule } from "@nestjs/passport";
+import { SessionSerializer } from "./utils/SessionSerializer";
+import { MulterModule } from "@nestjs/platform-express";
+
 
 
 @Module({
-    imports:[TypeOrmModule.forFeature([UserEntity,UserRepository,StudentEntity,TeamEntity,StudentRepository,RestPasswordTokenRepository]),JwtModule.register({})],
+    imports:[TypeOrmModule.forFeature([UserEntity,UserRepository,StudentEntity,TeamEntity,StudentRepository,RestPasswordTokenRepository]),
+    JwtModule.register({}),PassportModule.register({session:true} /*for session */),],
     controllers:[AuthController],
-    providers:[AuthService,AccessTokenStrategy,RefrechTokenStrategy]
+    providers:[AuthService,AccessTokenStrategy,RefrechTokenStrategy,LocalStrategy,
+        SessionSerializer
+    ]
 })
 export class Auth {}

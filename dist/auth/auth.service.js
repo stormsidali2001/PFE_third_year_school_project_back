@@ -15,19 +15,20 @@ const user_repository_1 = require("../core/repositories/user.repository");
 const user_entity_1 = require("../core/entities/user.entity");
 const bcrypt = require("bcryptjs");
 const student_repository_1 = require("../core/repositories/student.repository");
-const student_entity_1 = require("../core/entities/student.entity");
 const reset_password_token_repository_1 = require("../core/repositories/reset.password.token.repository");
 const crypto_1 = require("crypto");
 const nodemailer = require("nodemailer");
 const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("typeorm");
 const argon = require("argon2");
+const socket_service_1 = require("../socket/socket.service");
 let AuthService = class AuthService {
-    constructor(userRepository, studentRepository, resetPasswordTokenRepository, jwtService) {
+    constructor(userRepository, studentRepository, resetPasswordTokenRepository, jwtService, socketService) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.resetPasswordTokenRepository = resetPasswordTokenRepository;
         this.jwtService = jwtService;
+        this.socketService = socketService;
     }
     async signin(data) {
         const manager = (0, typeorm_1.getManager)();
@@ -42,18 +43,7 @@ let AuthService = class AuthService {
             common_1.Logger.error("Wrong Password", 'signin/AuthService');
             throw new common_1.HttpException('Wrong Password', common_1.HttpStatus.BAD_REQUEST);
         }
-        const tokens = await this._getTokens(user.id, user.email);
-        await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
-        if (user.userType === user_entity_1.UserType.STUDENT) {
-            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-            const student = await studentRepository.createQueryBuilder('student')
-                .where('student.userId = :userId', { userId: user.id })
-                .leftJoinAndSelect('student.team', 'team')
-                .leftJoinAndSelect('team.teamLeader', 'teamLaeder')
-                .getOne();
-            common_1.Logger.log(`login success\n ${JSON.stringify(Object.assign(Object.assign({}, tokens), { userType: user.userType, uuid: user.id, email: user.email, firstName: student.firstName, lastName: student.lastName, dob: student.dob, code: student.code, studentId: student.id }))}`, 'signin/AuthService');
-            return Object.assign(Object.assign({}, tokens), { userType: user.userType, uuid: user.id, email: user.email, firstName: student.firstName, lastName: student.lastName, dob: student.dob, code: student.code, studentId: student.id });
-        }
+        return { id: user.id };
     }
     async signupStudent(data) {
         var _a, _b, _c, _d;
@@ -125,10 +115,10 @@ let AuthService = class AuthService {
             },
         });
         let info = await transporter.sendMail({
-            from: '"It experts👻" <assoulsidali@gmail.com>',
+            from: '"It experts" <assoulsidali@gmail.com>',
             to: email,
-            subject: "Hello ✔",
-            html: `<b>vous avez envoyer une demmande de reincialisation de mot de passe presser sur le lien si il s'agit bien de vous </b><br/> le lien:  http://localhost:3000/resetpassword/${token}?uid=${user.id}`,
+            subject: "Mot de pasee oublié",
+            html: `<b>vous avez envoyer une demmande de réinitialisation de mot de passe.</b><br/> presser sur le lien si il s'agit bien de vous </b><br/> le lien:  http://localhost:3000/resetpassword/${token}?uid=${user.id}`,
         });
         console.log("Message sent: %s", info.messageId);
         console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
@@ -235,7 +225,8 @@ AuthService = __decorate([
     __metadata("design:paramtypes", [user_repository_1.UserRepository,
         student_repository_1.StudentRepository,
         reset_password_token_repository_1.RestPasswordTokenRepository,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        socket_service_1.SocketService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

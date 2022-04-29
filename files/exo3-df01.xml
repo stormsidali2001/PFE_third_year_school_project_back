@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding ='UTF-8'?>
+
+<pays>
+    <algerie>
+        <capital>Alger</capital>
+        <population annee='2019'>43078714</population>
+    </algerie>
+    <tunisie>
+        <capital>Tunis</capital>
+        <population annee='2018'>11516189</population>
+
+
+    </tunisie>
+    <maroc>
+        <capital>Rebat</capital>
+        <population annee='2020'>36910558</population>
+
+    </maroc>
+</pays>

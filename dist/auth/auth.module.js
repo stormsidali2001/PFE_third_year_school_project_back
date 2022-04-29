@@ -20,13 +20,19 @@ const reset_password_token_repository_1 = require("../core/repositories/reset.pa
 const jwt_1 = require("@nestjs/jwt");
 const refrech_token_strategy_1 = require("./strategies/refrech.token.strategy");
 const access_token_strategy_1 = require("./strategies/access.token.strategy");
+const local_startegy_1 = require("./strategies/local.startegy");
+const passport_1 = require("@nestjs/passport");
+const SessionSerializer_1 = require("./utils/SessionSerializer");
 let Auth = class Auth {
 };
 Auth = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, user_repository_1.UserRepository, student_entity_1.StudentEntity, team_entity_1.TeamEntity, student_repository_1.StudentRepository, reset_password_token_repository_1.RestPasswordTokenRepository]), jwt_1.JwtModule.register({})],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, user_repository_1.UserRepository, student_entity_1.StudentEntity, team_entity_1.TeamEntity, student_repository_1.StudentRepository, reset_password_token_repository_1.RestPasswordTokenRepository]),
+            jwt_1.JwtModule.register({}), passport_1.PassportModule.register({ session: true }),],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, access_token_strategy_1.AccessTokenStrategy, refrech_token_strategy_1.RefrechTokenStrategy]
+        providers: [auth_service_1.AuthService, access_token_strategy_1.AccessTokenStrategy, refrech_token_strategy_1.RefrechTokenStrategy, local_startegy_1.LocalStrategy,
+            SessionSerializer_1.SessionSerializer
+        ]
     })
 ], Auth);
 exports.Auth = Auth;

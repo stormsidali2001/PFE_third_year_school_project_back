@@ -14,8 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
 const get_current_user_id_decorator_1 = require("../common/decorators/get-current-user-id.decorator");
 const public_decorator_1 = require("../common/decorators/public.decorator");
+const files_middalewares_1 = require("../common/utils/files-middalewares");
 const user_dto_1 = require("../core/dtos/user.dto");
 const user_service_1 = require("./user.service");
 let UserController = class UserController {
@@ -44,9 +47,10 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createTeamAnnouncement(studentId, teamId, title, description) {
+    async createTeamAnnouncement(userId, title, description, documents) {
         try {
-            return await this.userService.createTeamAnnouncement(studentId, teamId, title, description);
+            common_1.Logger.error(title, "*****555****");
+            return await this.userService.createTeamAnnouncement(userId, title, description, documents);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/createTeamAnnouncement');
@@ -62,9 +66,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createSurvey(studentId, survey) {
+    async createSurvey(userId, survey) {
         try {
-            return await this.userService.createSurvey(studentId, survey);
+            return await this.userService.createSurvey(userId, survey);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/createSurvey');
@@ -133,6 +137,30 @@ let UserController = class UserController {
             common_1.Logger.error(err, 'UserController/getInvitationList');
         }
     }
+    async uploadFile(file) {
+        const response = {
+            originalname: file.originalname,
+            filename: file.filename,
+        };
+        common_1.Logger.warn("file uploaded", response);
+        return response;
+    }
+    seeUploadedFile(path, res) {
+        return res.sendFile(path, { root: './files' });
+    }
+    async uploadFiles(files) {
+        const response = [];
+        files.forEach(file => {
+            const fileReponse = {
+                originalname: file.originalname,
+                filename: file.filename,
+                destination: file.destination
+            };
+            response.push(fileReponse);
+        });
+        common_1.Logger.warn("files uploaded", response);
+        return response;
+    }
     async sendNotification(studentId, description) {
         try {
             return await this.userService._sendNotfication(studentId, description);
@@ -186,12 +214,12 @@ __decorate([
 ], UserController.prototype, "getInvitations", null);
 __decorate([
     (0, common_1.Post)('/createTeamAnnouncement'),
-    __param(0, (0, common_1.Body)('studentId')),
-    __param(1, (0, common_1.Body)('teamId')),
-    __param(2, (0, common_1.Body)('title')),
-    __param(3, (0, common_1.Body)('description')),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('title')),
+    __param(2, (0, common_1.Body)('description')),
+    __param(3, (0, common_1.Body)('documents')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createTeamAnnouncement", null);
 __decorate([
@@ -204,7 +232,7 @@ __decorate([
 ], UserController.prototype, "sendTeamChatMessage", null);
 __decorate([
     (0, common_1.Post)('createSurvey'),
-    __param(0, (0, common_1.Body)('studentId')),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __param(1, (0, common_1.Body)('survey')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
@@ -265,6 +293,40 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getInvitationList", null);
+__decorate([
+    (0, common_1.Post)('uploadFile'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './files',
+            filename: files_middalewares_1.editFileName,
+        }),
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "uploadFile", null);
+__decorate([
+    (0, common_1.Get)('getFile/:path'),
+    __param(0, (0, common_1.Param)('path')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "seeUploadedFile", null);
+__decorate([
+    (0, common_1.Post)('uploadFiles'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10, {
+        storage: (0, multer_1.diskStorage)({
+            destination: './files',
+            filename: files_middalewares_1.editFileName,
+        }),
+    })),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "uploadFiles", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),
