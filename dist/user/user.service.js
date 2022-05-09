@@ -419,7 +419,7 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async submitSurveyAnswer(studentId, surveyId, optionId, argument) {
+    async submitSurveyAnswer(userId, surveyId, optionId, argument) {
         try {
             const manager = (0, typeorm_1.getManager)();
             const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
@@ -428,7 +428,7 @@ let UserService = class UserService {
                 .innerJoinAndSelect('team.surveys', 'surveys')
                 .where('surveys.id = :surveyId', { surveyId })
                 .innerJoinAndSelect('surveys.options', 'options')
-                .where('student.id = :studentId', { studentId })
+                .andWhere('student.userId = :userId', { userId })
                 .andWhere('options.id = :optionId', { optionId })
                 .getOne();
             if (!student) {
@@ -440,7 +440,7 @@ let UserService = class UserService {
                 .innerJoin('surveyParticipant.survey', 'survey')
                 .innerJoin('surveyParticipant.student', 'student')
                 .innerJoinAndSelect('surveyParticipant.answer', 'answer')
-                .where('student.id = :studentId', { studentId })
+                .andWhere('student.userId = :userId', { userId })
                 .andWhere('survey.id = :surveyId', { surveyId })
                 .getOne();
             const surveyParticipant = surveyParticipantRepository.create({ survey: student.team.surveys[0], student: student, answer: student.team.surveys[0].options[0], argument });
@@ -468,12 +468,38 @@ let UserService = class UserService {
                 .leftJoin('survey.team', 'team')
                 .leftJoin('team.students', 'student')
                 .where('student.userId = :userId', { userId })
-                .leftJoinAndSelect('survey.participants', 'participant')
+                .leftJoinAndSelect('survey.participants', 'participants')
                 .getMany();
             return surveys;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getSurveys');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getSurvey(userId, surveyId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const surveyRepo = manager.getRepository(survey_entity_1.SurveyEntity);
+            const survey = await surveyRepo.createQueryBuilder('survey')
+                .where('survey.id = :surveyId', { surveyId })
+                .leftJoin('survey.team', 'team')
+                .leftJoin('team.students', 'student')
+                .andWhere('student.userId = :userId', { userId })
+                .leftJoinAndSelect('survey.participants', 'participant')
+                .leftJoinAndSelect('survey.options', 'options')
+                .loadRelationCountAndMap('options.answersCount', 'options.participations')
+                .leftJoinAndSelect("participant.student", 'studentP')
+                .andWhere('studentP.userId = :userId', { userId })
+                .getOne();
+            const response = Object.assign({}, survey);
+            const participants = response.participants;
+            delete response.participants;
+            response['answer'] = (participants === null || participants === void 0 ? void 0 : participants.length) >= 1 ? participants[0].argument : null;
+            return response;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getSurvey');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

@@ -84,9 +84,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async submitSurveyAnswer(studentId, surveyId, optionId, argument) {
+    async submitSurveyAnswer(userId, surveyId, optionId, argument) {
         try {
-            return await this.userService.submitSurveyAnswer(studentId, surveyId, optionId, argument);
+            return await this.userService.submitSurveyAnswer(userId, surveyId, optionId, argument);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/submitSurveyAnswer');
@@ -96,6 +96,15 @@ let UserController = class UserController {
     async getSurveys(userId) {
         try {
             return await this.userService.getSurveys(userId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, "UserController/getSurveys");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getSurvey(userId, surveyId) {
+        try {
+            return await this.userService.getSurvey(userId, surveyId);
         }
         catch (err) {
             common_1.Logger.error(err, "UserController/getSurveys");
@@ -287,7 +296,7 @@ __decorate([
 ], UserController.prototype, "getAnnouncement", null);
 __decorate([
     (0, common_1.Post)('submitSurveyAnswer'),
-    __param(0, (0, common_1.Body)('studentId')),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __param(1, (0, common_1.Body)('surveyId')),
     __param(2, (0, common_1.Body)('optionId')),
     __param(3, (0, common_1.Body)('argument')),
@@ -302,6 +311,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getSurveys", null);
+__decorate([
+    (0, common_1.Get)('surveys/:surveyId'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('surveyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getSurvey", null);
 __decorate([
     (0, common_1.Post)('createUrgentTeamMeet'),
     __param(0, (0, common_1.Body)('studentId')),

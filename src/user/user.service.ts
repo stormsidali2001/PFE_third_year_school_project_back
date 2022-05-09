@@ -554,7 +554,7 @@ async createSurvey(userId:string ,survey:SurveyDto){
     } 
 }
 
-async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argument:string){
+async submitSurveyAnswer(userId:string,surveyId:string,optionId:string,argument:string){
     try{
         const manager = getManager();
         const studentRepository = manager.getRepository(StudentEntity);
@@ -563,7 +563,7 @@ async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argume
         .innerJoinAndSelect('team.surveys','surveys')
         .where('surveys.id = :surveyId',{surveyId})
         .innerJoinAndSelect('surveys.options','options')
-        .where('student.id = :studentId',{studentId})
+        .andWhere('student.userId = :userId',{userId})
         .andWhere('options.id = :optionId',{optionId})
         .getOne();
      
@@ -579,7 +579,7 @@ async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argume
         .innerJoin('surveyParticipant.survey','survey')
         .innerJoin('surveyParticipant.student','student')
         .innerJoinAndSelect('surveyParticipant.answer','answer')
-        .where('student.id = :studentId',{studentId})
+        .andWhere('student.userId = :userId',{userId})
         .andWhere('survey.id = :surveyId',{surveyId})
         .getOne();
 
@@ -621,13 +621,41 @@ async getSurveys(userId:string){
         .leftJoin('survey.team','team')
         .leftJoin('team.students','student')
         .where('student.userId = :userId',{userId})
-        .leftJoinAndSelect('survey.participants','participant')
+        .leftJoinAndSelect('survey.participants','participants')
+        // .leftJoinAndSelect("participants.student",'studentP')
         // .andWhere('participant.userId = :userId',{userId})
         .getMany()
+    
       
         return surveys;
     }catch(err){
         Logger.error(err,'UserService/getSurveys')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
+async getSurvey(userId:string,surveyId:string){
+    try{
+        const manager =     getManager();
+        const surveyRepo =   manager.getRepository(SurveyEntity);
+        const survey = await surveyRepo.createQueryBuilder('survey')
+        .where('survey.id = :surveyId',{surveyId})
+        .leftJoin('survey.team','team')
+        .leftJoin('team.students','student')
+        .andWhere('student.userId = :userId',{userId})
+        .leftJoinAndSelect('survey.participants','participant')
+        .leftJoinAndSelect('survey.options','options')
+        .loadRelationCountAndMap('options.answersCount','options.participations')
+        .leftJoinAndSelect("participant.student",'studentP')
+        .andWhere('studentP.userId = :userId',{userId})
+        .getOne()
+        const response = {...survey};
+        const participants = response.participants;
+        delete response.participants;
+        response['answer'] = participants?.length>=1 ?participants[0].argument:null;
+        return response;
+    }catch(err){
+        Logger.error(err,'UserService/getSurvey')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
     }

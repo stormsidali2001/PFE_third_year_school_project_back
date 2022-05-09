@@ -101,13 +101,13 @@ export class UserController{
         }
     }
     @Post('submitSurveyAnswer')
-    async submitSurveyAnswer( @Body('studentId') studentId:string,
+    async submitSurveyAnswer( @GetCurrentUserId() userId:string,
                                 @Body('surveyId') surveyId:string,
                                 @Body('optionId') optionId:string,
                                 @Body('argument') argument:string
                                 ){
         try{
-            return await this.userService.submitSurveyAnswer(studentId,surveyId,optionId,argument);
+            return await this.userService.submitSurveyAnswer(userId,surveyId,optionId,argument);
         }catch(err){
             Logger.error(err,'UsrController/submitSurveyAnswer')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -118,6 +118,15 @@ export class UserController{
     async getSurveys(@GetCurrentUserId() userId:string){
             try{
                 return await this.userService.getSurveys(userId);
+            }catch(err){
+                Logger.error(err,"UserController/getSurveys");
+                throw new HttpException(err,HttpStatus.BAD_REQUEST)
+            }
+    }
+    @Get('surveys/:surveyId')
+    async getSurvey(@GetCurrentUserId() userId:string,@Param('surveyId') surveyId:string){
+            try{
+                return await this.userService.getSurvey(userId,surveyId);
             }catch(err){
                 Logger.error(err,"UserController/getSurveys");
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)

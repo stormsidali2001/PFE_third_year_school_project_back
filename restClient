@@ -182,7 +182,9 @@ content-type:application/json
 }
 
 ### get the surveys of a team
-Get http://localhost:8080/surveys
+Get http://localhost:8080/surveys/1ff0daf2-0a67-411f-82ba-4731414ae72a
+### get the surveys of a team
+Get http://localhost:8080/surveys/
 
 ### createNormalTeamMeet
 POST http://localhost:8080/createNormalTeamMeet
