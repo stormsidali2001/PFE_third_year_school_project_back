@@ -6,19 +6,32 @@ import * as passport from 'passport';
 import { SocketSessionAdapter } from './socket/socket-session.adapter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser'
+import {TypeormStore} from 'connect-typeorm'
+import { getManager } from 'typeorm';
+import { SessionEntity } from './core/entities/session.entity';
+
 async function bootstrap() {
+  
+    
     const port  = process.env.PORT ||8080 ;
     const app = await NestFactory.create(AppModule);
+   
     app.enableCors({
         credentials:true,
         origin:['http://localhost:3000'],
         methods:['POST','GET']
     });
+    const sessionRepository = getManager().getRepository(SessionEntity)
+    const store = new TypeormStore({
+        ttl: 86400
+    }).connect(sessionRepository);
+   
     const sessionMid = session({
         name:'NESTJS_SESSION_ID',
         secret:process.env.SECRET,
         resave:false,
         saveUninitialized:false,
+        store,
         cookie:{
             maxAge:6*60*60*1000,
             secure:false,

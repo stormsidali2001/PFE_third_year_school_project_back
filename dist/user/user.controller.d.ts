@@ -19,7 +19,7 @@ export declare class UserController {
         documents: import("../core/entities/announcement.document.entity").AnnouncementDocumentEntity[];
     }[]>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
-    getSurveys(teamId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
+    getSurveys(userId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{
@@ -27,7 +27,7 @@ export declare class UserController {
         totalNotificationCount: number;
     }>;
     getStudentsWithoutTeam(userId: string): Promise<import("../core/entities/student.entity").StudentEntity[]>;
-    getInvitationList(userId: string): Promise<{
+    getInvitationList(userId: string): Promise<({
         id: string;
         description: string;
         senderTeam: {
@@ -39,12 +39,26 @@ export declare class UserController {
                 lastName: string;
             };
         };
-    }[]>;
+        student?: undefined;
+    } | {
+        id: string;
+        description: string;
+        student: {
+            id: string;
+            firstname: string;
+            lastName: string;
+        };
+        senderTeam?: undefined;
+    })[]>;
     uploadFile(file: Express.Multer.File): Promise<{
         originalname: string;
         filename: string;
+        destination: string;
     }>;
     seeUploadedFile(path: any, res: any): any;
     uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
+    addTeamDocument(userId: string, name: string, url: string, description: string): Promise<void>;
+    getDocuments(userId: string): Promise<import("../core/entities/team.document.entity").TeamDocumentEntity[]>;
+    deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     sendNotification(studentId: string, description: string): Promise<string>;
 }

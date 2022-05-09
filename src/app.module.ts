@@ -45,6 +45,7 @@ import { AuthenticatedGuard } from './common/guards/authentificatedGuard';
 import { MessageModule } from './message/message.module';
 import { SocketModule } from './socket/socket.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { SessionEntity } from './core/entities/session.entity';
 
 @Module({
   imports: [
@@ -88,10 +89,11 @@ import { MulterModule } from '@nestjs/platform-express';
               NotificationEntity,
               ThemeSuggestionEntity,
               ThemeSuggestionDocumentEntity,
-              RestPasswordTokenEntity
+              RestPasswordTokenEntity,
+              SessionEntity
             
             
-
+ 
 
             ]
 

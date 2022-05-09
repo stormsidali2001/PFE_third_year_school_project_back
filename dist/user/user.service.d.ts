@@ -6,6 +6,7 @@ import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
 import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
+import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -31,11 +32,11 @@ export declare class UserService {
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(studentId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
-    getSurveys(teamId: string): Promise<SurveyEntity[]>;
+    getSurveys(userId: string): Promise<SurveyEntity[]>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     getStudentsWithoutTeam(userId: string): Promise<StudentEntity[]>;
-    getInvitationList(userId: string): Promise<{
+    getInvitationList(userId: string): Promise<({
         id: string;
         description: string;
         senderTeam: {
@@ -47,5 +48,18 @@ export declare class UserService {
                 lastName: string;
             };
         };
-    }[]>;
+        student?: undefined;
+    } | {
+        id: string;
+        description: string;
+        student: {
+            id: string;
+            firstname: string;
+            lastName: string;
+        };
+        senderTeam?: undefined;
+    })[]>;
+    addTeamDocument(userId: string, name: string, url: string, description: string): Promise<void>;
+    getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
+    deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
 }

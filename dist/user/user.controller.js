@@ -93,9 +93,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getSurveys(teamId) {
+    async getSurveys(userId) {
         try {
-            return await this.userService.getSurveys(teamId);
+            return await this.userService.getSurveys(userId);
         }
         catch (err) {
             common_1.Logger.error(err, "UserController/getSurveys");
@@ -150,6 +150,7 @@ let UserController = class UserController {
         const response = {
             originalname: file.originalname,
             filename: file.filename,
+            destination: file.destination
         };
         common_1.Logger.warn("file uploaded", response);
         return response;
@@ -172,6 +173,33 @@ let UserController = class UserController {
         });
         common_1.Logger.warn("files uploaded", response);
         return response;
+    }
+    async addTeamDocument(userId, name, url, description) {
+        try {
+            return await this.userService.addTeamDocument(userId, name, url, description);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/addTeamDocument');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getDocuments(userId) {
+        try {
+            return await this.userService.getTeamDocuments(userId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeamDocuments');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async deleteTeamDocs(userId, docsIds) {
+        try {
+            return await this.userService.deleteTeamDocs(userId, docsIds);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/deleteTeamDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async sendNotification(studentId, description) {
         try {
@@ -268,8 +296,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "submitSurveyAnswer", null);
 __decorate([
-    (0, common_1.Get)('surveys/:teamId'),
-    __param(0, (0, common_1.Param)('teamId')),
+    (0, common_1.Get)('surveys'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
@@ -346,6 +374,31 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "uploadFiles", null);
+__decorate([
+    (0, common_1.Post)('addTeamDocument'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('name')),
+    __param(2, (0, common_1.Body)('url')),
+    __param(3, (0, common_1.Body)('description')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "addTeamDocument", null);
+__decorate([
+    (0, common_1.Get)('getTeamDocuments'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getDocuments", null);
+__decorate([
+    (0, common_1.Post)('deleteTeamDocs'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('docsIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteTeamDocs", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

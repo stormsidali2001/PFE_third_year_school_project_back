@@ -17,6 +17,10 @@ import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
 import { SocketService } from "src/socket/socket.service";
 import { Server } from 'ws';
 import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
+import { TeamRepository } from "src/core/repositories/team.list.repository";
+import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
+import * as fs from 'fs';
+import * as path from "path";
 @Injectable()
 export class UserService{
     constructor(private schedulerRegistry: SchedulerRegistry,
@@ -82,8 +86,8 @@ export class UserService{
             await manager.getRepository(StudentEntity)
             .createQueryBuilder('student')
             .where('student.userId = :userId',{userId})
-            .innerJoin('student.team','team')
-            .innerJoin('team.teamLeader','leader')
+            // .innerJoin('student.team','team')
+            // .innerJoin('team.teamLeader','leader')
             .getOne()
             
          
@@ -494,11 +498,11 @@ async createSurvey(userId:string ,survey:SurveyDto){
     }
     
 
-    // // if(period<1 && period >7){
-    // //     Logger.error("period must be between 1 and 7",'UserService/createSurvey');
-    // //     throw new HttpException("period must be between 1 and 7",HttpStatus.BAD_REQUEST);
-    // // }
-    // period = period*24*60*60*1000;
+    if(period<1 && period >7){
+        Logger.error("period must be between 1 and 7",'UserService/createSurvey');
+        throw new HttpException("period must be between 1 and 7",HttpStatus.BAD_REQUEST);
+    }
+    period = period*24*60*60*1000;
     
 
     try{
@@ -535,7 +539,7 @@ async createSurvey(userId:string ,survey:SurveyDto){
         this._sendTeamNotfication(student.team.id,`a new survey has been created a survey with title: ${title}`);
         //running the crun job
       
-        const job = new CronJob(new Date(surveyData.createdAt.getTime()+period),()=>{
+        const job = new CronJob(new Date( new Date(surveyData.createdAt).getTime()+period),()=>{
             Logger.warn("survey period has ended",'UserService/createSurvey');
             surveyRepository.update({id:surveyData.id},{close:true});
             this._sendTeamNotfication(student.team.id,`the survey with title: ${title}  ended`);
@@ -609,16 +613,19 @@ async submitSurveyAnswer(studentId:string,surveyId:string,optionId:string,argume
        
 }
 
-async getSurveys(teamId:string){
+async getSurveys(userId:string){
     try{
         const manager =     getManager();
-        const teamRepository =   manager.getRepository(TeamEntity);
-        const team = await teamRepository.findOne({id:teamId},{relations:['surveys']});
-        if(!team){
-            Logger.error("team not found",'UserService/getSurveys')
-            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
-        }
-        return team.surveys;
+        const surveyRepo =   manager.getRepository(SurveyEntity);
+        const surveys = await surveyRepo.createQueryBuilder('survey')
+        .leftJoin('survey.team','team')
+        .leftJoin('team.students','student')
+        .where('student.userId = :userId',{userId})
+        .leftJoinAndSelect('survey.participants','participant')
+        // .andWhere('participant.userId = :userId',{userId})
+        .getMany()
+      
+        return surveys;
     }catch(err){
         Logger.error(err,'UserService/getSurveys')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -739,15 +746,16 @@ async getStudentsWithoutTeam(userId:string){
                 studentRepository
                 .createQueryBuilder('student')
                 .where('student.userId = :userId',{userId})
-                .innerJoin('student.team','team')
-                .innerJoin('team.teamLeader','leader')
+                // .innerJoin('student.team','team')
+                // .innerJoin('team.teamLeader','leader')
                 .getOne()
 
          if(!student){
-            Logger.error("operation allowed only for teamLeader",'UserService/getStudentsWithoutTeam')
-            throw new HttpException("operation allowed only for teamLeader",HttpStatus.BAD_REQUEST);
+            Logger.error("student not found",'UserService/getStudentsWithoutTeam')
+            throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
          }
       return await  studentRepository.createQueryBuilder('student')
+        .where('student.userId <> :userId',{userId})
         .andWhere('student.teamId IS NULL')
         .getMany()
         
@@ -761,31 +769,164 @@ async getStudentsWithoutTeam(userId:string){
 async getInvitationList(userId:string){
     const manager = getManager();
     const invitationsRepository = manager.getRepository(InvitationEntity);
+    try{
+        const invitations = await invitationsRepository
+        .createQueryBuilder('invitation')
+        .leftJoinAndSelect('invitation.reciever','reciever')
+        .where('reciever.userId = :userId',{userId})
+        .leftJoinAndSelect('invitation.sender','sender')
+        .leftJoinAndSelect('sender.team','team')
+        .getMany()
 
-    const invitations = await invitationsRepository
-    .createQueryBuilder('invitation')
-    .leftJoinAndSelect('invitation.reciever','reciever')
-    .where('reciever.userId = :userId',{userId})
-    .leftJoinAndSelect('invitation.sender','sender')
-    .leftJoinAndSelect('sender.team','team')
-    .getMany()
+      
+    
+        const reponses = invitations.map(inv=>{
+            const {id,description,sender} = inv;
+            if(sender.team){
+                return {
+                    id,
+                    description,
+                    senderTeam:{
+                        id:sender.team.id,
+                        nickname:sender.team.nickName,
+                        teamLeader:{
+                            id:sender.id,
+                            firstname:sender.firstName,
+                            lastName:sender.lastName
+                        }
+                    }
+                }
 
-    const reponses = invitations.map(inv=>{
-        const {id,description,sender} = inv;
-        return {
-            id,
-            description,
-            senderTeam:{
-                id:sender.team.id,nickname:sender.team.nickName,
-                teamLeader:{
-                    id:sender.id,
-                    firstname:sender.firstName,lastName:sender.lastName
+            }else{
+                return {
+                    id,
+                    description,
+                    student:{
+                        id:sender.id,
+                        firstname:sender.firstName,
+                        lastName:sender.lastName
+                    }
                 }
             }
-        }
-    })
+           
+        })
+        
+        return reponses;
+    }catch(err){
+        Logger.error(err,'UserService/getInvitationList')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
-    return reponses;
+    }
+  
+
+}
+
+async addTeamDocument(userId:string,name:string,url:string,description:string){
+    try{
+        const manager = getManager();
+        const team = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.students','student')
+        .where('student.userId = :userId',{userId})
+        .getOne();
+        if(!team){
+            Logger.error("user not found",'UserService/addTeamDocument')
+              throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
+        }
+
+        const teamDocumentRepository = manager.getRepository(TeamDocumentEntity);
+        const teamDocument = teamDocumentRepository.create({name,url,team,description,owner:team.students[0]})
+
+         manager.getRepository(TeamDocumentEntity)
+        .createQueryBuilder('teamDoc')
+        .insert()
+        .values(teamDocument)
+        .execute()
+
+      
+
+
+    }catch(err){
+        Logger.error(err,'UserService/addTeamDocument')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+async getTeamDocuments(userId:string){
+    try{
+        const manager = getManager();
+        const team = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.students','student')
+        .where('student.userId = :userId',{userId})
+        .leftJoinAndSelect('team.documents','document')
+        .leftJoinAndSelect('document.owner','owner')
+        .getOne();
+
+        if(!team){
+            Logger.error("team not found",'UserService/getTeamDocuments')
+              throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
+        }
+
+        return team.documents;
+        
+
+    }catch(err){
+        Logger.error(err,'UserService/getTeamDocuments')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async deleteTeamDocs(userId:string,docsIds:string[]){
+    try{
+        const manager = getManager();
+        const team = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.students','student')
+        .where('student.userId = :userId',{userId})
+        .leftJoinAndSelect('team.documents','document')
+        .leftJoinAndSelect('document.owner','owner')
+        .getOne();
+        if(!team){
+            Logger.error("team not found",'UserService/deleteTeamDocs')
+              throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
+        }
+        const documents = team.documents.filter(doc=>docsIds.some(id=>id === doc.id))
+        if(documents.length != docsIds.length){
+            Logger.error("wrong docs ids",'UserService/deleteTeamDocs')
+            throw new HttpException("wrong docs ids",HttpStatus.BAD_REQUEST);
+        }
+        
+        documents.forEach( doc=>{
+
+           
+              fs.unlink(path.resolve(doc.url),(err)=>{
+                  if(err){
+
+                      Logger.error(`failed to delete the document with id: ${doc.id} and url: ${doc.url}`,'UserService/deleteTeamDocs ',err)
+                   
+                      
+                }
+                      
+            })
+
+
+
+
+
+        })
+        await manager.getRepository(TeamDocumentEntity)
+        .createQueryBuilder('documents')
+        .delete()
+        .where('team_document.id IN (:...docsIds)',{docsIds})
+        .execute()
+        
+
+    }catch(err){
+        Logger.error(err,'UserService/deleteTeamDocs')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+
 }
 
 

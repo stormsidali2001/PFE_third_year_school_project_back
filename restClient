@@ -3,9 +3,16 @@ content-type:application/json
 
 {
     "email":"s.assoul@esi-sba.dz",
-    "password":"1@2@3@abC"
+    "password":"1@2@4@abC"
 }
+####
+POST http://localhost:8080/signin
+content-type:application/json
 
+{
+    "email":"h.debza4@esi-sba.dz",
+    "password":"1@2@4@abC"
+}
 ###
 POST http://localhost:8080/logout
 ###
@@ -24,10 +31,10 @@ POST http://localhost:8080/signup/student
 content-type:application/json
 
 {
-    "email":"h.debza7@esi-sba.dz",
+    "email":"s.assoul@esi-sba.dz",
     "password":"1@2@4@abC",
-    "firstName":"debza7",
-    "lastName":"houda7",
+    "firstName":"assoul",
+    "lastName":"sidali",
     "dob":"2001-04-20",
     "code":"191932004015"
 }
@@ -175,7 +182,7 @@ content-type:application/json
 }
 
 ### get the surveys of a team
-Get http://localhost:8080/surveys/50d4eefb-bc1b-4d20-908f-d1325339f454 
+Get http://localhost:8080/surveys
 
 ### createNormalTeamMeet
 POST http://localhost:8080/createNormalTeamMeet
@@ -228,3 +235,7 @@ GET http://localhost:8080/getInvitationList
 
 ### getAnnouncement
 GET http://localhost:8080/getAnnouncement
+
+### get team documents
+
+GET http://localhost:8080/getTeamDocuments

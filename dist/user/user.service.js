@@ -27,6 +27,9 @@ const cron_1 = require("cron");
 const meet_entity_1 = require("../core/entities/meet.entity");
 const socket_service_1 = require("../socket/socket.service");
 const announcement_document_entity_1 = require("../core/entities/announcement.document.entity");
+const team_document_entity_1 = require("../core/entities/team.document.entity");
+const fs = require("fs");
+const path = require("path");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -71,8 +74,6 @@ let UserService = class UserService {
             const sender = await manager.getRepository(student_entity_1.StudentEntity)
                 .createQueryBuilder('student')
                 .where('student.userId = :userId', { userId })
-                .innerJoin('student.team', 'team')
-                .innerJoin('team.teamLeader', 'leader')
                 .getOne();
             if (!sender) {
                 common_1.Logger.error("sender not found", 'UserService/sendATeamInvitation');
@@ -373,6 +374,11 @@ let UserService = class UserService {
             common_1.Logger.error("period is not a number", 'UserService/createSurvey');
             throw new common_1.HttpException("period is not a number", common_1.HttpStatus.BAD_REQUEST);
         }
+        if (period < 1 && period > 7) {
+            common_1.Logger.error("period must be between 1 and 7", 'UserService/createSurvey');
+            throw new common_1.HttpException("period must be between 1 and 7", common_1.HttpStatus.BAD_REQUEST);
+        }
+        period = period * 24 * 60 * 60 * 1000;
         try {
             const manager = (0, typeorm_1.getManager)();
             const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
@@ -399,7 +405,7 @@ let UserService = class UserService {
             await surveyOptionRepository.save(surveyOptions);
             const surveyData = await surveyRepository.findOne({ id: survey.id });
             this._sendTeamNotfication(student.team.id, `a new survey has been created a survey with title: ${title}`);
-            const job = new cron_1.CronJob(new Date(surveyData.createdAt.getTime() + period), () => {
+            const job = new cron_1.CronJob(new Date(new Date(surveyData.createdAt).getTime() + period), () => {
                 common_1.Logger.warn("survey period has ended", 'UserService/createSurvey');
                 surveyRepository.update({ id: surveyData.id }, { close: true });
                 this._sendTeamNotfication(student.team.id, `the survey with title: ${title}  ended`);
@@ -454,16 +460,17 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getSurveys(teamId) {
+    async getSurveys(userId) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
-            const team = await teamRepository.findOne({ id: teamId }, { relations: ['surveys'] });
-            if (!team) {
-                common_1.Logger.error("team not found", 'UserService/getSurveys');
-                throw new common_1.HttpException("team not found", common_1.HttpStatus.BAD_REQUEST);
-            }
-            return team.surveys;
+            const surveyRepo = manager.getRepository(survey_entity_1.SurveyEntity);
+            const surveys = await surveyRepo.createQueryBuilder('survey')
+                .leftJoin('survey.team', 'team')
+                .leftJoin('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .leftJoinAndSelect('survey.participants', 'participant')
+                .getMany();
+            return surveys;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getSurveys');
@@ -558,14 +565,13 @@ let UserService = class UserService {
             const student = await studentRepository
                 .createQueryBuilder('student')
                 .where('student.userId = :userId', { userId })
-                .innerJoin('student.team', 'team')
-                .innerJoin('team.teamLeader', 'leader')
                 .getOne();
             if (!student) {
-                common_1.Logger.error("operation allowed only for teamLeader", 'UserService/getStudentsWithoutTeam');
-                throw new common_1.HttpException("operation allowed only for teamLeader", common_1.HttpStatus.BAD_REQUEST);
+                common_1.Logger.error("student not found", 'UserService/getStudentsWithoutTeam');
+                throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
             }
             return await studentRepository.createQueryBuilder('student')
+                .where('student.userId <> :userId', { userId })
                 .andWhere('student.teamId IS NULL')
                 .getMany();
         }
@@ -577,28 +583,132 @@ let UserService = class UserService {
     async getInvitationList(userId) {
         const manager = (0, typeorm_1.getManager)();
         const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
-        const invitations = await invitationsRepository
-            .createQueryBuilder('invitation')
-            .leftJoinAndSelect('invitation.reciever', 'reciever')
-            .where('reciever.userId = :userId', { userId })
-            .leftJoinAndSelect('invitation.sender', 'sender')
-            .leftJoinAndSelect('sender.team', 'team')
-            .getMany();
-        const reponses = invitations.map(inv => {
-            const { id, description, sender } = inv;
-            return {
-                id,
-                description,
-                senderTeam: {
-                    id: sender.team.id, nickname: sender.team.nickName,
-                    teamLeader: {
-                        id: sender.id,
-                        firstname: sender.firstName, lastName: sender.lastName
-                    }
+        try {
+            const invitations = await invitationsRepository
+                .createQueryBuilder('invitation')
+                .leftJoinAndSelect('invitation.reciever', 'reciever')
+                .where('reciever.userId = :userId', { userId })
+                .leftJoinAndSelect('invitation.sender', 'sender')
+                .leftJoinAndSelect('sender.team', 'team')
+                .getMany();
+            const reponses = invitations.map(inv => {
+                const { id, description, sender } = inv;
+                if (sender.team) {
+                    return {
+                        id,
+                        description,
+                        senderTeam: {
+                            id: sender.team.id,
+                            nickname: sender.team.nickName,
+                            teamLeader: {
+                                id: sender.id,
+                                firstname: sender.firstName,
+                                lastName: sender.lastName
+                            }
+                        }
+                    };
                 }
-            };
-        });
-        return reponses;
+                else {
+                    return {
+                        id,
+                        description,
+                        student: {
+                            id: sender.id,
+                            firstname: sender.firstName,
+                            lastName: sender.lastName
+                        }
+                    };
+                }
+            });
+            return reponses;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getInvitationList');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async addTeamDocument(userId, name, url, description) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .leftJoinAndSelect('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("user not found", 'UserService/addTeamDocument');
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const teamDocumentRepository = manager.getRepository(team_document_entity_1.TeamDocumentEntity);
+            const teamDocument = teamDocumentRepository.create({ name, url, team, description, owner: team.students[0] });
+            manager.getRepository(team_document_entity_1.TeamDocumentEntity)
+                .createQueryBuilder('teamDoc')
+                .insert()
+                .values(teamDocument)
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/addTeamDocument');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamDocuments(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .leftJoinAndSelect('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .leftJoinAndSelect('team.documents', 'document')
+                .leftJoinAndSelect('document.owner', 'owner')
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("team not found", 'UserService/getTeamDocuments');
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            return team.documents;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeamDocuments');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async deleteTeamDocs(userId, docsIds) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .leftJoinAndSelect('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .leftJoinAndSelect('team.documents', 'document')
+                .leftJoinAndSelect('document.owner', 'owner')
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("team not found", 'UserService/deleteTeamDocs');
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const documents = team.documents.filter(doc => docsIds.some(id => id === doc.id));
+            if (documents.length != docsIds.length) {
+                common_1.Logger.error("wrong docs ids", 'UserService/deleteTeamDocs');
+                throw new common_1.HttpException("wrong docs ids", common_1.HttpStatus.BAD_REQUEST);
+            }
+            documents.forEach(doc => {
+                fs.unlink(path.resolve(doc.url), (err) => {
+                    if (err) {
+                        common_1.Logger.error(`failed to delete the document with id: ${doc.id} and url: ${doc.url}`, 'UserService/deleteTeamDocs ', err);
+                    }
+                });
+            });
+            await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
+                .createQueryBuilder('documents')
+                .delete()
+                .where('team_document.id IN (:...docsIds)', { docsIds })
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/deleteTeamDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
 };
 UserService = __decorate([

@@ -20,9 +20,15 @@ const team_entity_1 = require("./team.entity");
 let TeamDocumentEntity = class TeamDocumentEntity extends document_data_1.DoucmentData {
 };
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
 ], TeamDocumentEntity.prototype, "deleted", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: ''
+    }),
+    __metadata("design:type", String)
+], TeamDocumentEntity.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.documents),
     __metadata("design:type", team_entity_1.TeamEntity)

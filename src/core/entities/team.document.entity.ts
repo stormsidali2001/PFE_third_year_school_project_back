@@ -10,8 +10,13 @@ import { TeamEntity } from "./team.entity";
 @Entity('team_document')
 export class TeamDocumentEntity extends DoucmentData{
     
-    @Column()
+    @Column({default:false})
     deleted:boolean;
+
+    @Column({
+        default:''
+    })
+    description:string;
 
     //relations
 

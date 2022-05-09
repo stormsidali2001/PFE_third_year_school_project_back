@@ -14,6 +14,7 @@ import {
 import passport from 'passport';
 import * as cookieParser from 'cookie'
 
+
   
   @WebSocketGateway({
     cors:{
@@ -59,12 +60,14 @@ import * as cookieParser from 'cookie'
   
     public handleConnection(client:Socket): void {
     
-    
+       
        this.logger.log(JSON.stringify(client.handshake.headers))
+       
        this.logger.log(`cookie : ${JSON.stringify(cookieParser.parse(client.handshake.headers.cookie))}`);
        //@ts-ignore
        this.logger.log(JSON.stringify(`session : ${client.handshake.session}`))
               //@ts-ignore
+
 
        this.logger.log(JSON.stringify(`request.session : ${client.request.session}`))
       

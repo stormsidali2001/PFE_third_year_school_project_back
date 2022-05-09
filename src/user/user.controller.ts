@@ -114,10 +114,10 @@ export class UserController{
         }
     }
 
-    @Get('surveys/:teamId')
-    async getSurveys(@Param('teamId') teamId:string){
+    @Get('surveys')
+    async getSurveys(@GetCurrentUserId() userId:string){
             try{
-                return await this.userService.getSurveys(teamId);
+                return await this.userService.getSurveys(userId);
             }catch(err){
                 Logger.error(err,"UserController/getSurveys");
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)
@@ -186,6 +186,7 @@ export class UserController{
         const response = {
             originalname: file.originalname,
             filename: file.filename,
+            destination:file.destination
         };
         Logger.warn("file uploaded",response);
         return response;
@@ -225,7 +226,42 @@ export class UserController{
         return response;
     }
 
-
+    @Post('addTeamDocument')
+    async addTeamDocument(
+        @GetCurrentUserId() userId:string,
+        @Body('name') name:string,
+        @Body('url') url:string,
+        @Body('description') description:string
+    ){
+        try{
+            return await this.userService.addTeamDocument(userId,name,url,description);
+        }catch(err){
+            Logger.error(err,'UserController/addTeamDocument')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+        
+    }
+    @Get('getTeamDocuments')
+    async getDocuments(@GetCurrentUserId() userId:string){
+        try{
+            return await this.userService.getTeamDocuments(userId);
+        }catch(err){
+            Logger.error(err,'UserController/getTeamDocuments')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Post('deleteTeamDocs')
+    async deleteTeamDocs(
+        @GetCurrentUserId() userId:string,
+        @Body('docsIds') docsIds:string[]
+        ){
+            try{
+                return await this.userService.deleteTeamDocs(userId,docsIds);
+            }catch(err){
+                Logger.error(err,'UserController/deleteTeamDocs')
+                throw new HttpException(err,HttpStatus.BAD_REQUEST);
+            }
+        }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
