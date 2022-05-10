@@ -20,17 +20,7 @@ export declare class UserController {
     }[]>;
     submitSurveyAnswer(userId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(userId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
-    getSurvey(userId: string, surveyId: string): Promise<{
-        id: string;
-        title: string;
-        description: string;
-        createdAt: Date;
-        period: number;
-        close: boolean;
-        team: import("../core/entities/team.entity").TeamEntity;
-        options: import("../core/entities/survey.option.entity").SurveyOptionEntity[];
-        participants: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
-    }>;
+    getSurvey(userId: string, surveyId: string): Promise<import("../core/entities/survey.entity").SurveyEntity | "not found">;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{

@@ -647,8 +647,10 @@ async getSurvey(userId:string,surveyId:string){
         .leftJoinAndSelect('survey.options','options')
         .loadRelationCountAndMap('options.answersCount','options.participations')
         .leftJoinAndSelect("participant.student",'studentP')
-        .andWhere('studentP.userId = :userId',{userId})
+        // .andWhere('studentP.userId = :userId',{userId})
         .getOne()
+        if(!survey) return "not found"
+        return survey;
         const response = {...survey};
         const participants = response.participants;
         delete response.participants;

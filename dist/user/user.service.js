@@ -490,8 +490,10 @@ let UserService = class UserService {
                 .leftJoinAndSelect('survey.options', 'options')
                 .loadRelationCountAndMap('options.answersCount', 'options.participations')
                 .leftJoinAndSelect("participant.student", 'studentP')
-                .andWhere('studentP.userId = :userId', { userId })
                 .getOne();
+            if (!survey)
+                return "not found";
+            return survey;
             const response = Object.assign({}, survey);
             const participants = response.participants;
             delete response.participants;

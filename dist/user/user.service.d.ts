@@ -3,9 +3,6 @@ import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
-import { SurveyOptionEntity } from "src/core/entities/survey.option.entity";
-import { SurveyParticipantEntity } from "src/core/entities/survey.participant.entity";
-import { TeamEntity } from "src/core/entities/team.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
 import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
@@ -36,17 +33,7 @@ export declare class UserService {
     createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     submitSurveyAnswer(userId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(userId: string): Promise<SurveyEntity[]>;
-    getSurvey(userId: string, surveyId: string): Promise<{
-        id: string;
-        title: string;
-        description: string;
-        createdAt: Date;
-        period: number;
-        close: boolean;
-        team: TeamEntity;
-        options: SurveyOptionEntity[];
-        participants: SurveyParticipantEntity[];
-    }>;
+    getSurvey(userId: string, surveyId: string): Promise<SurveyEntity | "not found">;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     getStudentsWithoutTeam(userId: string): Promise<StudentEntity[]>;
