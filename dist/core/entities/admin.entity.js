@@ -19,13 +19,13 @@ __decorate([
     __metadata("design:type", String)
 ], AdminEntity.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.PrimaryColumn)(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], AdminEntity.prototype, "code", void 0);
+], AdminEntity.prototype, "firstName", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], AdminEntity.prototype, "name", void 0);
+], AdminEntity.prototype, "lastName", void 0);
 __decorate([
     (0, typeorm_1.OneToOne)(type => user_entity_1.UserEntity),
     (0, typeorm_1.JoinColumn)(),

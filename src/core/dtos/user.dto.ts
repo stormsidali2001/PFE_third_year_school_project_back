@@ -15,15 +15,22 @@ export class UserRO{
 }
 
 export class TeacherDTO{
+    ssn:string;
     email:string;
     password:string;
+    firstName:string;
+    lastName:string;
+    speciality:string;
+}
+
+export class StudentDTO{
+    email:string;
     firstName:string;
     lastName:string;
     code:string;
     dob:Date;
 }
-
-export class StudentDTO{
+export class StudentTestDTO{
     email:string;
     password:string;
     firstName:string;
@@ -36,6 +43,12 @@ export class EnterpriseDTO{
     password:string;
     name:string;
   
+}
+export class AdminDto{
+    firstName:string;
+    lastName:string;
+    password:string;
+    email:string;
 }
 
 export class SurveyDto{

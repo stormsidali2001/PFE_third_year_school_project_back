@@ -9,14 +9,21 @@ export declare class UserRO {
     email: string;
 }
 export declare class TeacherDTO {
+    ssn: string;
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
+    speciality: string;
+}
+export declare class StudentDTO {
+    email: string;
     firstName: string;
     lastName: string;
     code: string;
     dob: Date;
 }
-export declare class StudentDTO {
+export declare class StudentTestDTO {
     email: string;
     password: string;
     firstName: string;
@@ -28,6 +35,12 @@ export declare class EnterpriseDTO {
     email: string;
     password: string;
     name: string;
+}
+export declare class AdminDto {
+    firstName: string;
+    lastName: string;
+    password: string;
+    email: string;
 }
 export declare class SurveyDto {
     title: string;

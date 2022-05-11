@@ -5,7 +5,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { AuthenticatedGuard } from "src/common/guards/authentificatedGuard";
 import { LocalAuthGuard } from "src/common/guards/local-auth.guard";
 import { RefrechTokenGuard } from "src/common/guards/refrech-token-guard";
-import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
+import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
 import { AuthService } from "./auth.service";
 
 @Controller()
@@ -24,12 +24,21 @@ export class AuthController{
      
        return this.authService.signupTeacher(data);
    }
+
    @Public()
    @Post('signup/student')
    async signupStudent(@Body() data:StudentDTO){
     
        return await this.authService.signupStudent(data);
    }
+
+   @Public()
+   @Post('signup/students')
+   async signupStudents(@Body() data:StudentDTO[]){
+    
+       return await this.authService.signupStudents(data);
+   }
+   
    @Public()
    @Post('signup/entreprise')
    async signupEntereprise(@Body() data:EnterpriseDTO){
@@ -58,11 +67,23 @@ export class AuthController{
 
         return "logedout!!"
     }
+
+    @Public()
+    @Post("signupAdmin/afsjsfajgdlgdjdsgljlgjdjgdajsgj;lgdssgd")
+    async signupAdmin(@Body() admin:AdminDto){
+        return this.authService.signupAdmin(admin);
+    }
     // test
     
     @Get('getUserInfo')
     async getUser(@Request() request){
         return request.user;
+    }
+    @Public()
+    @Post('signup/studentTest')
+    async signupStudentTest(@Body() data:StudentTestDTO){
+     
+        return await this.authService.signupStudentTest(data);
     }
 
      

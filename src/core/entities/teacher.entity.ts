@@ -13,16 +13,19 @@ export class TeacherEntity{
     id:string;
     
     @PrimaryColumn()
-    code:string;
+    ssn:string;
 
     @Column()
     firstName:string;
+    
+    @Column()
+    speciality:string;
+
 
     @Column()
     lastName:string;
 
-    @Column('date')
-    dob:Date; 
+   
 
     //relations
     @OneToOne(type=>UserEntity) @JoinColumn()

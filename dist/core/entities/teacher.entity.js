@@ -25,7 +25,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.PrimaryColumn)(),
     __metadata("design:type", String)
-], TeacherEntity.prototype, "code", void 0);
+], TeacherEntity.prototype, "ssn", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -33,11 +33,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], TeacherEntity.prototype, "lastName", void 0);
+], TeacherEntity.prototype, "speciality", void 0);
 __decorate([
-    (0, typeorm_1.Column)('date'),
-    __metadata("design:type", Date)
-], TeacherEntity.prototype, "dob", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], TeacherEntity.prototype, "lastName", void 0);
 __decorate([
     (0, typeorm_1.OneToOne)(type => user_entity_1.UserEntity),
     (0, typeorm_1.JoinColumn)(),

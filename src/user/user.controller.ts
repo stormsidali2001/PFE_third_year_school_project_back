@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post, Res, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post, Put, Res, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
@@ -271,6 +271,31 @@ export class UserController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
         }
+
+    @Public()
+    @Get('getStudents')
+    async getStudents(){
+        try{
+            return await this.userService.getStudents()
+        }catch(err){
+            Logger.error(err,'UserController/getStudents')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+
+    }
+    @Post('deleteStudent')
+    async deleteStudent(@Body('studentId') studentId:string ){
+        try{
+            return await this.userService.deleteStudent(studentId)
+        }catch(err){
+            Logger.error(err,'UserController/addStudent')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Put('editStudent')
+    async editStudent(){
+
+    }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')

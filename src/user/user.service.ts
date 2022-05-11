@@ -594,8 +594,8 @@ async submitSurveyAnswer(userId:string,surveyId:string,optionId:string,argument:
             return "survey answered succesfully"
         }
     
-       if(surveyParticipant.answer.id === existingSurveyParticipant.answer.id){
-        Logger.error("you've already answered to the survey using that option",'UserService/submitSurvey')
+       if(surveyParticipant.answer.id === existingSurveyParticipant.answer.id && surveyParticipant.argument === argument){
+        Logger.error("you've already answered to the survey using that option or by providing the same argument",'UserService/submitSurvey')
         throw new HttpException("you've already answered to the survey using that option",HttpStatus.BAD_REQUEST);
        }
    
@@ -624,6 +624,7 @@ async getSurveys(userId:string){
         .leftJoinAndSelect('survey.participants','participants')
         // .leftJoinAndSelect("participants.student",'studentP')
         // .andWhere('participant.userId = :userId',{userId})
+        .orderBy('survey.createdAt','DESC')
         .getMany()
     
       
@@ -643,18 +644,20 @@ async getSurvey(userId:string,surveyId:string){
         .leftJoin('survey.team','team')
         .leftJoin('team.students','student')
         .andWhere('student.userId = :userId',{userId})
-        .leftJoinAndSelect('survey.participants','participant')
+        .leftJoinAndSelect('survey.participants','participant','participant.student.id = student.id')
+        .leftJoinAndSelect('participant.answer','answer')
         .leftJoinAndSelect('survey.options','options')
         .loadRelationCountAndMap('options.answersCount','options.participations')
-        .leftJoinAndSelect("participant.student",'studentP')
-        // .andWhere('studentP.userId = :userId',{userId})
+        .leftJoinAndSelect("participant.student",'participantStudent','participantStudent.id = student.id')
+
         .getOne()
-        if(!survey) return "not found"
-        return survey;
+      
+      
         const response = {...survey};
         const participants = response.participants;
         delete response.participants;
-        response['answer'] = participants?.length>=1 ?participants[0].argument:null;
+        response['argument'] = participants?.length>=1 ?participants[0].argument:null;
+        response['answer'] = participants?.length>=1 ?participants[0].answer:'';
         return response;
     }catch(err){
         Logger.error(err,'UserService/getSurvey')
@@ -958,6 +961,50 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
     }
 
 }
+//crud operations student----------------------------------------
+async getStudents(){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
 
+        const students =  await studentRepository.createQueryBuilder('students')
+        .getMany();
+
+        return students;
+    }catch(err){
+        Logger.error(err,'UserService/getStudents')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async deleteStudent(studentId:string){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
+
+      await studentRepository.createQueryBuilder('students')
+       .delete()
+       .where('student.id = :studentId',{studentId}).execute()
+
+        return "deleted!!"
+    }catch(err){
+        Logger.error(err,'UserService/deleteStudent')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async editStudent(studentId:string,data:Partial<StudentEntity>){
+    try{
+        const manager = getManager();
+        const studentRepository = manager.getRepository(StudentEntity);
+
+      await studentRepository.createQueryBuilder('students')
+       .update()
+       .set(data)
+       .where('students.id = :studentId',{studentId}).execute()
+        return "updated !!"
+    }catch(err){
+        Logger.error(err,'UserService/editStudent')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 
 }

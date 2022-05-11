@@ -34,6 +34,10 @@ export class SessionSerializer extends PassportSerializer{
          .leftJoinAndSelect('team.teamLeader','teamLeader')
          .getOne()
          
+        }else if(userDb.userType === UserType.ADMIN){
+            entity = await getManager().getRepository(AdminEntity).createQueryBuilder('admin')
+            .where('admin.userId = :userId',{userId:user.id})
+            .getOne()
         }
         const responseObj = {
             userType:userDb.userType,

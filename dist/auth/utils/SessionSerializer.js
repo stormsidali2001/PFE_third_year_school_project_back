@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SessionSerializer = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
+const admin_entity_1 = require("../../core/entities/admin.entity");
 const student_entity_1 = require("../../core/entities/student.entity");
 const user_entity_1 = require("../../core/entities/user.entity");
 const typeorm_1 = require("typeorm");
@@ -32,6 +33,11 @@ let SessionSerializer = class SessionSerializer extends passport_1.PassportSeria
                     .where('student.userId = :userId', { userId: user.id })
                     .leftJoinAndSelect('student.team', 'team')
                     .leftJoinAndSelect('team.teamLeader', 'teamLeader')
+                    .getOne();
+            }
+            else if (userDb.userType === user_entity_1.UserType.ADMIN) {
+                entity = await (0, typeorm_1.getManager)().getRepository(admin_entity_1.AdminEntity).createQueryBuilder('admin')
+                    .where('admin.userId = :userId', { userId: user.id })
                     .getOne();
             }
             const responseObj = {

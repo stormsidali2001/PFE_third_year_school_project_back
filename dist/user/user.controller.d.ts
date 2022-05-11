@@ -20,7 +20,17 @@ export declare class UserController {
     }[]>;
     submitSurveyAnswer(userId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
     getSurveys(userId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
-    getSurvey(userId: string, surveyId: string): Promise<import("../core/entities/survey.entity").SurveyEntity | "not found">;
+    getSurvey(userId: string, surveyId: string): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        createdAt: Date;
+        period: number;
+        close: boolean;
+        team: import("../core/entities/team.entity").TeamEntity;
+        options: import("../core/entities/survey.option.entity").SurveyOptionEntity[];
+        participants: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
+    }>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{
@@ -61,5 +71,8 @@ export declare class UserController {
     addTeamDocument(userId: string, name: string, url: string, description: string): Promise<void>;
     getDocuments(userId: string): Promise<import("../core/entities/team.document.entity").TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
+    getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
+    deleteStudent(studentId: string): Promise<string>;
+    editStudent(): Promise<void>;
     sendNotification(studentId: string, description: string): Promise<string>;
 }

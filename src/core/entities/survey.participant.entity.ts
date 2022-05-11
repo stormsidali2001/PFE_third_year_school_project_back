@@ -9,7 +9,9 @@ export class SurveyParticipantEntity {
     @PrimaryGeneratedColumn('uuid')
     id:string;
 
-    @Column()
+    @Column({
+        default:''
+    })
     argument:string;
 
 

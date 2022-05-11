@@ -31,6 +31,9 @@ let AuthController = class AuthController {
     async signupStudent(data) {
         return await this.authService.signupStudent(data);
     }
+    async signupStudents(data) {
+        return await this.authService.signupStudents(data);
+    }
     async signupEntereprise(data) {
         return this.authService.signupEnterprise(data);
     }
@@ -46,8 +49,14 @@ let AuthController = class AuthController {
         request.session.cookie.maxAge = 0;
         return "logedout!!";
     }
+    async signupAdmin(admin) {
+        return this.authService.signupAdmin(admin);
+    }
     async getUser(request) {
         return request.user;
+    }
+    async signupStudentTest(data) {
+        return await this.authService.signupStudentTest(data);
     }
 };
 __decorate([
@@ -75,6 +84,14 @@ __decorate([
     __metadata("design:paramtypes", [user_dto_1.StudentDTO]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupStudent", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('signup/students'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "signupStudents", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/entreprise'),
@@ -109,12 +126,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)("signupAdmin/afsjsfajgdlgdjdsgljlgjdjgdajsgj;lgdssgd"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_dto_1.AdminDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "signupAdmin", null);
+__decorate([
     (0, common_1.Get)('getUserInfo'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getUser", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('signup/studentTest'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_dto_1.StudentTestDTO]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "signupStudentTest", null);
 AuthController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

@@ -210,6 +210,26 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getStudents() {
+        try {
+            return await this.userService.getStudents();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getStudents');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async deleteStudent(studentId) {
+        try {
+            return await this.userService.deleteStudent(studentId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/addStudent');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async editStudent() {
+    }
     async sendNotification(studentId, description) {
         try {
             return await this.userService._sendNotfication(studentId, description);
@@ -416,6 +436,26 @@ __decorate([
     __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteTeamDocs", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getStudents'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getStudents", null);
+__decorate([
+    (0, common_1.Post)('deleteStudent'),
+    __param(0, (0, common_1.Body)('studentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteStudent", null);
+__decorate([
+    (0, common_1.Put)('editStudent'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "editStudent", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

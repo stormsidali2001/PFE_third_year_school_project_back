@@ -15,6 +15,7 @@ const user_repository_1 = require("../core/repositories/user.repository");
 const user_entity_1 = require("../core/entities/user.entity");
 const bcrypt = require("bcryptjs");
 const student_repository_1 = require("../core/repositories/student.repository");
+const student_entity_1 = require("../core/entities/student.entity");
 const reset_password_token_repository_1 = require("../core/repositories/reset.password.token.repository");
 const crypto_1 = require("crypto");
 const nodemailer = require("nodemailer");
@@ -22,6 +23,8 @@ const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("typeorm");
 const argon = require("argon2");
 const socket_service_1 = require("../socket/socket.service");
+const admin_entity_1 = require("../core/entities/admin.entity");
+const teacher_entity_1 = require("../core/entities/teacher.entity");
 let AuthService = class AuthService {
     constructor(userRepository, studentRepository, resetPasswordTokenRepository, jwtService, socketService) {
         this.userRepository = userRepository;
@@ -48,6 +51,86 @@ let AuthService = class AuthService {
     async signupStudent(data) {
         var _a, _b, _c, _d;
         try {
+            const { email, firstName, lastName, dob, code } = data;
+            let user = await this.userRepository.findOne({ where: { email } });
+            const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
+            const lastNameEmail = (_b = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _b === void 0 ? void 0 : _b.split('.')[1];
+            const service = (_c = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _c === void 0 ? void 0 : _c.split('.')[0];
+            const domain = (_d = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _d === void 0 ? void 0 : _d.split('.')[1];
+            if ((name === null || name === void 0 ? void 0 : name.length) > 0 && (lastNameEmail === null || lastNameEmail === void 0 ? void 0 : lastNameEmail.length) > 0 && service !== 'esi-sba' && domain != 'dz') {
+                throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (user) {
+                throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+            }
+            var randomPassword = await new Promise((resolve, reject) => {
+                (0, crypto_1.randomBytes)(32, (err, buf) => {
+                    if (err)
+                        reject(err);
+                    resolve(buf.toString('hex'));
+                });
+            });
+            user = this.userRepository.create({ email, password: randomPassword, userType: user_entity_1.UserType.STUDENT });
+            user.password = await bcrypt.hash(user.password, 10);
+            const student = this.studentRepository.create({ firstName, lastName, dob, code });
+            student.user = user;
+            user = await this.userRepository.save(user);
+            await this.studentRepository.save(student);
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/signupStudent");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async signupStudents(data) {
+        var _a, _b, _c, _d;
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const students = [];
+            const users = [];
+            for (let key in data) {
+                const studentData = data[key];
+                console.log("student data", studentData);
+                const { email, firstName, lastName, dob, code } = studentData;
+                let user = await this.userRepository.findOne({ where: { email } });
+                const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
+                const lastNameEmail = (_b = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _b === void 0 ? void 0 : _b.split('.')[1];
+                const service = (_c = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _c === void 0 ? void 0 : _c.split('.')[0];
+                const domain = (_d = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _d === void 0 ? void 0 : _d.split('.')[1];
+                if ((name === null || name === void 0 ? void 0 : name.length) > 0 && (lastNameEmail === null || lastNameEmail === void 0 ? void 0 : lastNameEmail.length) > 0 && service !== 'esi-sba' && domain != 'dz') {
+                    throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+                }
+                if (user) {
+                    throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+                }
+                var randomPassword = await new Promise((resolve, reject) => {
+                    (0, crypto_1.randomBytes)(32, (err, buf) => {
+                        if (err)
+                            reject(err);
+                        resolve(buf.toString('hex'));
+                    });
+                });
+                user = this.userRepository.create({ email, password: randomPassword, userType: user_entity_1.UserType.STUDENT });
+                user.password = await bcrypt.hash(user.password, 10);
+                const student = this.studentRepository.create({ firstName, lastName, dob, code });
+                student.user = user;
+                users.push(user);
+                students.push(student);
+            }
+            common_1.Logger.log("starting exevuting db save", "AuthService/signupStudents");
+            await manager.getRepository(user_entity_1.UserEntity).save(users);
+            await manager.getRepository(student_entity_1.StudentEntity).save(students);
+            common_1.Logger.log(students, "AuthService/signupStudents");
+            return students;
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/signupStudents");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async signupStudentTest(data) {
+        var _a, _b, _c, _d;
+        try {
             const { email, password, firstName, lastName, dob, code } = data;
             let user = await this.userRepository.findOne({ where: { email } });
             const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
@@ -70,9 +153,6 @@ let AuthService = class AuthService {
             student.user = user;
             user = await this.userRepository.save(user);
             await this.studentRepository.save(student);
-            const tokens = await this._getTokens(user.id, user.email);
-            await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
-            return tokens;
         }
         catch (err) {
             common_1.Logger.error(err, "AuthService/signupStudent");
@@ -80,8 +160,76 @@ let AuthService = class AuthService {
         }
     }
     async signupTeacher(data) {
+        var _a, _b, _c, _d;
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const { email, firstName, lastName, ssn, speciality } = data;
+            let user = await this.userRepository.findOne({ where: { email } });
+            const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
+            const lastNameEmail = (_b = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _b === void 0 ? void 0 : _b.split('.')[1];
+            const service = (_c = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _c === void 0 ? void 0 : _c.split('.')[0];
+            const domain = (_d = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _d === void 0 ? void 0 : _d.split('.')[1];
+            if ((name === null || name === void 0 ? void 0 : name.length) > 0 && (lastNameEmail === null || lastNameEmail === void 0 ? void 0 : lastNameEmail.length) > 0 && service !== 'esi-sba' && domain != 'dz') {
+                throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (user) {
+                throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+            }
+            var randomPassword = await new Promise((resolve, reject) => {
+                (0, crypto_1.randomBytes)(32, (err, buf) => {
+                    if (err)
+                        reject(err);
+                    resolve(buf.toString('hex'));
+                });
+            });
+            user = this.userRepository.create({ email, password: randomPassword, userType: user_entity_1.UserType.STUDENT });
+            user.password = await bcrypt.hash(user.password, 10);
+            const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
+            const teacher = teacherRepository.create({ firstName, lastName, ssn, speciality });
+            teacher.user = user;
+            user = await this.userRepository.save(user);
+            await teacherRepository.save(teacher);
+        }
+        catch (err) {
+            common_1.Logger.error(err, "AuthService/signupStudent");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async signupEnterprise(data) {
+    }
+    async signupAdmin(admin) {
+        var _a, _b, _c, _d;
+        const { firstName, lastName, password, email } = admin;
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            let user = await this.userRepository.findOne({ where: { email } });
+            const name = (_a = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _a === void 0 ? void 0 : _a.split('.')[0];
+            const lastNameEmail = (_b = email === null || email === void 0 ? void 0 : email.split('@')[0]) === null || _b === void 0 ? void 0 : _b.split('.')[1];
+            const service = (_c = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _c === void 0 ? void 0 : _c.split('.')[0];
+            const domain = (_d = email === null || email === void 0 ? void 0 : email.split('@')[1]) === null || _d === void 0 ? void 0 : _d.split('.')[1];
+            if ((name === null || name === void 0 ? void 0 : name.length) > 0 && (lastNameEmail === null || lastNameEmail === void 0 ? void 0 : lastNameEmail.length) > 0 && service !== 'esi-sba' && domain != 'dz') {
+                throw new common_1.HttpException("le mail doit etre un mail scholaire!", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (user) {
+                throw new common_1.HttpException('Email already exists', common_1.HttpStatus.BAD_REQUEST);
+            }
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (password.match(regex) == null) {
+                throw new common_1.HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters', common_1.HttpStatus.BAD_REQUEST);
+            }
+            user = this.userRepository.create({ email, password, userType: user_entity_1.UserType.ADMIN });
+            user.password = await bcrypt.hash(user.password, 10);
+            const adminRepository = manager.getRepository(admin_entity_1.AdminEntity);
+            const admin = adminRepository.create({ firstName, lastName });
+            admin.user = user;
+            user = await this.userRepository.save(user);
+            await adminRepository.save(admin);
+            return Object.assign(Object.assign({}, admin), { user });
+        }
+        catch (err) {
+            common_1.Logger.log(err, "AuthService/signupAdmin");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async forgotPassword(email) {
         const user = await this.userRepository.findOne({ where: { email } });

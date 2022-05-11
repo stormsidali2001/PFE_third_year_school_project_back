@@ -27,11 +27,11 @@ Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiMmFhOTEyNT
 }
 ###
 
-POST http://localhost:8080/signup/student
+POST http://localhost:8080/signup/studentTest
 content-type:application/json
 
 {
-    "email":"s.assoul@esi-sba.dz",
+    "email":"k1.dsajads@esi-sba.dz",
     "password":"1@2@4@abC",
     "firstName":"assoul",
     "lastName":"sidali",
@@ -182,7 +182,7 @@ content-type:application/json
 }
 
 ### get the surveys of a team
-Get http://localhost:8080/surveys/1ff0daf2-0a67-411f-82ba-4731414ae72a
+Get http://localhost:8080/surveys/6834c167-a8b0-425c-8cc6-800164703086
 ### get the surveys of a team
 Get http://localhost:8080/surveys/
 
@@ -241,3 +241,15 @@ GET http://localhost:8080/getAnnouncement
 ### get team documents
 
 GET http://localhost:8080/getTeamDocuments
+
+
+### signup admin
+POST http://localhost:8080/signupAdmin/afsjsfajgdlgdjdsgljlgjdjgdajsgj;lgdssgd
+Content-Type:application/json
+
+{
+    "email":"d.admin@esi-sba.dz",
+    "password":"1@2@4@abC",
+    "firstName":"Bensaber",
+    "lastName":"amar"
+}

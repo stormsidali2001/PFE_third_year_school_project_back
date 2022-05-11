@@ -7,12 +7,12 @@ import { UserEntity } from "./user.entity";
 export class AdminEntity{
     @PrimaryGeneratedColumn('uuid')
     id:String;
-    
-    @PrimaryColumn()
-    code:string;
+  
 
     @Column()
-    name:String;
+    firstName:String;
+    @Column()
+    lastName:String;
 
     //relation
     @OneToOne(type=>UserEntity) @JoinColumn()

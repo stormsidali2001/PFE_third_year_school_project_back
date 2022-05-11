@@ -5,10 +5,10 @@ import { ThemeSuggestionEntity } from "./theme.suggestion";
 import { UserEntity } from "./user.entity";
 export declare class TeacherEntity {
     id: string;
-    code: string;
+    ssn: string;
     firstName: string;
+    speciality: string;
     lastName: string;
-    dob: Date;
     user: UserEntity;
     teamTeacherChatMessages: TeamTeacherChatMessage[];
     encadrements: EncadrementEntity[];

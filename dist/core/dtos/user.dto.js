@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TeamAnnoncementDocDto = exports.UrgentTeamMeetDto = exports.NormalTeamMeetDto = exports.OptionsDto = exports.SurveyDto = exports.EnterpriseDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
+exports.TeamAnnoncementDocDto = exports.UrgentTeamMeetDto = exports.NormalTeamMeetDto = exports.OptionsDto = exports.SurveyDto = exports.AdminDto = exports.EnterpriseDTO = exports.StudentTestDTO = exports.StudentDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
 const class_transformer_1 = require("class-transformer");
 class UserDTO {
 }
@@ -23,9 +23,15 @@ exports.TeacherDTO = TeacherDTO;
 class StudentDTO {
 }
 exports.StudentDTO = StudentDTO;
+class StudentTestDTO {
+}
+exports.StudentTestDTO = StudentTestDTO;
 class EnterpriseDTO {
 }
 exports.EnterpriseDTO = EnterpriseDTO;
+class AdminDto {
+}
+exports.AdminDto = AdminDto;
 class SurveyDto {
 }
 __decorate([

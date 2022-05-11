@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRepository } from "src/core/repositories/user.repository";
-import { EnterpriseDTO, StudentDTO, TeacherDTO, UserDTO, UserRO } from "../core/dtos/user.dto";
+import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, UserDTO, UserRO } from "../core/dtos/user.dto";
 import {  UserEntity, UserType } from "../core/entities/user.entity";
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -17,6 +17,8 @@ import { Tokens } from "./types/tokens";
 import { getManager } from "typeorm";
 import * as argon from 'argon2'
 import { SocketService } from "src/socket/socket.service";
+import { AdminEntity } from "src/core/entities/admin.entity";
+import { TeacherEntity } from "src/core/entities/teacher.entity";
 
 
 
@@ -63,7 +65,96 @@ export class AuthService{
         
     }
    
-    async signupStudent(data:StudentDTO):Promise<Tokens>{
+    async signupStudent(data:StudentDTO){
+        try{
+
+        
+        const {email,firstName,lastName,dob,code} = data;
+        let user:UserEntity = await this.userRepository.findOne({where:{email}})
+        const name = email?.split('@')[0]?.split('.')[0];
+        const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+        const service = email?.split('@')[1]?.split('.')[0];
+        const domain = email?.split('@')[1]?.split('.')[1];
+        
+        if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+            throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+        }
+        if(user){
+            throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+        }
+      
+        var randomPassword:string =await new Promise((resolve,reject)=>{
+            randomBytes(32,(err,buf)=>{
+                if(err) reject(err);
+                resolve(buf.toString('hex'))
+            })
+        }) 
+        user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+        user.password = await bcrypt.hash(user.password,10);
+        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code});
+        student.user = user;
+        user = await this.userRepository.save(user);
+        await this.studentRepository.save(student);
+
+        // const tokens:Tokens = await this._getTokens(user.id,user.email);
+        // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+
+        //     return tokens;
+        }catch(err){
+            Logger.error(err,"AuthService/signupStudent")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+    }
+    async signupStudents(data:StudentDTO[]){
+        try{
+        const manager = getManager()
+        const students = [];
+        const users = [];
+        for(let key in data){
+            const studentData = data[key];
+            console.log("student data",studentData)
+            const {email,firstName,lastName,dob,code} = studentData;
+            let user:UserEntity = await this.userRepository.findOne({where:{email}})
+            const name = email?.split('@')[0]?.split('.')[0];
+            const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+            const service = email?.split('@')[1]?.split('.')[0];
+            const domain = email?.split('@')[1]?.split('.')[1];
+            
+            if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+                throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+            }
+            if(user){
+                throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+            }
+          
+            var randomPassword:string =await new Promise((resolve,reject)=>{
+                randomBytes(32,(err,buf)=>{
+                    if(err) reject(err);
+                    resolve(buf.toString('hex'))
+                })
+            }) 
+            user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+            user.password = await bcrypt.hash(user.password,10);
+            const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code});
+            student.user = user;
+            users.push(user)
+            students.push(student)
+        }
+         
+
+        Logger.log("starting exevuting db save","AuthService/signupStudents")
+        await manager.getRepository(UserEntity).save(users)
+        await manager.getRepository(StudentEntity).save(students);
+        
+
+        Logger.log(students,"AuthService/signupStudents")
+        return students;
+        }catch(err){
+            Logger.error(err,"AuthService/signupStudents")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+    }
+     async signupStudentTest(data:StudentTestDTO){
         try{
 
         
@@ -93,20 +184,93 @@ export class AuthService{
         user = await this.userRepository.save(user);
         await this.studentRepository.save(student);
 
-        const tokens:Tokens = await this._getTokens(user.id,user.email);
-        await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+        // const tokens:Tokens = await this._getTokens(user.id,user.email);
+        // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
 
-            return tokens;
+        //     return tokens;
         }catch(err){
             Logger.error(err,"AuthService/signupStudent")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
     }
     async signupTeacher(data:TeacherDTO){
+        try{
+
+            const manager = getManager()
+            const {email,firstName,lastName,ssn,speciality} = data;
+            let user:UserEntity = await this.userRepository.findOne({where:{email}})
+            const name = email?.split('@')[0]?.split('.')[0];
+            const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+            const service = email?.split('@')[1]?.split('.')[0];
+            const domain = email?.split('@')[1]?.split('.')[1];
+            
+            if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+                throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+            }
+            if(user){
+                throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+            }
+          
+            var randomPassword:string =await new Promise((resolve,reject)=>{
+                randomBytes(32,(err,buf)=>{
+                    if(err) reject(err);
+                    resolve(buf.toString('hex'))
+                })
+            }) 
+            user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+            user.password = await bcrypt.hash(user.password,10);
+            const teacherRepository = manager.getRepository(TeacherEntity);
+            const teacher:TeacherEntity = teacherRepository.create({firstName,lastName,ssn,speciality});
+            teacher.user = user;
+            user = await this.userRepository.save(user);
+            await teacherRepository.save(teacher);
+            }catch(err){
+                Logger.error(err,"AuthService/signupStudent")
+                throw new HttpException(err,HttpStatus.BAD_REQUEST)
+            }
         
     }
     async signupEnterprise(data:EnterpriseDTO){
 
+    }
+    async signupAdmin(admin:AdminDto){
+        const {firstName,lastName,password,email} = admin;
+        try{
+            const manager = getManager();
+          
+            let user:UserEntity = await this.userRepository.findOne({where:{email}})
+            const name = email?.split('@')[0]?.split('.')[0];
+            const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+            const service = email?.split('@')[1]?.split('.')[0];
+            const domain = email?.split('@')[1]?.split('.')[1];
+            
+            if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+                throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+            }
+            if(user){
+                throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+            }
+            // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
+            const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if(password.match(regex)==null){
+                throw new HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters',HttpStatus.BAD_REQUEST); 
+            }
+         
+            user =  this.userRepository.create({email,password,userType:UserType.ADMIN});
+            user.password = await bcrypt.hash(user.password,10);
+            const adminRepository = manager.getRepository(AdminEntity);
+            const admin = adminRepository.create({firstName,lastName})
+            admin.user = user;
+            user = await this.userRepository.save(user);
+
+            await adminRepository.save(admin);
+            
+            return {...admin,user}
+        }catch(err){
+            Logger.log(err,"AuthService/signupAdmin")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+
+        }
     }
 
     async forgotPassword(email:string){
