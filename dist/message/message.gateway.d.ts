@@ -4,7 +4,7 @@ import { Server } from 'ws';
 import { SocketService } from 'src/socket/socket.service';
 export declare class MessageGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private socketService;
-    constructor(socketService: SocketService);
+    constructor(socketService: SocketService, getManager: any);
     server: Server;
     private users;
     private logger;

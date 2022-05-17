@@ -20,7 +20,6 @@ const team_chat_message_entity_1 = require("./team.chat.message.entity");
 const team_document_commit_entity_1 = require("./team.document.commit.entity");
 const team_document_entity_1 = require("./team.document.entity");
 const theme_entity_1 = require("./theme.entity");
-const theme_suggestion_1 = require("./theme.suggestion");
 let TeamEntity = class TeamEntity {
 };
 __decorate([
@@ -89,10 +88,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => team_document_commit_entity_1.TeamDocumentCommit, teamDocumentCommit => teamDocumentCommit.team),
     __metadata("design:type", Array)
 ], TeamEntity.prototype, "documentCommits", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(type => theme_suggestion_1.ThemeSuggestionEntity, themeSuggestion => themeSuggestion.team),
-    __metadata("design:type", Array)
-], TeamEntity.prototype, "themeSuggestions", void 0);
 TeamEntity = __decorate([
     (0, typeorm_1.Entity)('team')
 ], TeamEntity);

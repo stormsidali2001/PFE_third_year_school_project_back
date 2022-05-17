@@ -13,6 +13,9 @@ import {
   import { SocketService } from 'src/socket/socket.service';
 import passport from 'passport';
 import * as cookieParser from 'cookie'
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { getManager } from 'typeorm';
+import { SessionEntity } from 'src/core/entities/session.entity';
 
 
   
@@ -25,7 +28,7 @@ import * as cookieParser from 'cookie'
    
 })
   export class MessageGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    constructor(private socketService:SocketService ){}
+    constructor(private socketService:SocketService ,@InjectEntityManager() getManager){}
     @WebSocketServer() 
     public server: Server;
     
@@ -59,17 +62,20 @@ import * as cookieParser from 'cookie'
     }
   
     public handleConnection(client:Socket): void {
-    
+       
        
        this.logger.log(JSON.stringify(client.handshake.headers))
        
        this.logger.log(`cookie : ${JSON.stringify(cookieParser.parse(client.handshake.headers.cookie))}`);
-       //@ts-ignore
-       this.logger.log(JSON.stringify(`session : ${client.handshake.session}`))
-              //@ts-ignore
+      
 
 
-       this.logger.log(JSON.stringify(`request.session : ${client.request.session}`))
+       const sessionId = cookieParser.parse(client.handshake.headers.cookie).NESTJS_SESSION_ID;
+       console.log("sessionId = ",sessionId)
+       const manager = getManager();
+      //  manager.getRepository(SessionEntity).createQueryBuilder('session')
+      //  .where('session.id = ')
+      //  .getOne()
       
      
     

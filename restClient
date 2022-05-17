@@ -253,3 +253,6 @@ Content-Type:application/json
     "firstName":"Bensaber",
     "lastName":"amar"
 }
+
+### team crud operations
+GET http://localhost:8080/getTeams

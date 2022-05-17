@@ -69,3 +69,7 @@ export declare class TeamAnnoncementDocDto {
     url: string;
     name: string;
 }
+export declare class ThemeSuggestionDocDto {
+    url: string;
+    name: string;
+}

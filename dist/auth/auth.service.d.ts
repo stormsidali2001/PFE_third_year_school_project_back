@@ -20,6 +20,7 @@ export declare class AuthService {
     signupStudents(data: StudentDTO[]): Promise<any[]>;
     signupStudentTest(data: StudentTestDTO): Promise<void>;
     signupTeacher(data: TeacherDTO): Promise<void>;
+    signupTeachers(data: TeacherDTO[]): Promise<any[]>;
     signupEnterprise(data: EnterpriseDTO): Promise<void>;
     signupAdmin(admin: AdminDto): Promise<{
         user: UserEntity;

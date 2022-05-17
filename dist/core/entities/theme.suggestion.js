@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeSuggestionEntity = void 0;
 const typeorm_1 = require("typeorm");
 const teacher_entity_1 = require("./teacher.entity");
-const team_entity_1 = require("./team.entity");
 const theme_suggestion_document_entity_1 = require("./theme.suggestion.document.entity");
 let ThemeSuggestionEntity = class ThemeSuggestionEntity {
 };
@@ -36,10 +35,6 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => teacher_entity_1.TeacherEntity, teacher => teacher.themeSuggestions),
     __metadata("design:type", teacher_entity_1.TeacherEntity)
 ], ThemeSuggestionEntity.prototype, "teacher", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.themeSuggestions),
-    __metadata("design:type", teacher_entity_1.TeacherEntity)
-], ThemeSuggestionEntity.prototype, "team", void 0);
 ThemeSuggestionEntity = __decorate([
     (0, typeorm_1.Entity)('theme_suggestion')
 ], ThemeSuggestionEntity);

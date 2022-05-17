@@ -30,6 +30,9 @@ const announcement_document_entity_1 = require("../core/entities/announcement.do
 const team_document_entity_1 = require("../core/entities/team.document.entity");
 const fs = require("fs");
 const path = require("path");
+const teacher_entity_1 = require("../core/entities/teacher.entity");
+const theme_suggestion_1 = require("../core/entities/theme.suggestion");
+const theme_suggestion_document_entity_1 = require("../core/entities/theme.suggestion.document.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -777,6 +780,174 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/editStudent');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeachers() {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
+            const teachers = await teacherRepository.createQueryBuilder('teachers')
+                .getMany();
+            return teachers;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeachers');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async deleteTeacher(teacherId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
+            await teacherRepository.createQueryBuilder()
+                .delete()
+                .where('teacher.id = :teacherId', { teacherId }).execute();
+            return "deleted!!";
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/deleteTeacher');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async editTeacher(teacherId, data) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
+            await teacherRepository.createQueryBuilder('teachers')
+                .update()
+                .set(data)
+                .where('teachers.id = :teacherId', { teacherId }).execute();
+            return "updated !!";
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/editTeacher');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createThemeSuggestion(userId, title, description, documents) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id = :userId', { userId })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("user not found", 'UserService/createThemeSuggestion');
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const { userType } = user;
+            if (userType !== user_entity_1.UserType.TEACHER) {
+                common_1.Logger.error("you need to be a teacher to submit a theme suggestion ", 'UserService/createThemeSuggestion');
+                throw new common_1.HttpException("you need to be a teacher to submit a theme suggestion ", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const teacher = await manager.getRepository(teacher_entity_1.TeacherEntity)
+                .createQueryBuilder('teacher')
+                .where('teacher.userId = :userId', { userId })
+                .getOne();
+            common_1.Logger.error(title, "*********");
+            const themeSuggestionRepository = manager.getRepository(theme_suggestion_1.ThemeSuggestionEntity);
+            const themeSuggestion = themeSuggestionRepository.create({ title, description, teacher });
+            await themeSuggestionRepository
+                .createQueryBuilder()
+                .insert()
+                .values(themeSuggestion)
+                .execute();
+            const themeSuggestionDocumentRepository = manager.getRepository(theme_suggestion_document_entity_1.ThemeSuggestionDocumentEntity);
+            const themeSuggestionsDocs = [];
+            documents.forEach(doc => {
+                const announcementDoc = themeSuggestionDocumentRepository.create({ name: doc.name, url: doc.url, themeSuggestion });
+                themeSuggestionsDocs.push(announcementDoc);
+            });
+            await themeSuggestionDocumentRepository.createQueryBuilder()
+                .insert()
+                .values(themeSuggestionsDocs)
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/createThemeSuggestion');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getThemeSuggestions() {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const themeSuggestions = await manager.getRepository(theme_suggestion_1.ThemeSuggestionEntity)
+                .createQueryBuilder('themeSuggestion')
+                .getMany();
+            const response = themeSuggestions.map(({ id, title, description, documents }) => {
+                return {
+                    id,
+                    title,
+                    description,
+                    documents
+                };
+            });
+            return response;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getThemeSuggestions');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getThemeSuggestion(themeId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const themeSuggestion = await manager.getRepository(theme_suggestion_1.ThemeSuggestionEntity)
+                .createQueryBuilder('themeSuggestion')
+                .where('themeSuggestion.id = :themeId', { themeId })
+                .leftJoinAndSelect('themeSuggestion.documents', 'docs')
+                .getOne();
+            return themeSuggestion;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getThemeSuggestion');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeams() {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teams = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .leftJoinAndSelect('team.givenTheme', 'givenTheme')
+                .loadRelationCountAndMap('team.membersCount', 'team.students')
+                .getMany();
+            return teams.map(({ nickName, givenTheme, membersCount, id }) => {
+                return {
+                    id,
+                    pseudo: nickName,
+                    theme: givenTheme,
+                    nombre: membersCount
+                };
+            });
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeams');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeam(teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.id = :teamId', { teamId })
+                .leftJoinAndSelect('team.givenTheme', 'givenTheme')
+                .leftJoinAndSelect('team.students', 'students')
+                .getOne();
+            const { id, nickName, givenTheme, students, description, rules } = team;
+            return {
+                id,
+                pseudo: nickName,
+                theme: givenTheme,
+                members: students,
+                description,
+                rules
+            };
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeams');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

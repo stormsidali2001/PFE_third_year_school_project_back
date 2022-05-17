@@ -230,6 +230,72 @@ let UserController = class UserController {
     }
     async editStudent() {
     }
+    async getTeachers() {
+        try {
+            return await this.userService.getTeachers();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeachers');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async deleteTeacher(teacherId) {
+        try {
+            return await this.userService.deleteTeacher(teacherId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/deleteTeacher');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async editTeacher() {
+    }
+    async createThemeSuggestion(userId, title, description, documents) {
+        common_1.Logger.error(documents, "*****555****");
+        try {
+            return await this.userService.createThemeSuggestion(userId, title, description, documents);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/ThemeSuggestionDocDto');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getThemeSuggestions(userId) {
+        try {
+            return await this.userService.getThemeSuggestions();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/getThemeSuggestions');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getThemeSuggestion(themeId) {
+        try {
+            return await this.userService.getThemeSuggestion(themeId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/getThemeSuggestion');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeams() {
+        try {
+            return await this.userService.getTeams();
+        }
+        catch (err) {
+            common_1.Logger.error(err, "UserController/getTeams");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeam(teamId) {
+        try {
+            return await this.userService.getTeam(teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, "UserController/getTeam");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async sendNotification(studentId, description) {
         try {
             return await this.userService._sendNotfication(studentId, description);
@@ -456,6 +522,67 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "editStudent", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTeachers'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeachers", null);
+__decorate([
+    (0, common_1.Post)('deleteTeacher'),
+    __param(0, (0, common_1.Body)('teacherId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deleteTeacher", null);
+__decorate([
+    (0, common_1.Put)('editTeacher'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "editTeacher", null);
+__decorate([
+    (0, common_1.Post)('/createThemeSuggestion'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('title')),
+    __param(2, (0, common_1.Body)('description')),
+    __param(3, (0, common_1.Body)('documents')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, Array]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createThemeSuggestion", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getThemeSuggestions'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getThemeSuggestions", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getThemeSuggestions/:themeId'),
+    __param(0, (0, common_1.Param)('themeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getThemeSuggestion", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTeams'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeams", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTeams/:teamId'),
+    __param(0, (0, common_1.Param)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeam", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

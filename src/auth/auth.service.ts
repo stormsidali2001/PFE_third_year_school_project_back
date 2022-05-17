@@ -230,6 +230,55 @@ export class AuthService{
             }
         
     }
+    async signupTeachers(data:TeacherDTO[]){
+        try{
+            const manager = getManager()
+            const teachers = [];
+            const users = [];
+            for(let key in data){
+                const teacherData = data[key];
+              
+                const {email,firstName,lastName,ssn,speciality} = teacherData;
+                let user:UserEntity = await this.userRepository.findOne({where:{email}})
+                const name = email?.split('@')[0]?.split('.')[0];
+                const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+                const service = email?.split('@')[1]?.split('.')[0];
+                const domain = email?.split('@')[1]?.split('.')[1];
+                
+                if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+                    throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+                }
+                if(user){
+                    throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+                }
+              
+                var randomPassword:string =await new Promise((resolve,reject)=>{
+                    randomBytes(32,(err,buf)=>{
+                        if(err) reject(err);
+                        resolve(buf.toString('hex'))
+                    })
+                }) 
+                user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+                user.password = await bcrypt.hash(user.password,10);
+                const teacher:TeacherEntity = manager.getRepository(TeacherEntity).create({firstName,lastName,ssn,speciality});
+                teacher.user = user;
+                users.push(user)
+                teachers.push(teacher)
+            }
+             
+    
+            Logger.log("starting exevuting db save","AuthService/signupStudents")
+            await manager.getRepository(UserEntity).save(users)
+            await manager.getRepository(TeacherEntity).save(teachers);
+            
+    
+            Logger.log(teachers,"AuthService/signupteachers")
+            return teachers;
+            }catch(err){
+                Logger.error(err,"AuthService/signupteachers")
+                throw new HttpException(err,HttpStatus.BAD_REQUEST)
+            }
+    }
     async signupEnterprise(data:EnterpriseDTO){
 
     }

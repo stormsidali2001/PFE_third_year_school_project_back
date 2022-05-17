@@ -5,6 +5,7 @@ export declare class AuthController {
     constructor(authService: AuthService);
     signin(req: any): Promise<any>;
     signupTeacher(data: TeacherDTO): Promise<void>;
+    signupTeachers(data: TeacherDTO[]): Promise<any[]>;
     signupStudent(data: StudentDTO): Promise<void>;
     signupStudents(data: StudentDTO[]): Promise<any[]>;
     signupEntereprise(data: EnterpriseDTO): Promise<void>;

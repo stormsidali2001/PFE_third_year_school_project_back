@@ -7,7 +7,6 @@ import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
-import { ThemeSuggestionEntity } from "./theme.suggestion";
 export declare class TeamEntity {
     id: string;
     nickName: string;
@@ -24,5 +23,4 @@ export declare class TeamEntity {
     givenTheme: ThemeEntity;
     meets: MeetEntity[];
     documentCommits: TeamDocumentCommit[];
-    themeSuggestions: ThemeSuggestionEntity[];
 }

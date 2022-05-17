@@ -1,4 +1,4 @@
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, ThemeSuggestionDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
@@ -10,6 +10,9 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
 import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
 import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
+import { TeacherEntity } from "src/core/entities/teacher.entity";
+import { ThemeSuggestionEntity } from "src/core/entities/theme.suggestion";
+import { ThemeSuggestionDocumentEntity } from "src/core/entities/theme.suggestion.document.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -79,4 +82,29 @@ export declare class UserService {
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
+    getTeachers(): Promise<TeacherEntity[]>;
+    deleteTeacher(teacherId: string): Promise<string>;
+    editTeacher(teacherId: string, data: Partial<TeacherEntity>): Promise<string>;
+    createThemeSuggestion(userId: string, title: string, description: string, documents: ThemeSuggestionDocDto[]): Promise<void>;
+    getThemeSuggestions(): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        documents: ThemeSuggestionDocumentEntity[];
+    }[]>;
+    getThemeSuggestion(themeId: string): Promise<ThemeSuggestionEntity>;
+    getTeams(): Promise<{
+        id: string;
+        pseudo: string;
+        theme: import("../core/entities/theme.entity").ThemeEntity;
+        nombre: any;
+    }[]>;
+    getTeam(teamId: any): Promise<{
+        id: string;
+        pseudo: string;
+        theme: import("../core/entities/theme.entity").ThemeEntity;
+        members: StudentEntity[];
+        description: string;
+        rules: string;
+    }>;
 }

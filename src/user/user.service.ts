@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { NormalTeamMeetDto, SurveyDto , TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto , TeamAnnoncementDocDto, ThemeSuggestionDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -21,6 +21,9 @@ import { TeamRepository } from "src/core/repositories/team.list.repository";
 import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import * as fs from 'fs';
 import * as path from "path";
+import { TeacherEntity } from "src/core/entities/teacher.entity";
+import { ThemeSuggestionEntity } from "src/core/entities/theme.suggestion";
+import { ThemeSuggestionDocumentEntity } from "src/core/entities/theme.suggestion.document.entity";
 @Injectable()
 export class UserService{
     constructor(private schedulerRegistry: SchedulerRegistry,
@@ -1005,6 +1008,210 @@ async editStudent(studentId:string,data:Partial<StudentEntity>){
         Logger.error(err,'UserService/editStudent')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
+}
+
+//crud operations Teacher----------------------------------------
+async getTeachers(){
+    try{
+        const manager = getManager();
+        const teacherRepository = manager.getRepository(TeacherEntity);
+
+        const teachers:TeacherEntity[] =  await teacherRepository.createQueryBuilder('teachers')
+        .getMany();
+       
+
+        return teachers;
+    }catch(err){
+        Logger.error(err,'UserService/getTeachers')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async deleteTeacher(teacherId:string){
+    try{
+        const manager = getManager();
+        const teacherRepository = manager.getRepository(TeacherEntity);
+
+      await teacherRepository.createQueryBuilder()
+       .delete()
+       .where('teacher.id = :teacherId',{teacherId}).execute()
+
+        return "deleted!!"
+    }catch(err){
+        Logger.error(err,'UserService/deleteTeacher')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async editTeacher(teacherId:string,data:Partial<TeacherEntity>){
+    try{
+        const manager = getManager();
+        const teacherRepository = manager.getRepository(TeacherEntity);
+
+      await teacherRepository.createQueryBuilder('teachers')
+       .update()
+       .set(data)
+       .where('teachers.id = :teacherId',{teacherId}).execute()
+        return "updated !!"
+    }catch(err){
+        Logger.error(err,'UserService/editTeacher')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+//crud operations theme suggestions
+async createThemeSuggestion(userId:string,title:string,description:string,documents:ThemeSuggestionDocDto[]){
+
+    try{
+        const manager = getManager()
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.id = :userId',{userId})
+        .getOne();
+        if(!user){
+            Logger.error("user not found",'UserService/createThemeSuggestion')
+            throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
+        }
+        const {userType} = user;
+        if(userType !== UserType.TEACHER ){
+            Logger.error("you need to be a teacher to submit a theme suggestion ",'UserService/createThemeSuggestion')
+            throw new HttpException("you need to be a teacher to submit a theme suggestion ",HttpStatus.BAD_REQUEST);
+        }
+        const teacher = await manager.getRepository(TeacherEntity)
+        .createQueryBuilder('teacher')
+        .where('teacher.userId = :userId',{userId})
+        .getOne();
+        Logger.error(title,"*********")
+        const themeSuggestionRepository = manager.getRepository(ThemeSuggestionEntity)
+        const themeSuggestion = themeSuggestionRepository.create({title,description,teacher})
+         await themeSuggestionRepository
+        .createQueryBuilder()
+        .insert()
+        .values(themeSuggestion)
+        .execute();
+
+        
+
+        const themeSuggestionDocumentRepository =  manager.getRepository(ThemeSuggestionDocumentEntity);
+        const themeSuggestionsDocs:ThemeSuggestionDocDto[] = [];
+        documents.forEach(doc=>{
+            const announcementDoc = themeSuggestionDocumentRepository.create({name:doc.name,url:doc.url,themeSuggestion});
+            themeSuggestionsDocs.push(announcementDoc)
+        })
+       
+       await themeSuggestionDocumentRepository.createQueryBuilder()
+        .insert()
+        .values(themeSuggestionsDocs)
+        .execute();
+
+      
+       
+    }catch(err){
+        Logger.error(err,'UserService/createThemeSuggestion')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+
+}
+async getThemeSuggestions(){
+    try{
+        const manager = getManager();
+        const themeSuggestions:ThemeSuggestionEntity[] = await manager.getRepository(ThemeSuggestionEntity)
+        .createQueryBuilder('themeSuggestion')
+        .getMany()
+
+        const response = themeSuggestions.map(({id,title,description,documents})=>{
+            return {
+              id,
+              title,
+              description,
+              documents
+            }
+        })
+
+        return response ;
+    }catch(err){
+        Logger.error(err,'UserService/getThemeSuggestions')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async getThemeSuggestion(themeId:string){
+    try{
+        const manager = getManager();
+        const themeSuggestion = await manager.getRepository(ThemeSuggestionEntity)
+        .createQueryBuilder('themeSuggestion')
+        .where('themeSuggestion.id = :themeId',{themeId})
+        .leftJoinAndSelect('themeSuggestion.documents','docs')
+        .getOne()
+
+       
+        return themeSuggestion ;
+    }catch(err){
+        Logger.error(err,'UserService/getThemeSuggestion')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+//team crud operations
+async getTeams(){
+    try{
+        const manager = getManager();
+        const teams = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.givenTheme','givenTheme')
+        .loadRelationCountAndMap('team.membersCount','team.students')
+        
+        .getMany()
+        
+
+        //@ts-ignore
+        return teams.map(({nickName,givenTheme,membersCount,id})=>{
+            return {
+                id,
+                pseudo:nickName,
+                theme:givenTheme,
+                nombre:membersCount
+            }
+        }) ;
+    }catch(err){
+        Logger.error(err,'UserService/getTeams')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+
+}
+
+async getTeam(teamId){
+    try{
+        const manager = getManager();
+        const team = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .where('team.id = :teamId',{teamId})
+        .leftJoinAndSelect('team.givenTheme','givenTheme')
+        .leftJoinAndSelect('team.students','students')
+        .getOne()
+      
+        const {
+            id,
+           nickName,
+            givenTheme,
+              //@ts-ignore
+            students,
+            description,
+            rules
+        } = team;
+        
+    
+            return {
+                id,
+                pseudo:nickName,
+                theme:givenTheme,
+                members:students,
+                description,
+                rules
+            }
+      
+    }catch(err){
+        Logger.error(err,'UserService/getTeams')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+
 }
 
 }

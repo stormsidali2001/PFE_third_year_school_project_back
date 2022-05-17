@@ -4,7 +4,7 @@ import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto ,ThemeSuggestionDocDto} from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
  
@@ -271,7 +271,7 @@ export class UserController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
         }
-
+    //crud operations student
     @Public()
     @Get('getStudents')
     async getStudents(){
@@ -295,6 +295,94 @@ export class UserController{
     @Put('editStudent')
     async editStudent(){
 
+    }
+
+     //crud operations student
+     @Public()
+     @Get('getTeachers')
+     async getTeachers(){
+         try{
+             return await this.userService.getTeachers()
+         }catch(err){
+             Logger.error(err,'UserController/getTeachers')
+             throw new HttpException(err,HttpStatus.BAD_REQUEST);
+         }
+ 
+     }
+     @Post('deleteTeacher')
+     async deleteTeacher(@Body('teacherId') teacherId:string ){
+         try{
+             return await this.userService.deleteTeacher(teacherId)
+         }catch(err){
+             Logger.error(err,'UserController/deleteTeacher')
+             throw new HttpException(err,HttpStatus.BAD_REQUEST);
+         }
+     }
+     @Put('editTeacher')
+     async editTeacher(){
+ 
+     }
+
+    //theme suggestions crud operations
+    @Post('/createThemeSuggestion')
+    async createThemeSuggestion(@GetCurrentUserId() userId:string,
+                                @Body('title') title:string,
+                                @Body('description') description:string,
+                                @Body('documents') documents:ThemeSuggestionDocDto[]
+                              
+                                
+                                ){        
+                                    Logger.error(documents,"*****555****")
+        try{
+            return await this.userService.createThemeSuggestion(userId,title,description,documents);
+        }catch(err){
+            Logger.error(err,'UsrController/ThemeSuggestionDocDto')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Get('getThemeSuggestions')
+    async getThemeSuggestions(@GetCurrentUserId() userId:string){
+        try{
+            return await this.userService.getThemeSuggestions()
+        }catch(err){
+            Logger.error(err,'UsrController/getThemeSuggestions')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Get('getThemeSuggestions/:themeId')
+    async getThemeSuggestion(@Param('themeId') themeId:string){
+        try{
+            return await this.userService.getThemeSuggestion(themeId)
+        }catch(err){
+            Logger.error(err,'UsrController/getThemeSuggestion')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Get('getTeams')
+    async getTeams(){
+        try{
+            return await this.userService.getTeams()
+        }catch(err){
+            Logger.error(err,"UserController/getTeams")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @Public()
+    @Get('getTeams/:teamId')
+    async getTeam(@Param('teamId') teamId:string){
+        try{
+            return await this.userService.getTeam(teamId)
+        }catch(err){
+            Logger.error(err,"UserController/getTeam")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
     }
     //test routes---------------------------
     @Public()

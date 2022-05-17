@@ -1,5 +1,5 @@
 /// <reference types="multer" />
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto, ThemeSuggestionDocDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 export declare class UserController {
     private readonly userService;
@@ -74,5 +74,30 @@ export declare class UserController {
     getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(): Promise<void>;
+    getTeachers(): Promise<import("../core/entities/teacher.entity").TeacherEntity[]>;
+    deleteTeacher(teacherId: string): Promise<string>;
+    editTeacher(): Promise<void>;
+    createThemeSuggestion(userId: string, title: string, description: string, documents: ThemeSuggestionDocDto[]): Promise<void>;
+    getThemeSuggestions(userId: string): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        documents: import("../core/entities/theme.suggestion.document.entity").ThemeSuggestionDocumentEntity[];
+    }[]>;
+    getThemeSuggestion(themeId: string): Promise<import("../core/entities/theme.suggestion").ThemeSuggestionEntity>;
+    getTeams(): Promise<{
+        id: string;
+        pseudo: string;
+        theme: import("../core/entities/theme.entity").ThemeEntity;
+        nombre: any;
+    }[]>;
+    getTeam(teamId: string): Promise<{
+        id: string;
+        pseudo: string;
+        theme: import("../core/entities/theme.entity").ThemeEntity;
+        members: import("../core/entities/student.entity").StudentEntity[];
+        description: string;
+        rules: string;
+    }>;
     sendNotification(studentId: string, description: string): Promise<string>;
 }

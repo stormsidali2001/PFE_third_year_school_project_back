@@ -86,3 +86,9 @@ export class TeamAnnoncementDocDto{
     url:string;
     name:string;
 }
+
+export class ThemeSuggestionDocDto{
+    url:string;
+    name:string;
+
+}

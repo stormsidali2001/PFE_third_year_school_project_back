@@ -28,6 +28,9 @@ let AuthController = class AuthController {
     async signupTeacher(data) {
         return this.authService.signupTeacher(data);
     }
+    async signupTeachers(data) {
+        return await this.authService.signupTeachers(data);
+    }
     async signupStudent(data) {
         return await this.authService.signupStudent(data);
     }
@@ -76,6 +79,14 @@ __decorate([
     __metadata("design:paramtypes", [user_dto_1.TeacherDTO]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupTeacher", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('signup/teachers'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "signupTeachers", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/student'),

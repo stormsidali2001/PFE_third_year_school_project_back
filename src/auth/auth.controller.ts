@@ -26,6 +26,12 @@ export class AuthController{
    }
 
    @Public()
+   @Post('signup/teachers')
+   async signupTeachers(@Body() data:TeacherDTO[]){
+       return await this.authService.signupTeachers(data)
+   }
+
+   @Public()
    @Post('signup/student')
    async signupStudent(@Body() data:StudentDTO){
     
@@ -38,7 +44,7 @@ export class AuthController{
     
        return await this.authService.signupStudents(data);
    }
-   
+
    @Public()
    @Post('signup/entreprise')
    async signupEntereprise(@Body() data:EnterpriseDTO){

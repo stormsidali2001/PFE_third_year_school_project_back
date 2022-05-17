@@ -6,5 +6,4 @@ export declare class ThemeSuggestionEntity {
     description: string;
     documents: ThemeSuggestionDocumentEntity[];
     teacher: TeacherEntity;
-    team: TeacherEntity;
 }

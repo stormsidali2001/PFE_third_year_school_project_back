@@ -68,9 +68,7 @@ export class TeamEntity{
     @OneToMany(type=>TeamDocumentCommit,teamDocumentCommit=>teamDocumentCommit.team)
     documentCommits:TeamDocumentCommit[];
 
-    //to theme suggestion
-    @ManyToOne(type=>ThemeSuggestionEntity,themeSuggestion=>themeSuggestion.team)
-    themeSuggestions:ThemeSuggestionEntity[];
+  
     
 
   

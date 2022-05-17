@@ -22,6 +22,5 @@ export class ThemeSuggestionEntity{
     @ManyToOne(type=>TeacherEntity,teacher=>teacher.themeSuggestions)
     teacher:TeacherEntity;
 
-    @ManyToOne(type=>TeamEntity,team=>team.themeSuggestions)
-    team:TeacherEntity;
+  
 }
