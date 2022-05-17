@@ -19,21 +19,62 @@ const common_1 = require("@nestjs/common");
 const socket_io_1 = require("socket.io");
 const ws_1 = require("ws");
 const socket_service_1 = require("../socket/socket.service");
-const cookieParser = require("cookie");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const user_entity_1 = require("../core/entities/user.entity");
+const student_entity_1 = require("../core/entities/student.entity");
+const team_chat_message_entity_1 = require("../core/entities/team.chat.message.entity");
 let MessageGateway = class MessageGateway {
     constructor(socketService, getManager) {
         this.socketService = socketService;
         this.users = {};
         this.logger = new common_1.Logger('MessageGateway');
     }
-    handleMessage(client, payload) {
-        return this.server.to(payload.room).emit('msgToClient', payload);
+    async handleMessage(client, payload) {
+        if (!client.request.isAuthenticated()) {
+            common_1.Logger.error('not authenticated', 'MessageGateway/teamMessageToServer');
+            throw new common_1.HttpException("not authenticated", common_1.HttpStatus.FORBIDDEN);
+        }
+        const userId = client.request.session.passport.user.id;
+        const manager = (0, typeorm_2.getManager)();
+        const user = await manager.getRepository(user_entity_1.UserEntity).createQueryBuilder('user')
+            .where('user.id = :userId', { userId })
+            .getOne();
+        if (user.userType != user_entity_1.UserType.STUDENT) {
+            common_1.Logger.error('not student', 'MessageGateway/teamMessageToServer');
+            throw new common_1.HttpException("not student", common_1.HttpStatus.FORBIDDEN);
+        }
+        const student = await manager.getRepository(student_entity_1.StudentEntity).createQueryBuilder('student')
+            .where('student.userId = :userId', { userId })
+            .leftJoinAndSelect('student.team', 'team')
+            .getOne();
+        const teamId = student.team.id;
+        await manager.getRepository(team_chat_message_entity_1.TeamChatMessageEntity)
+            .save({ message: payload.txt, team: student.team, owner: student });
+        common_1.Logger.error(`payload : ${JSON.stringify(payload)}`, 'MessageGateway/teamMessageToServer');
+        return this.server.to(teamId).emit('teamMessageToClient', payload);
     }
-    joinRoom(client, room) {
-        client.join(room);
-        client.emit('joinedRoom', room);
+    async joinRoom(client, room) {
+        if (!client.request.isAuthenticated()) {
+            common_1.Logger.error('not authenticated', 'MessageGateway/handleConnection');
+            throw new common_1.HttpException("not authenticated", common_1.HttpStatus.FORBIDDEN);
+        }
+        const userId = client.request.session.passport.user.id;
+        const manager = (0, typeorm_2.getManager)();
+        const user = await manager.getRepository(user_entity_1.UserEntity).createQueryBuilder('user')
+            .where('user.id = :userId', { userId })
+            .getOne();
+        if (user.userType != user_entity_1.UserType.STUDENT) {
+            common_1.Logger.error('not student', 'MessageGateway/handleConnection');
+            throw new common_1.HttpException("not student", common_1.HttpStatus.FORBIDDEN);
+        }
+        const student = await manager.getRepository(student_entity_1.StudentEntity).createQueryBuilder('student')
+            .where('student.userId = :userId', { userId })
+            .leftJoinAndSelect('student.team', 'team')
+            .getOne();
+        const teamId = student.team.id;
+        common_1.Logger.log(`user:${userId} joined the room teamId ${teamId}`, "MessageGateWay/subscribe(joinTeamRoom)");
+        client.join(teamId);
     }
     leaveRoom(client, room) {
         client.leave(room);
@@ -47,11 +88,12 @@ let MessageGateway = class MessageGateway {
         return this.logger.log(`Client disconnected: ${client.id}`);
     }
     handleConnection(client) {
-        this.logger.log(JSON.stringify(client.handshake.headers));
-        this.logger.log(`cookie : ${JSON.stringify(cookieParser.parse(client.handshake.headers.cookie))}`);
-        const sessionId = cookieParser.parse(client.handshake.headers.cookie).NESTJS_SESSION_ID;
-        console.log("sessionId = ", sessionId);
-        const manager = (0, typeorm_2.getManager)();
+        if (!client.request.isAuthenticated()) {
+            common_1.Logger.error('not authenticated', 'MessageGateway/handleConnection');
+            throw new common_1.HttpException("not authenticated", common_1.HttpStatus.FORBIDDEN);
+        }
+        const userId = client.request.session.passport.user.id;
+        console.log("client.request.session ", userId);
         return this.logger.log(`Client connected: ${client.id}`);
     }
 };
@@ -60,16 +102,16 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof ws_1.Server !== "undefined" && ws_1.Server) === "function" ? _a : Object)
 ], MessageGateway.prototype, "server", void 0);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('msgToServer'),
+    (0, websockets_1.SubscribeMessage)('teamMessageToServer'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", Promise)
 ], MessageGateway.prototype, "handleMessage", null);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('joinRoom'),
+    (0, websockets_1.SubscribeMessage)('joinTeamRoom'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MessageGateway.prototype, "joinRoom", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('leaveRoom'),

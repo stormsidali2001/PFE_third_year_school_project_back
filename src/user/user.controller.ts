@@ -12,11 +12,7 @@ import { UserService } from "./user.service";
 export class UserController{
     constructor(private readonly userService:UserService) {}
     
-    @Post('/user')
-    async getUserInfo(@Body('id') id:string){
-
-        return this.userService.getUserInfo(id);
-    }
+  
 
     @Post('/sendATeamInvitation')
     async sendATeamInvitation(
@@ -383,6 +379,15 @@ export class UserController{
             Logger.error(err,"UserController/getTeam")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
+    }
+    @Get('getUserInfo')
+    async getUser(@GetCurrentUserId() userId:string){
+        return await this.userService.getUserInfo(userId)
+    }
+
+    @Get('getTeamMessages')
+    async getTeamMessages(@GetCurrentUserId() userId:string){
+        return await this.userService.getTeamMessages(userId)
     }
     //test routes---------------------------
     @Public()

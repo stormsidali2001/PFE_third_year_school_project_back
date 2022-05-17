@@ -24,6 +24,8 @@ import * as path from "path";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { ThemeSuggestionEntity } from "src/core/entities/theme.suggestion";
 import { ThemeSuggestionDocumentEntity } from "src/core/entities/theme.suggestion.document.entity";
+import { AdminEntity } from "src/core/entities/admin.entity";
+import { EntrepriseEntity } from "src/core/entities/entreprise.entity";
 @Injectable()
 export class UserService{
     constructor(private schedulerRegistry: SchedulerRegistry,
@@ -32,50 +34,43 @@ export class UserService{
     async getUserInfo(userId:string){
         const manager = getManager();
         const userRepository = manager.getRepository(UserEntity);
-        let user;
+        
         try{
-            
-             user = await userRepository.findOne({id:userId});
-        
-        }catch(err){
-            Logger.error(err,'UserService/getUserInfo')
-            throw new HttpException("user not found",HttpStatus.BAD_REQUEST)
-            
-        }
-       
-        switch(user.userType){
-        
-            case UserType.STUDENT:
+            const user = await userRepository.createQueryBuilder('user')
+            .where('user.id = :userId',{userId})
+            .getOne()
+            if(!user){
+                Logger.log("user not found","userService/getUserInfo")
+                throw new HttpException("user not found",HttpStatus.FORBIDDEN)
+            }
 
-                const studentRepository = manager.getRepository(StudentEntity);
-                let student;
-                try{
-                     student = await studentRepository.createQueryBuilder('student').where('student.userId =:id',{id:user.id}).getOne();
-
-                }catch(err){
-                    Logger.error(err,'UserService/getUserInfo')
-                    throw new HttpException("user not found",HttpStatus.BAD_REQUEST)
+            let entity:StudentEntity | TeacherEntity |AdminEntity | EntrepriseEntity;
+    
+            if(user.userType === UserType.STUDENT){
+             entity = await getManager().getRepository(StudentEntity).createQueryBuilder('student')
+             .where('student.userId = :userId',{userId})
+             .leftJoinAndSelect('student.team','team')
+             .leftJoinAndSelect('team.teamLeader','teamLeader')
+             .getOne()
+             
+            }else if(user.userType === UserType.ADMIN){
+                entity = await getManager().getRepository(AdminEntity).createQueryBuilder('admin')
+                .where('admin.userId = :userId',{userId:user.id})
+                .getOne()
+            }
+            const responseObj = {
+                userType:user.userType,
+                [`${user.userType}`]:{
+                    ...entity
                 }
-               
-
-                return student;
-            break;
-            case UserType.ENTERPRISE:
-                
-
-            break;
-            case UserType.ADMIN:
-                
-
-            break;
-            case UserType.TEACHER:
-                
-
-            break;
-
-        }
-        
-       
+            }
+           
+            return responseObj;
+    
+           }catch(err){
+            Logger.error(err,"userService/getUserInfo")
+            throw new HttpException(err,HttpStatus.INTERNAL_SERVER_ERROR)
+           }
     }
     /*
      * team leader/student sends an invitation  to a student without a team
@@ -1197,6 +1192,7 @@ async getTeam(teamId){
             rules
         } = team;
         
+
     
             return {
                 id,
@@ -1213,5 +1209,25 @@ async getTeam(teamId){
     }
 
 }
+//messages crud operations
 
+async getTeamMessages(userId){
+    try{
+        const manager = getManager();
+      const teamMessages = await manager.getRepository(TeamChatMessageEntity)
+      .createQueryBuilder('messages')
+      .leftJoinAndSelect('messages.owner','owner')
+      .innerJoin('messages.team','team')
+      .innerJoin('team.students','student')
+      .where('student.userId = :userId',{userId})
+      .getMany()
+
+      return teamMessages;
+
+      
+    }catch(err){
+        Logger.error(err,'UserService/getTeams')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 }

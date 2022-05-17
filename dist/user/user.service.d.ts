@@ -5,7 +5,9 @@ import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SurveyOptionEntity } from "src/core/entities/survey.option.entity";
 import { SurveyParticipantEntity } from "src/core/entities/survey.participant.entity";
+import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
+import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
 import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
@@ -17,7 +19,45 @@ export declare class UserService {
     private schedulerRegistry;
     private socketService;
     constructor(schedulerRegistry: SchedulerRegistry, socketService: SocketService);
-    getUserInfo(userId: string): Promise<any>;
+    getUserInfo(userId: string): Promise<{
+        [x: string]: UserType | {
+            id: string;
+            code: string;
+            firstName: string;
+            lastName: string;
+            dob: Date;
+            team: TeamEntity;
+            user: UserEntity;
+            sentInvitations: InvitationEntity[];
+            receivedInvitations: InvitationEntity[];
+            teamChatMessages: TeamChatMessageEntity[];
+            documents: TeamDocumentEntity[];
+            participationsInSurveys: SurveyParticipantEntity[];
+            meetAbsences: import("../core/entities/meet.absent.entity").MeetAbsentEntity[];
+        } | {
+            id: string;
+            ssn: string;
+            firstName: string;
+            speciality: string;
+            lastName: string;
+            user: UserEntity;
+            teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
+            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
+            commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
+            themeSuggestions: ThemeSuggestionEntity[];
+        } | {
+            id: String;
+            firstName: String;
+            lastName: String;
+            user: UserEntity;
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+        };
+        userType: UserType;
+    }>;
     sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
     acceptRefuseTeamInvitation(invitationId: string, userId: string, accepted: boolean): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
@@ -107,4 +147,5 @@ export declare class UserService {
         description: string;
         rules: string;
     }>;
+    getTeamMessages(userId: any): Promise<TeamChatMessageEntity[]>;
 }

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
+
 import { Auth } from './auth/auth.module';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { UserEntity } from './core/entities/user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { StudentEntity } from './core/entities/student.entity';
 import { TeacherEntity } from './core/entities/teacher.entity';
+
 import { TeamEntity } from './core/entities/team.entity';
 import { EntrepriseEntity } from './core/entities/entreprise.entity';
 import { AdminEntity } from './core/entities/admin.entity';
@@ -40,12 +41,12 @@ import { HttpErrorFilter } from './shared/http.error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AccessTokenGuard } from './common/guards/acces-token.guard';
 import { AuthenticatedGuard } from './common/guards/authentificatedGuard';
 import { MessageModule } from './message/message.module';
 import { SocketModule } from './socket/socket.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { SessionEntity } from './core/entities/session.entity';
+
 
 @Module({
   imports: [
@@ -109,8 +110,8 @@ import { SessionEntity } from './core/entities/session.entity';
     dest: './upload',
   })
 ],
-  controllers: [AppController],
-  providers: [AppService,
+  controllers: [],
+  providers: [
     {
     provide:APP_FILTER,
     useClass:HttpErrorFilter

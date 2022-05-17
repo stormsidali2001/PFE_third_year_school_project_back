@@ -256,3 +256,6 @@ Content-Type:application/json
 
 ### team crud operations
 GET http://localhost:8080/getTeams
+
+###
+GET http://localhost:8080/getTeamMessages

@@ -17,42 +17,8 @@ export class SessionSerializer extends PassportSerializer{
       
     }
    async deserializeUser(user: any, done: Function) {
-       Logger.log("Serializing user ...","SessionSerializer/deserializeUser")
-       try{
-        const userDb = await getManager().getRepository(UserEntity).createQueryBuilder('user')
-        .where('user.id = :userId',{userId:user.id})
-        .getOne()
-        if(!userDb){
-            return done(null,null);
-        }
-        let entity:StudentEntity | TeacherEntity |AdminEntity | EntrepriseEntity;
-
-        if(userDb.userType === UserType.STUDENT){
-         entity = await getManager().getRepository(StudentEntity).createQueryBuilder('student')
-         .where('student.userId = :userId',{userId:user.id})
-         .leftJoinAndSelect('student.team','team')
-         .leftJoinAndSelect('team.teamLeader','teamLeader')
-         .getOne()
-         
-        }else if(userDb.userType === UserType.ADMIN){
-            entity = await getManager().getRepository(AdminEntity).createQueryBuilder('admin')
-            .where('admin.userId = :userId',{userId:user.id})
-            .getOne()
-        }
-        const responseObj = {
-            userType:userDb.userType,
-            [`${userDb.userType}`]:{
-                ...entity
-            }
-        }
-       
-        return done(null,responseObj);
-
-       }catch(err){
-        Logger.error(err,"SessionSerializer/deserializeUser")
-        throw new HttpException(err,HttpStatus.INTERNAL_SERVER_ERROR)
-       }
-     
+      
+            return done(null,user)
     }
   
 }

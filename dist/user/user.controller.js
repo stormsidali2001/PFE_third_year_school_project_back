@@ -25,9 +25,6 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async getUserInfo(id) {
-        return this.userService.getUserInfo(id);
-    }
     async sendATeamInvitation(userId, recieverId, description) {
         common_1.Logger.log({ recieverId, description }, 'UserController/sendATeamInvitation');
         return await this.userService.sendATeamInvitation(userId, recieverId, description);
@@ -296,6 +293,12 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getUser(userId) {
+        return await this.userService.getUserInfo(userId);
+    }
+    async getTeamMessages(userId) {
+        return await this.userService.getTeamMessages(userId);
+    }
     async sendNotification(studentId, description) {
         try {
             return await this.userService._sendNotfication(studentId, description);
@@ -306,13 +309,6 @@ let UserController = class UserController {
         }
     }
 };
-__decorate([
-    (0, common_1.Post)('/user'),
-    __param(0, (0, common_1.Body)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getUserInfo", null);
 __decorate([
     (0, common_1.Post)('/sendATeamInvitation'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
@@ -583,6 +579,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeam", null);
+__decorate([
+    (0, common_1.Get)('getUserInfo'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUser", null);
+__decorate([
+    (0, common_1.Get)('getTeamMessages'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeamMessages", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

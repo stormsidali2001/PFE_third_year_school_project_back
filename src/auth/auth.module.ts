@@ -14,7 +14,6 @@ import { AccessTokenStrategy } from "./strategies/access.token.strategy";
 import { LocalStrategy } from "./strategies/local.startegy";
 import { PassportModule } from "@nestjs/passport";
 import { SessionSerializer } from "./utils/SessionSerializer";
-import { MulterModule } from "@nestjs/platform-express";
 
 
 

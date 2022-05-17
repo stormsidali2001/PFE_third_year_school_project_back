@@ -7,7 +7,7 @@ import {
     OnGatewayDisconnect,
     WsResponse,
   } from '@nestjs/websockets';
-  import { Logger } from '@nestjs/common';
+  import { HttpException, HttpStatus, Logger } from '@nestjs/common';
   import { Socket } from 'socket.io';
   import { Server } from 'ws';
   import { SocketService } from 'src/socket/socket.service';
@@ -16,6 +16,10 @@ import * as cookieParser from 'cookie'
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { getManager } from 'typeorm';
 import { SessionEntity } from 'src/core/entities/session.entity';
+import { UserEntity, UserType } from 'src/core/entities/user.entity';
+import { UserRepository } from 'src/core/repositories/user.repository';
+import { StudentEntity } from 'src/core/entities/student.entity';
+import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entity';
 
 
   
@@ -32,18 +36,74 @@ import { SessionEntity } from 'src/core/entities/session.entity';
     @WebSocketServer() 
     public server: Server;
     
-    private users = {};
+   
+    private users = {}
     private logger: Logger = new Logger('MessageGateway');
   
-    @SubscribeMessage('msgToServer')
-    public handleMessage(client: Socket, payload: any): Promise<WsResponse<any>> {
-      return this.server.to(payload.room).emit('msgToClient', payload);
+    @SubscribeMessage('teamMessageToServer')
+    public async handleMessage(client: Socket, payload: any): Promise<WsResponse<any>> {
+      //@ts-ignore
+      if(!client.request.isAuthenticated()){
+        Logger.error('not authenticated','MessageGateway/teamMessageToServer')
+        throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
+       }
+       //@ts-ignore
+      const userId = client.request.session.passport.user.id;
+      const manager = getManager();
+      const user =  await manager.getRepository(UserEntity).createQueryBuilder('user')
+      .where('user.id = :userId',{userId})
+      .getOne();
+      if(user.userType != UserType.STUDENT){
+        Logger.error('not student','MessageGateway/teamMessageToServer')
+        throw new HttpException("not student",HttpStatus.FORBIDDEN)
+      }
+      const student  =  await manager.getRepository(StudentEntity).createQueryBuilder('student')
+      .where('student.userId = :userId',{userId})
+      .leftJoinAndSelect('student.team','team')
+      .getOne();
+
+
+      const teamId = student.team.id;
+
+      await manager.getRepository(TeamChatMessageEntity)
+      .save({message:payload.txt,team:student.team,owner:student})
+      
+      Logger.error(`payload : ${JSON.stringify(payload)}`,'MessageGateway/teamMessageToServer')
+      return this.server.to(teamId).emit('teamMessageToClient', payload);
     }
   
-    @SubscribeMessage('joinRoom')
-    public joinRoom(client: Socket, room: string): void {
-      client.join(room);
-      client.emit('joinedRoom', room);
+    @SubscribeMessage('joinTeamRoom')
+    public  async joinRoom(client: Socket, room: string) {
+      //@ts-ignore
+      if(!client.request.isAuthenticated()){
+        Logger.error('not authenticated','MessageGateway/handleConnection')
+        throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
+       }
+       //@ts-ignore
+      const userId = client.request.session.passport.user.id;
+      const manager = getManager();
+      const user =  await manager.getRepository(UserEntity).createQueryBuilder('user')
+      .where('user.id = :userId',{userId})
+      .getOne();
+      if(user.userType != UserType.STUDENT){
+        Logger.error('not student','MessageGateway/handleConnection')
+        throw new HttpException("not student",HttpStatus.FORBIDDEN)
+      }
+      const student  =  await manager.getRepository(StudentEntity).createQueryBuilder('student')
+      .where('student.userId = :userId',{userId})
+      .leftJoinAndSelect('student.team','team')
+      .getOne();
+
+
+      const teamId = student.team.id;
+       
+            //@ts-ignore
+      Logger.log(`user:${userId} joined the room teamId ${teamId}`,"MessageGateWay/subscribe(joinTeamRoom)")
+       client.join(teamId);
+
+       
+      
+      // client.emit('joinedRoom', room);
     }
   
     @SubscribeMessage('leaveRoom')
@@ -63,19 +123,17 @@ import { SessionEntity } from 'src/core/entities/session.entity';
   
     public handleConnection(client:Socket): void {
        
-       
-       this.logger.log(JSON.stringify(client.handshake.headers))
-       
-       this.logger.log(`cookie : ${JSON.stringify(cookieParser.parse(client.handshake.headers.cookie))}`);
+        //@ts-ignore
+       if(!client.request.isAuthenticated()){
+        Logger.error('not authenticated','MessageGateway/handleConnection')
+        throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
+       }
+        //@ts-ignore
+       const userId = client.request.session.passport.user.id;
+       console.log("client.request.session ",userId)
+    
+   
       
-
-
-       const sessionId = cookieParser.parse(client.handshake.headers.cookie).NESTJS_SESSION_ID;
-       console.log("sessionId = ",sessionId)
-       const manager = getManager();
-      //  manager.getRepository(SessionEntity).createQueryBuilder('session')
-      //  .where('session.id = ')
-      //  .getOne()
       
      
     

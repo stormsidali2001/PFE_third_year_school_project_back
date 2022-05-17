@@ -18,6 +18,5 @@ export declare class AuthController {
         firstName: String;
         lastName: String;
     }>;
-    getUser(request: any): Promise<any>;
     signupStudentTest(data: StudentTestDTO): Promise<void>;
 }

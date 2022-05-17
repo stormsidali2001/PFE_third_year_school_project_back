@@ -4,7 +4,6 @@ import { UserService } from "./user.service";
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    getUserInfo(id: string): Promise<any>;
     sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
     acceptRefuseTeamInvitation(invitationId: string, accepted: boolean, userId: string): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
@@ -99,5 +98,45 @@ export declare class UserController {
         description: string;
         rules: string;
     }>;
+    getUser(userId: string): Promise<{
+        [x: string]: import("../core/entities/user.entity").UserType | {
+            id: string;
+            code: string;
+            firstName: string;
+            lastName: string;
+            dob: Date;
+            team: import("../core/entities/team.entity").TeamEntity;
+            user: import("../core/entities/user.entity").UserEntity;
+            sentInvitations: import("../core/entities/invitation.entity").InvitationEntity[];
+            receivedInvitations: import("../core/entities/invitation.entity").InvitationEntity[];
+            teamChatMessages: import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[];
+            documents: import("../core/entities/team.document.entity").TeamDocumentEntity[];
+            participationsInSurveys: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
+            meetAbsences: import("../core/entities/meet.absent.entity").MeetAbsentEntity[];
+        } | {
+            id: string;
+            ssn: string;
+            firstName: string;
+            speciality: string;
+            lastName: string;
+            user: import("../core/entities/user.entity").UserEntity;
+            teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
+            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
+            commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
+            themeSuggestions: import("../core/entities/theme.suggestion").ThemeSuggestionEntity[];
+        } | {
+            id: String;
+            firstName: String;
+            lastName: String;
+            user: import("../core/entities/user.entity").UserEntity;
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: import("../core/entities/user.entity").UserEntity;
+        };
+        userType: import("../core/entities/user.entity").UserType;
+    }>;
+    getTeamMessages(userId: string): Promise<import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[]>;
     sendNotification(studentId: string, description: string): Promise<string>;
 }

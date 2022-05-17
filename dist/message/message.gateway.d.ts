@@ -9,7 +9,7 @@ export declare class MessageGateway implements OnGatewayInit, OnGatewayConnectio
     private users;
     private logger;
     handleMessage(client: Socket, payload: any): Promise<WsResponse<any>>;
-    joinRoom(client: Socket, room: string): void;
+    joinRoom(client: Socket, room: string): Promise<void>;
     leaveRoom(client: Socket, room: string): void;
     afterInit(server: Server): void;
     handleDisconnect(client: Socket): void;

@@ -33,6 +33,7 @@ const path = require("path");
 const teacher_entity_1 = require("../core/entities/teacher.entity");
 const theme_suggestion_1 = require("../core/entities/theme.suggestion");
 const theme_suggestion_document_entity_1 = require("../core/entities/theme.suggestion.document.entity");
+const admin_entity_1 = require("../core/entities/admin.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -41,33 +42,36 @@ let UserService = class UserService {
     async getUserInfo(userId) {
         const manager = (0, typeorm_1.getManager)();
         const userRepository = manager.getRepository(user_entity_1.UserEntity);
-        let user;
         try {
-            user = await userRepository.findOne({ id: userId });
+            const user = await userRepository.createQueryBuilder('user')
+                .where('user.id = :userId', { userId })
+                .getOne();
+            if (!user) {
+                common_1.Logger.log("user not found", "userService/getUserInfo");
+                throw new common_1.HttpException("user not found", common_1.HttpStatus.FORBIDDEN);
+            }
+            let entity;
+            if (user.userType === user_entity_1.UserType.STUDENT) {
+                entity = await (0, typeorm_1.getManager)().getRepository(student_entity_1.StudentEntity).createQueryBuilder('student')
+                    .where('student.userId = :userId', { userId })
+                    .leftJoinAndSelect('student.team', 'team')
+                    .leftJoinAndSelect('team.teamLeader', 'teamLeader')
+                    .getOne();
+            }
+            else if (user.userType === user_entity_1.UserType.ADMIN) {
+                entity = await (0, typeorm_1.getManager)().getRepository(admin_entity_1.AdminEntity).createQueryBuilder('admin')
+                    .where('admin.userId = :userId', { userId: user.id })
+                    .getOne();
+            }
+            const responseObj = {
+                userType: user.userType,
+                [`${user.userType}`]: Object.assign({}, entity)
+            };
+            return responseObj;
         }
         catch (err) {
-            common_1.Logger.error(err, 'UserService/getUserInfo');
-            throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
-        }
-        switch (user.userType) {
-            case user_entity_1.UserType.STUDENT:
-                const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-                let student;
-                try {
-                    student = await studentRepository.createQueryBuilder('student').where('student.userId =:id', { id: user.id }).getOne();
-                }
-                catch (err) {
-                    common_1.Logger.error(err, 'UserService/getUserInfo');
-                    throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
-                }
-                return student;
-                break;
-            case user_entity_1.UserType.ENTERPRISE:
-                break;
-            case user_entity_1.UserType.ADMIN:
-                break;
-            case user_entity_1.UserType.TEACHER:
-                break;
+            common_1.Logger.error(err, "userService/getUserInfo");
+            throw new common_1.HttpException(err, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async sendATeamInvitation(userId, recieverId, description) {
@@ -945,6 +949,23 @@ let UserService = class UserService {
                 description,
                 rules
             };
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeams');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamMessages(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teamMessages = await manager.getRepository(team_chat_message_entity_1.TeamChatMessageEntity)
+                .createQueryBuilder('messages')
+                .leftJoinAndSelect('messages.owner', 'owner')
+                .innerJoin('messages.team', 'team')
+                .innerJoin('team.students', 'student')
+                .where('student.userId = :userId', { userId })
+                .getMany();
+            return teamMessages;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTeams');

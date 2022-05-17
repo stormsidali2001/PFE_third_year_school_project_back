@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session'
 import * as passport from 'passport';
-import { SocketSessionAdapter } from './socket/socket-session.adapter';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import * as cookieParser from 'cookie-parser'
+
 import {TypeormStore} from 'connect-typeorm'
 import { getManager } from 'typeorm';
 import { SessionEntity } from './core/entities/session.entity';
+import { SessionAdapter } from './adapters/SessionAdapter';
+
 
 async function bootstrap() {
   
@@ -46,12 +46,13 @@ async function bootstrap() {
     app.use(passport.initialize())
     app.use(passport.session())
     //for session with passport ---x
-
+     app.useWebSocketAdapter(new SessionAdapter(sessionMid,app));
    
     app.useGlobalPipes(new ValidationPipe({transform:true}))
     await app.listen(port);
     Logger.log(`the server is running on http://localhost:${port}`,'Bootstrap');
   
+
 
 }
 bootstrap();

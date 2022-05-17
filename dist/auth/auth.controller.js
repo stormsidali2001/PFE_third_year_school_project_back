@@ -55,9 +55,6 @@ let AuthController = class AuthController {
     async signupAdmin(admin) {
         return this.authService.signupAdmin(admin);
     }
-    async getUser(request) {
-        return request.user;
-    }
     async signupStudentTest(data) {
         return await this.authService.signupStudentTest(data);
     }
@@ -144,13 +141,6 @@ __decorate([
     __metadata("design:paramtypes", [user_dto_1.AdminDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signupAdmin", null);
-__decorate([
-    (0, common_1.Get)('getUserInfo'),
-    __param(0, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "getUser", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('signup/studentTest'),

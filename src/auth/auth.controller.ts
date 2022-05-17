@@ -81,10 +81,7 @@ export class AuthController{
     }
     // test
     
-    @Get('getUserInfo')
-    async getUser(@Request() request){
-        return request.user;
-    }
+  
     @Public()
     @Post('signup/studentTest')
     async signupStudentTest(@Body() data:StudentTestDTO){
