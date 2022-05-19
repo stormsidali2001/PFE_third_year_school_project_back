@@ -46,6 +46,7 @@ import { MessageModule } from './message/message.module';
 import { SocketModule } from './socket/socket.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { SessionEntity } from './core/entities/session.entity';
+import { ConfigEntity } from './core/entities/config.entity';
 
 
 @Module({
@@ -91,12 +92,14 @@ import { SessionEntity } from './core/entities/session.entity';
               ThemeSuggestionEntity,
               ThemeSuggestionDocumentEntity,
               RestPasswordTokenEntity,
-              SessionEntity
+              SessionEntity,
+              ConfigEntity
             
             
  
 
-            ]
+            ],
+  
 
   }),
   Auth,

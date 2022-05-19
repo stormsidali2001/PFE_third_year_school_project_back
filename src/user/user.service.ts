@@ -60,8 +60,10 @@ export class UserService{
             }
             const responseObj = {
                 userType:user.userType,
+                email:user.email,
                 [`${user.userType}`]:{
-                    ...entity
+                    ...entity,
+
                 }
             }
            
@@ -312,7 +314,7 @@ export class UserService{
             const notification = notificationRepository.create({description,user:student.user,seen:false});
             await notificationRepository.save(notification);
             const socket = this.socketService.socket as Server;
-            socket.emit("test","dsgggddgdgdsgjhdgskhdsghkgdhgdh")
+            socket.to(student.id).emit("new_notification",notification)
             return `notification sent with success to: ${student.firstName+' '+student.lastName}`;
             
 }  
@@ -439,8 +441,10 @@ async getAnnouncement(userId:string){
         .innerJoinAndSelect('team.students','student')
         .where('student.userId = :userId',{userId})
         .leftJoinAndSelect('announcement.documents','documents')
+        .orderBy('createdAt','DESC')
         .getMany()
 
+        
         const response = Announcements.map(({id,title,description,documents})=>{
             return {
               id,
@@ -1220,6 +1224,7 @@ async getTeamMessages(userId){
       .innerJoin('messages.team','team')
       .innerJoin('team.students','student')
       .where('student.userId = :userId',{userId})
+      .orderBy('createdAt','ASC')
       .getMany()
 
       return teamMessages;

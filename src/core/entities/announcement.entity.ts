@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { AnnouncementDocumentEntity } from "./announcement.document.entity";
 import { TeamEntity } from "./team.entity";
 
@@ -12,6 +12,9 @@ export class AnnouncementEntity{
 
     @Column()
     description:string;
+
+    @CreateDateColumn()
+    createdAt:Date;
 
     //relations
     @OneToMany(type=>AnnouncementDocumentEntity,announcementDoc=>announcementDoc.announcement)

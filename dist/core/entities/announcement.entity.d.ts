@@ -4,6 +4,7 @@ export declare class AnnouncementEntity {
     id: string;
     title: string;
     description: string;
+    createdAt: Date;
     documents: AnnouncementDocumentEntity[];
     team: TeamEntity;
 }

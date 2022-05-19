@@ -9,38 +9,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnnouncementEntity = void 0;
+exports.ConfigEntity = void 0;
 const typeorm_1 = require("typeorm");
-const announcement_document_entity_1 = require("./announcement.document.entity");
-const team_entity_1 = require("./team.entity");
-let AnnouncementEntity = class AnnouncementEntity {
+let ConfigEntity = class ConfigEntity {
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
     __metadata("design:type", String)
-], AnnouncementEntity.prototype, "id", void 0);
+], ConfigEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], AnnouncementEntity.prototype, "title", void 0);
+], ConfigEntity.prototype, "key", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], AnnouncementEntity.prototype, "description", void 0);
+], ConfigEntity.prototype, "value", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
-], AnnouncementEntity.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(type => announcement_document_entity_1.AnnouncementDocumentEntity, announcementDoc => announcementDoc.announcement),
-    __metadata("design:type", Array)
-], AnnouncementEntity.prototype, "documents", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.announcements),
-    __metadata("design:type", team_entity_1.TeamEntity)
-], AnnouncementEntity.prototype, "team", void 0);
-AnnouncementEntity = __decorate([
-    (0, typeorm_1.Entity)('annoncement')
-], AnnouncementEntity);
-exports.AnnouncementEntity = AnnouncementEntity;
-//# sourceMappingURL=announcement.entity.js.map
+], ConfigEntity.prototype, "createdAt", void 0);
+ConfigEntity = __decorate([
+    (0, typeorm_1.Entity)('config')
+], ConfigEntity);
+exports.ConfigEntity = ConfigEntity;
+//# sourceMappingURL=config.entity.js.map

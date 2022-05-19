@@ -99,7 +99,7 @@ export declare class UserController {
         rules: string;
     }>;
     getUser(userId: string): Promise<{
-        [x: string]: import("../core/entities/user.entity").UserType | {
+        [x: string]: string | {
             id: string;
             code: string;
             firstName: string;
@@ -113,6 +113,11 @@ export declare class UserController {
             documents: import("../core/entities/team.document.entity").TeamDocumentEntity[];
             participationsInSurveys: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
             meetAbsences: import("../core/entities/meet.absent.entity").MeetAbsentEntity[];
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: import("../core/entities/user.entity").UserEntity;
         } | {
             id: string;
             ssn: string;
@@ -129,13 +134,9 @@ export declare class UserController {
             firstName: String;
             lastName: String;
             user: import("../core/entities/user.entity").UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: import("../core/entities/user.entity").UserEntity;
         };
         userType: import("../core/entities/user.entity").UserType;
+        email: string;
     }>;
     getTeamMessages(userId: string): Promise<import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[]>;
     sendNotification(studentId: string, description: string): Promise<string>;

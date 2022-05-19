@@ -68,7 +68,9 @@ import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entit
       await manager.getRepository(TeamChatMessageEntity)
       .save({message:payload.txt,team:student.team,owner:student})
       
-      Logger.error(`payload : ${JSON.stringify(payload)}`,'MessageGateway/teamMessageToServer')
+      Logger.log(`payload : ${JSON.stringify(payload)}`,'MessageGateway/teamMessageToServer')
+
+
       return this.server.to(teamId).emit('teamMessageToClient', payload);
     }
   
@@ -100,6 +102,7 @@ import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entit
             //@ts-ignore
       Logger.log(`user:${userId} joined the room teamId ${teamId}`,"MessageGateWay/subscribe(joinTeamRoom)")
        client.join(teamId);
+       client.join(student.id)
 
        
       

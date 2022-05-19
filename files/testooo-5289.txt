@@ -1,0 +1,94 @@
+The crypto industry is investing heavily in getting more people to buy in. That doesn&#39;t mean you
+have to.
+Crypto billboards surround the Bay Area and line LA highways, and you can’t catch a train in
+NYC without running into an ad for a coin or exchange. A-listers like Gwyneth Paltrow are
+pushing crypto platforms, and this year’s Super Bowl broadcast was studded with big-budget
+crypto spots, each trumpeting the opportunity to strike it rich and “make history”.
+But despite their ubiquity and lavish expense, these ads routinely omit any description of
+what crypto is or what any of the crypto companies that have paid to plaster our
+landscape—a group that includes currencies like Bitcoin and exchanges such as FTX,
+Coinbase, and Crypto.com—are actually selling. There’s a good reason for that. While the
+industry has been good to lucky speculators with the disposable cash to risk and the time to
+figure out how to do so, it has little to offer the average person today. 
+The term “crypto” has become something of a catch-all for technology that runs on a
+blockchain. It’s often just referring to cryptocurrencies, like Bitcoin or Ether, but it can also
+more broadly mean a suite of tokenized web applications collectively referred to as Web3,
+most of which run on the Ethereum network. Much of it is deeply weird, some of it is
+potentially promising, and there’s a good bit that seems like little more than a scam.
+Regardless, crypto attracted more than 0 billion in VC investment last year and has
+drawn nearly  billion this year so far. Fresh crypto startups are boasting billion-dollar
+valuations months after founding.
+Ready or not, cryptocurrencies are coming for us all. 
+Crypto enthusiasts claim that the industry will revolutionize financial systems by
+decentralizing commerce, grabbing the reins from the grip of the banks that have betrayed
+us in the past and the Big Tech gatekeepers that have held creators and innovators hostage
+with biased algorithms and hefty fees. The populist mantra of crypto believers is “WAGMI,”
+or “We’re all gonna make it,” and the community has deployed it in Discords, on Twitter,
+and to encourage commitment to the cause through crypto’s wild price swings. 
+But so far, the crypto industry has not made good on that democratizing promise.
+“Historically, claims like these often originate from groups of people with a significant
+amount of power and privilege already, who are seeking to reconsolidate and enhance that
+
+power in a new realm,” says Mar Hicks, a historian of technology, and the author
+of Programmed Inequality. Indeed, apart from a few lucky players, the crypto riches seem to
+be flowing mostly toward crypto executives and longtime Silicon Valley VCs, who need
+regular people to continue to invest in the industry so that it can keep growing. As of
+September 2021, almost 9 in 10 Americans polled had heard of cryptocurrencies but just
+16% of those had used them; meanwhile, billions of dollars have already been lost to crypto
+fraudsters and scammers.
+There is no clear picture of exactly how crypto will change the future of finance or the web,
+and little that can actually be done with cryptocurrencies should you buy some.
+Nevertheless, the crypto industry has ballooned into a shape too big to ignore. You may be
+able to block out the litany of paid messaging, but we all will likely feel the effects of crypto’s
+impact on society, whether we choose to engage or not.
+And there are some beneficial changes happening. The distributed blockchain protocol on
+which cryptocurrencies rely is winding its way into the back ends of industries like traditional
+finance and pharmaceuticals, offering real but mostly behind-the-scenes benefits like speed
+and transactional transparency. Look past the utopian rhetoric, the regulators playing catch-
+up, and the potential reshuffling of web platforms, and you’ll see that crypto’s most lasting
+positive contribution to history may be something closer to an invisible protocol like
+Bluetooth than a worldwide financial revolution. 
+To understand the crypto industry, we first have to pull apart its three main pieces:
+The first element is cryptocurrencies. There are more than 10,000 of them globally, the most
+popular being Ether (ETH) and Bitcoin (BTC). Cryptocurrencies can be either coins or tokens.
+It’s a distinction that might seem a few syllables away from a hand wave, but in essence,
+tokens represent an asset (access to a lecture, for instance, or a digital representation of a
+physical item like a contract). By contrast, coins have purchasing power—the ability to buy
+tokens and, one day, a wide variety of other goods. 
+The second is the blockchain, which—despite the singular form—isn’t just one thing. It’s a
+type of back-end protocol that uses “consensus mechanisms” (in place of traditional
+authorities like banks) to approve changes, and visible ledgers (rather than private
+recordkeeping) to log those changes. The history of blockchain is intertwined with that of
+crypto; a pseudonymous engineer—or group of engineers—called Satoshi Nakamoto used
+the protocol to devise Bitcoin in 2008, in the midst of the US financial crisis. Bitcoin was to
+be a new, decentralized system that would allow “any two willing parties to transact directly
+with each other without the need for a trusted third party,” eliminating middlemen like
+banks. With a blockchain, Nakamoto wrote, finance could be purely peer-to-peer, with each
+transaction added to an immutable record.
+The third piece of this story is Web 3.0, or Web3, a term coined in 2014 by Ethereum Project
+cofounder Gavin Wood. Expanding on Nakamoto’s ideas, Wood envisioned a fully
+
+decentralized internet, where individuals could use digital tokens to do business online
+instead of relying on Big Tech platforms like Amazon or Google to manage security, storage,
+payments, and everything else that keeps the internet running. Web3 is a container concept
+for crypto and blockchain, positing a whole new digital economy where individuals carry a
+variety of cryptocurrencies in a digital wallet to buy goods and services from other
+individuals, or just to tip the creators of content they enjoy. In this (still theoretical) vision,
+the Web3 world resembles an enormous mall, with each shop taking payment in gift cards
+that you must purchase with real money before stepping inside. Many companies are
+purportedly working to realize the vision, but the biggest “Web3” businesses today are still
+cryptocurrency exchanges, cryptocurrencies, or the tooling to support them
+What is a regular person to make of all this? 
+Fourteen years after Bitcoin first came to be, regular people can mostly engage with crypto
+only by investing in currencies. That means buying coins or tokens and waiting for them to
+increase in value. The purchase requires using a third-party crypto exchange platform like
+Coinbase or FTX, which all charge trading fees and have different levels of security.
+When consumers buy crypto, it’s added to their wallet, a word that promises the same kind
+of everyday spending power of credit cards and cash. But sending crypto from one individual
+to another, or between individuals and small businesses, is still expensive and unwieldy.
+Both parties need to have compatible wallets—you can’t send bitcoin from an Ethereum
+wallet, for example—and the sender must enter the receiver’s wallet ID, which is usually
+more than 20 characters long. Sending crypto to another wallet can take from a few minutes
+to hours, depending on how busy the network is, and there are no security measures to
+ensure you’ve reached the correct person; if you accidentally miss a digit and drop coins in
+the wrong wallet, you’re out of luck.

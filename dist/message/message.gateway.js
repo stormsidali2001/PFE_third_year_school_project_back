@@ -51,7 +51,7 @@ let MessageGateway = class MessageGateway {
         const teamId = student.team.id;
         await manager.getRepository(team_chat_message_entity_1.TeamChatMessageEntity)
             .save({ message: payload.txt, team: student.team, owner: student });
-        common_1.Logger.error(`payload : ${JSON.stringify(payload)}`, 'MessageGateway/teamMessageToServer');
+        common_1.Logger.log(`payload : ${JSON.stringify(payload)}`, 'MessageGateway/teamMessageToServer');
         return this.server.to(teamId).emit('teamMessageToClient', payload);
     }
     async joinRoom(client, room) {
@@ -75,6 +75,7 @@ let MessageGateway = class MessageGateway {
         const teamId = student.team.id;
         common_1.Logger.log(`user:${userId} joined the room teamId ${teamId}`, "MessageGateWay/subscribe(joinTeamRoom)");
         client.join(teamId);
+        client.join(student.id);
     }
     leaveRoom(client, room) {
         client.leave(room);

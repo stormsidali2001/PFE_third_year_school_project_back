@@ -225,8 +225,8 @@ POST http://localhost:8080/test/sendNotification
 content-type:application/json
 
 {
-    "studentId":"e378cfdb-77eb-492c-ad4c-ad724569a0cb",
-    "description":"123"
+    "studentId":"88c20089-aa85-4128-a4c3-918481db6974",
+    "description":"work yhdik rebbi ya  82"
 }
 ###
 GET http://localhost:8080/getFile/exo1-dd33.xml

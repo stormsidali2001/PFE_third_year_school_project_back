@@ -52,6 +52,7 @@ const message_module_1 = require("./message/message.module");
 const socket_module_1 = require("./socket/socket.module");
 const platform_express_1 = require("@nestjs/platform-express");
 const session_entity_1 = require("./core/entities/session.entity");
+const config_entity_1 = require("./core/entities/config.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -98,8 +99,9 @@ AppModule = __decorate([
                     theme_suggestion_1.ThemeSuggestionEntity,
                     theme_suggestion_document_entity_1.ThemeSuggestionDocumentEntity,
                     resetPasswordToken_entity_1.RestPasswordTokenEntity,
-                    session_entity_1.SessionEntity
-                ]
+                    session_entity_1.SessionEntity,
+                    config_entity_1.ConfigEntity
+                ],
             }),
             auth_module_1.Auth,
             user_module_1.UserModule,

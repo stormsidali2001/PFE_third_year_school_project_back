@@ -20,7 +20,7 @@ export declare class UserService {
     private socketService;
     constructor(schedulerRegistry: SchedulerRegistry, socketService: SocketService);
     getUserInfo(userId: string): Promise<{
-        [x: string]: UserType | {
+        [x: string]: string | {
             id: string;
             code: string;
             firstName: string;
@@ -34,6 +34,11 @@ export declare class UserService {
             documents: TeamDocumentEntity[];
             participationsInSurveys: SurveyParticipantEntity[];
             meetAbsences: import("../core/entities/meet.absent.entity").MeetAbsentEntity[];
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
         } | {
             id: string;
             ssn: string;
@@ -50,13 +55,9 @@ export declare class UserService {
             firstName: String;
             lastName: String;
             user: UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
         };
         userType: UserType;
+        email: string;
     }>;
     sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
     acceptRefuseTeamInvitation(invitationId: string, userId: string, accepted: boolean): Promise<string>;
