@@ -2,13 +2,13 @@ import {  Column, Entity, JoinColumn, Long, ManyToOne, OneToMany, OneToOne, Prim
 import { AnnouncementEntity } from "./announcement.entity";
 import { MeetEntity } from "./meet.entity";
 import { ModificationActionEntity } from "./modification.action.entity";
+import { PromotionEntity } from "./promotion.entity";
 import { StudentEntity } from "./student.entity";
 import { SurveyEntity } from "./survey.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
-import { ThemeSuggestionEntity } from "./theme.suggestion";
 
 
 @Entity('team')
@@ -67,6 +67,9 @@ export class TeamEntity{
 
     @OneToMany(type=>TeamDocumentCommit,teamDocumentCommit=>teamDocumentCommit.team)
     documentCommits:TeamDocumentCommit[];
+
+    @ManyToOne(type=>PromotionEntity,promotion=>promotion.teams)
+    promotion:PromotionEntity;
 
   
     

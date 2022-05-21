@@ -31,12 +31,13 @@ POST http://localhost:8080/signup/studentTest
 content-type:application/json
 
 {
-    "email":"k1.dsajads@esi-sba.dz",
+    "email":"s.assoul@esi-sba.dz",
     "password":"1@2@4@abC",
     "firstName":"assoul",
     "lastName":"sidali",
     "dob":"2001-04-20",
-    "code":"191932004015"
+    "code":"191932004015",
+    "promotionId":"b18723d5-f379-4f9a-9b99-131f2988f3fc"
 }
 
 ###
@@ -225,8 +226,8 @@ POST http://localhost:8080/test/sendNotification
 content-type:application/json
 
 {
-    "studentId":"88c20089-aa85-4128-a4c3-918481db6974",
-    "description":"work yhdik rebbi ya  82"
+    "userId":"6cdc81ba-1d40-4ec8-a9f1-b7645f687168",
+    "description":"working 1"
 }
 ###
 GET http://localhost:8080/getFile/exo1-dd33.xml
@@ -259,3 +260,44 @@ GET http://localhost:8080/getTeams
 
 ###
 GET http://localhost:8080/getTeamMessages
+
+
+### 
+POST http://localhost:8080/test/createNewConfig
+Content-Type:application/json
+
+{
+
+   "key":"maxTeam",
+   "value":"4"
+}
+
+
+###
+GET http://localhost:8080/getThemeSuggestions/52ff9776-86eb-4cb8-bf8e-eb965301648d
+
+###
+POST http://localhost:8080/test/createNewPromotion
+Content-Type:application/json
+
+{
+
+  "name":"1CPI"
+}
+
+####
+GET http://localhost:8080/getAllPromotions
+
+
+### signup teacher test
+POST  http://localhost:8080/signup/signupTeacherTest
+Content-Type:application/json
+
+{
+    "ssn":"034565456465",
+    "email":"t.teacher@esi-sba.dz",
+    "password":"1@2@3@4@passwordP",
+    "firstName":"teacher",
+    "lastName":"teacher",
+    "speciality":"Web"
+}

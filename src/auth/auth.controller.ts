@@ -5,7 +5,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { AuthenticatedGuard } from "src/common/guards/authentificatedGuard";
 import { LocalAuthGuard } from "src/common/guards/local-auth.guard";
 import { RefrechTokenGuard } from "src/common/guards/refrech-token-guard";
-import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, UserDTO } from "../core/dtos/user.dto";
+import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, TeacherTestDTO, UserDTO } from "../core/dtos/user.dto";
 import { AuthService } from "./auth.service";
 
 @Controller()
@@ -20,29 +20,29 @@ export class AuthController{
    }
    @Public()
    @Post('signup/teacher')
-   async signupTeacher(@Body() data:TeacherDTO){
+   async signupTeacher(@GetCurrentUserId() userId:string,@Body() data:TeacherDTO){
      
-       return this.authService.signupTeacher(data);
+       return this.authService.signupTeacher(userId,data);
    }
 
    @Public()
    @Post('signup/teachers')
-   async signupTeachers(@Body() data:TeacherDTO[]){
-       return await this.authService.signupTeachers(data)
+   async signupTeachers(@GetCurrentUserId() userId:string,@Body() data:TeacherDTO[]){
+       return await this.authService.signupTeachers(userId,data)
    }
 
    @Public()
    @Post('signup/student')
-   async signupStudent(@Body() data:StudentDTO){
+   async signupStudent(@GetCurrentUserId() userId:string,@Body() data:StudentDTO){
     
-       return await this.authService.signupStudent(data);
+       return await this.authService.signupStudent(userId,data);
    }
 
    @Public()
    @Post('signup/students')
-   async signupStudents(@Body() data:StudentDTO[]){
+   async signupStudents(@GetCurrentUserId() userId:string,@Body() data:StudentDTO[]){
     
-       return await this.authService.signupStudents(data);
+       return await this.authService.signupStudents(userId,data);
    }
 
    @Public()
@@ -87,6 +87,14 @@ export class AuthController{
     async signupStudentTest(@Body() data:StudentTestDTO){
      
         return await this.authService.signupStudentTest(data);
+    }
+
+    
+    @Public()
+    @Post('signup/signupTeacherTest')
+    async signupTeacherTest(@Body() data:TeacherTestDTO){
+     
+        return await this.authService.signupTeacherTest(data);
     }
 
      

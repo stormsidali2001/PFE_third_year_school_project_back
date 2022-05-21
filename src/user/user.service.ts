@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { NormalTeamMeetDto, SurveyDto , TeamAnnoncementDocDto, ThemeSuggestionDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -10,7 +10,7 @@ import { SurveyParticipantEntity } from "src/core/entities/survey.participant.en
 import { TeamChatMessageEntity } from "src/core/entities/team.chat.message.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
-import { getManager } from "typeorm";
+import { getConnection, getManager } from "typeorm";
 import {SchedulerRegistry} from '@nestjs/schedule'
 import { CronJob } from "cron";
 import { MeetEntity, MeetType } from "src/core/entities/meet.entity";
@@ -22,10 +22,14 @@ import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import * as fs from 'fs';
 import * as path from "path";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
-import { ThemeSuggestionEntity } from "src/core/entities/theme.suggestion";
-import { ThemeSuggestionDocumentEntity } from "src/core/entities/theme.suggestion.document.entity";
 import { AdminEntity } from "src/core/entities/admin.entity";
 import { EntrepriseEntity } from "src/core/entities/entreprise.entity";
+import { ConfigEntity } from "src/core/entities/config.entity";
+import { ThemeEntity } from "src/core/entities/theme.entity";
+import { ThemeDocumentEntity } from "src/core/entities/theme.document.entity";
+import { PromotionEntity } from "src/core/entities/promotion.entity";
+import {QueryBuilder} from  'typeorm'
+
 @Injectable()
 export class UserService{
     constructor(private schedulerRegistry: SchedulerRegistry,
@@ -57,6 +61,14 @@ export class UserService{
                 entity = await getManager().getRepository(AdminEntity).createQueryBuilder('admin')
                 .where('admin.userId = :userId',{userId:user.id})
                 .getOne()
+            }else if(user.userType === UserType.TEACHER){
+                entity = await getManager().getRepository(TeacherEntity).createQueryBuilder('teacher')
+                .where('teacher.userId = :userId',{userId:user.id})
+                .getOne()
+
+
+            }else if(user.userType === UserType.ENTERPRISE){
+
             }
             const responseObj = {
                 userType:user.userType,
@@ -81,13 +93,17 @@ export class UserService{
     async sendATeamInvitation(userId:string,recieverId:string,description:string){
         try{
             const manager = getManager();
-            const studentRepository = manager.getRepository(StudentEntity);
+        
+            /**
+             * the sender can be:
+             * 1-a team leader
+             * 2-a student without a team (to form a team)
+             */
             const sender =
             await manager.getRepository(StudentEntity)
             .createQueryBuilder('student')
+            .leftJoinAndSelect('student.promotion','promotion')
             .where('student.userId = :userId',{userId})
-            // .innerJoin('student.team','team')
-            // .innerJoin('team.teamLeader','leader')
             .getOne()
             
          
@@ -102,6 +118,7 @@ export class UserService{
 
             const reciever =  await manager.getRepository(StudentEntity)
             .createQueryBuilder('student')
+            .leftJoinAndSelect('student.promotion','promotion')
             .where('student.teamId IS  NULL')
             .andWhere('student.id = :recieverId',{recieverId})
             .getOne()
@@ -121,10 +138,15 @@ export class UserService{
                 Logger.error("you v'e already send an invitation to that particular user",'UserService/sendATeamInvitation')
                 throw new HttpException("you v'e already send an invitation to that particular user",HttpStatus.BAD_REQUEST);
             }
+            if(sender.promotion.id !== reciever.promotion.id){
+                Logger.error("the sender and reciever should be in the same promotion",'UserService/sendATeamInvitation')
+                throw new HttpException("the sender and reciever should be in the same promotion",HttpStatus.BAD_REQUEST);
+
+            }
             const invitationsRepository = manager.getRepository(InvitationEntity);
             const invitation:InvitationEntity = invitationsRepository.create({description,sender,reciever});
             await invitationsRepository.save(invitation);
-            return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName}`;
+            return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName} of the promotion ${sender.promotion.name}`;
         }catch(err){
             Logger.error(err,'UserService/sendATeamInvitation')
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
@@ -144,26 +166,36 @@ export class UserService{
      
       
      
-        const manager = getManager();
-
-        const invitationsRepository = manager.getRepository(InvitationEntity);
-        let invitation:InvitationEntity;
+     
+        
         try{
+            let newTeamCreated = false;
+            let invitation:InvitationEntity;
+
+            let outputMessage = `invitation has been accepted`;
+            await getConnection().transaction(async manager=>{
+                const invitationsRepository = manager.getRepository(InvitationEntity);
+              
+           
              invitation = await invitationsRepository
              .createQueryBuilder('invitation')
              .leftJoinAndSelect('invitation.sender','sender')
              .leftJoinAndSelect('invitation.reciever','reciever')
              .leftJoinAndSelect('sender.team','steam')
              .leftJoinAndSelect('reciever.team','rteam')
+             .leftJoinAndSelect('sender.promotion','spromotion')
              .where('invitation.id = :invitationId',{invitationId})
              .andWhere('reciever.userId = :userId',{userId})
              .getOne()
-             
+            
+
+         
          
         if(!invitation){
             Logger.error("invitation not found",'UserService/getAcceptRefuseTeamInvitation')
             throw new HttpException("invitation not found",HttpStatus.FORBIDDEN);
         }
+
       
       
       if(!accepted){
@@ -171,7 +203,7 @@ export class UserService{
             either a teamLeader or a student  refused the invitation
           */
           await invitationsRepository.delete({id:invitation.id})
-          this._sendNotfication(invitation.sender.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `)
+          this._sendNotficationStudent(invitation.sender.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `)
           return "the invitation has been refused";
           
       }
@@ -182,23 +214,40 @@ export class UserService{
      
       
         const studentRepository = manager.getRepository(StudentEntity);
-        let newTeamCreated = false;
+     
+      
         if(!invitation.sender.team){
-            const teamLength:number = await teamRepository.count();
+           
+            const teamLength:number = await teamRepository
+            .createQueryBuilder('team')
+            .getCount()
+
+
+           
+           
             newTeamCreated = true;
-            const newTeam = teamRepository.create({nickName:'team'+teamLength,teamLeader:invitation.sender});
+            const newTeam = teamRepository.create({nickName:'team'+teamLength,teamLeader:invitation.sender,promotion:invitation.sender.promotion});
             await teamRepository.save(newTeam);
             invitation.reciever.team = newTeam;
             invitation.sender.team = newTeam;
             await studentRepository.save(invitation.reciever);
             await studentRepository.save(invitation.sender);
 
+
+
         }else{
+           
             invitation.reciever.team = invitation.sender.team;
             await studentRepository.save(invitation.reciever)
         }
-        await invitationsRepository.delete({id:invitation.id})
-        let outputMessage = `invitation has been accepted`;
+
+        await invitationsRepository.createQueryBuilder()
+        .delete()
+        .where('invitation.recieverId = :recieverId',{recieverId:invitation.reciever.id})
+        .execute()
+    })
+
+     
         if(newTeamCreated){
 
             outputMessage += `\n team: ${invitation.sender.team.nickName} was created.`
@@ -216,7 +265,7 @@ export class UserService{
         return outputMessage;
         
 
-
+ 
       
     }catch(err){
         Logger.error(err,'UserService/getAcceptRefuseTeamInvitation')
@@ -227,7 +276,7 @@ export class UserService{
 
 
     }
-
+    // not checked or used yet
     async sendTeamJoinRequest(senderId:string,teamId:string,description:string){
 
         const manager = getManager();
@@ -266,6 +315,7 @@ export class UserService{
 
     }
 
+    // only for tests
     async getInvitations(studentId:string){
       
         try{
@@ -296,7 +346,7 @@ export class UserService{
 
 
     }
-   async _sendNotfication(studentId:string,description:string){          
+   async _sendNotficationStudent(studentId:string,description:string){          
        // get the notification repository
          const manager = getManager();
             //get student repository    
@@ -314,7 +364,7 @@ export class UserService{
             const notification = notificationRepository.create({description,user:student.user,seen:false});
             await notificationRepository.save(notification);
             const socket = this.socketService.socket as Server;
-            socket.to(student.id).emit("new_notification",notification)
+            socket.to(student.user.id).emit("new_notification",notification)
             return `notification sent with success to: ${student.firstName+' '+student.lastName}`;
             
 }  
@@ -350,8 +400,36 @@ export class UserService{
           
         }
         await notificationRepository.save(notifications)
+        const socket = this.socketService.socket as Server;
+        notifications.forEach(nf=>{
+            socket.to(nf.user).emit("new_notification",nf)
+
+        })
+       
         return `notification sent with success to team: ${team.nickName} members` ;   
     }
+ async _sendNotfication(userId:string,description:string){          
+       // get the notification repository
+         const manager = getManager();
+            //get student repository    
+            const userRepository = manager.getRepository(UserEntity);
+            const user = await userRepository.createQueryBuilder('user')
+            .where('user.id = :userId',{userId})
+            .getOne()
+        
+            if(!user){
+                Logger.error("user not found",'UserService/sendNotfication') 
+                throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
+            }
+            const notificationRepository = manager.getRepository(NotificationEntity);
+            const notification = notificationRepository.create({description,user,seen:false});
+            await notificationRepository.save(notification);
+            const socket = this.socketService.socket as Server;
+            Logger.error(`emit to ${userId}  event new_notification`,"debugggggg")
+            socket.to(userId).emit("new_notification",notification)
+            return `notification sent with `;
+            
+}  
     //the number param has an undefined or number type
 async  getLastNotifications(userId:string,number:number = undefined){   
 
@@ -777,20 +855,19 @@ async getStudentsWithoutTeam(userId:string){
         
         const studentRepository = manager.getRepository(StudentEntity);
       
-        const student =  await 
-                studentRepository
-                .createQueryBuilder('student')
-                .where('student.userId = :userId',{userId})
-                // .innerJoin('student.team','team')
-                // .innerJoin('team.teamLeader','leader')
-                .getOne()
-
-         if(!student){
-            Logger.error("student not found",'UserService/getStudentsWithoutTeam')
-            throw new HttpException("student not found",HttpStatus.BAD_REQUEST);
-         }
+      
       return await  studentRepository.createQueryBuilder('student')
-        .where('student.userId <> :userId',{userId})
+        .where(qb=>{
+                const subQuery = qb.subQuery()
+                .select('student.promotionId')
+                .from(StudentEntity,'student')
+                .where('student.userId = :userId',{userId})
+                .getQuery();
+
+                return 'student.promotionId  IN '+subQuery;
+
+        })
+        .andWhere('student.userId <> :userId',{userId})
         .andWhere('student.teamId IS NULL')
         .getMany()
         
@@ -855,7 +932,7 @@ async getInvitationList(userId:string){
   
 
 }
-
+//crud operations document----------------------------------------
 async addTeamDocument(userId:string,name:string,url:string,description:string){
     try{
         const manager = getManager();
@@ -886,7 +963,6 @@ async addTeamDocument(userId:string,name:string,url:string,description:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
-
 async getTeamDocuments(userId:string){
     try{
         const manager = getManager();
@@ -968,8 +1044,8 @@ async getStudents(){
     try{
         const manager = getManager();
         const studentRepository = manager.getRepository(StudentEntity);
-
         const students =  await studentRepository.createQueryBuilder('students')
+        .leftJoinAndSelect('students.promotion','promotion')
         .getMany();
 
         return students;
@@ -1056,7 +1132,7 @@ async editTeacher(teacherId:string,data:Partial<TeacherEntity>){
     }
 }
 //crud operations theme suggestions
-async createThemeSuggestion(userId:string,title:string,description:string,documents:ThemeSuggestionDocDto[]){
+async createThemeSuggestion(userId:string,title:string,description:string,documents:ThemeDocDto[],promotionId:string){
 
     try{
         const manager = getManager()
@@ -1064,23 +1140,53 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
         .createQueryBuilder('user')
         .where('user.id = :userId',{userId})
         .getOne();
+
+      
+        
         if(!user){
             Logger.error("user not found",'UserService/createThemeSuggestion')
             throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
         }
+
         const {userType} = user;
-        if(userType !== UserType.TEACHER ){
-            Logger.error("you need to be a teacher to submit a theme suggestion ",'UserService/createThemeSuggestion')
-            throw new HttpException("you need to be a teacher to submit a theme suggestion ",HttpStatus.BAD_REQUEST);
+        if(userType !== UserType.TEACHER && userType !== UserType.ENTERPRISE ){
+            Logger.error("you need to be either a teacher or an entreprise to submit a theme suggestion ",'UserService/createThemeSuggestion')
+            throw new HttpException("you need to be either a teacher or an entreprise to submit a theme suggestion  ",HttpStatus.BAD_REQUEST);
         }
-        const teacher = await manager.getRepository(TeacherEntity)
-        .createQueryBuilder('teacher')
-        .where('teacher.userId = :userId',{userId})
-        .getOne();
-        Logger.error(title,"*********")
-        const themeSuggestionRepository = manager.getRepository(ThemeSuggestionEntity)
-        const themeSuggestion = themeSuggestionRepository.create({title,description,teacher})
-         await themeSuggestionRepository
+        const promotion = await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .where('promotion.id = :promotionId',{promotionId})
+        .getOne()
+
+        if(!promotion){
+            Logger.error("promotion not found",'UserService/createThemeSuggestion')
+            throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST);
+        }
+        let themeSuggestion;
+        const themeRepository = manager.getRepository(ThemeEntity)
+        if(userType === UserType.TEACHER){
+            const teacher = await manager.getRepository(TeacherEntity)
+            .createQueryBuilder('teacher')
+            .where('teacher.userId = :userId',{userId})
+            .getOne();
+            themeSuggestion = themeRepository.create({title,description,suggestedByTeacher:teacher,promotion})
+
+        }else if(userType === UserType.ENTERPRISE){
+            const entreprise = await manager.getRepository(EntrepriseEntity)
+            .createQueryBuilder('entrprise')
+            .where('entrprise.userId = :userId',{userId})
+            .getOne();
+            themeSuggestion = themeRepository.create({title,description,suggestedByEntreprise:entreprise,promotion})
+
+
+        }
+        
+     
+        
+        
+        
+      
+         await themeRepository
         .createQueryBuilder()
         .insert()
         .values(themeSuggestion)
@@ -1088,14 +1194,14 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
 
         
 
-        const themeSuggestionDocumentRepository =  manager.getRepository(ThemeSuggestionDocumentEntity);
-        const themeSuggestionsDocs:ThemeSuggestionDocDto[] = [];
+        const themeDocumentRepository =  manager.getRepository(ThemeDocumentEntity);
+        const themeSuggestionsDocs:ThemeDocumentEntity[] = [];
         documents.forEach(doc=>{
-            const announcementDoc = themeSuggestionDocumentRepository.create({name:doc.name,url:doc.url,themeSuggestion});
-            themeSuggestionsDocs.push(announcementDoc)
+            const themeSugDoc = themeDocumentRepository.create({name:doc.name,url:doc.url,theme:themeSuggestion});
+            themeSuggestionsDocs.push(themeSugDoc)
         })
        
-       await themeSuggestionDocumentRepository.createQueryBuilder()
+       await themeDocumentRepository.createQueryBuilder()
         .insert()
         .values(themeSuggestionsDocs)
         .execute();
@@ -1109,35 +1215,56 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
     }
 
 }
-async getThemeSuggestions(){
+async getThemeSuggestions(promotionId:string){
     try{
         const manager = getManager();
-        const themeSuggestions:ThemeSuggestionEntity[] = await manager.getRepository(ThemeSuggestionEntity)
-        .createQueryBuilder('themeSuggestion')
+        const themeSuggestions:ThemeEntity[] = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .andWhere('theme.promotionId = :promotionId',{promotionId})
+        .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher','theme.suggestedByTeacher IS NOT NULL')
+        .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise','theme.suggestedByEntreprise IS NOT NULL')
         .getMany()
+       
 
-        const response = themeSuggestions.map(({id,title,description,documents})=>{
-            return {
-              id,
-              title,
-              description,
-              documents
-            }
-        })
+       return themeSuggestions
+        
 
-        return response ;
+       
+
+       
     }catch(err){
         Logger.error(err,'UserService/getThemeSuggestions')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async getAllThemeSuggestions(){
+    try{
+        const manager = getManager();
+        const themeSuggestions:ThemeEntity[] = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher','theme.suggestedByTeacher IS NOT NULL')
+        .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise','theme.suggestedByEntreprise IS NOT NULL')
+        .leftJoinAndSelect('theme.promotion','promotion')
+        .getMany()
+
+        return themeSuggestions;
+
+     
+       
+    }catch(err){
+        Logger.error(err,'UserService/getAllThemeSuggestions')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
 async getThemeSuggestion(themeId:string){
     try{
         const manager = getManager();
-        const themeSuggestion = await manager.getRepository(ThemeSuggestionEntity)
-        .createQueryBuilder('themeSuggestion')
-        .where('themeSuggestion.id = :themeId',{themeId})
-        .leftJoinAndSelect('themeSuggestion.documents','docs')
+        const themeSuggestion = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .where("theme.id = :themeId",{themeId})
+        .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher')
+        .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise')
+        .leftJoinAndSelect('theme.docuements','documents')
         .getOne()
 
        
@@ -1147,6 +1274,35 @@ async getThemeSuggestion(themeId:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
+async validateThemeSuggestion(userId:string,themeId:string){
+    try{
+        const manager = getManager();
+
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.userType = :userType',{userType:UserType.ADMIN})
+        .andWhere('user.id = :userId',{userId})
+        .getOne()
+        if(!user){
+            Logger.error("permession denied",'UserService/validateThemeSuggestion')
+            throw new HttpException("permession denied",HttpStatus.BAD_REQUEST);
+        }
+
+        await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .update()
+        .set({validated:true})
+        .where('theme.id = :themeId',{themeId})
+        .execute();
+
+    }catch(err){
+        Logger.error(err,'UserService/validateThemeSuggestion')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        
+    }
+}
+
+
 
 //team crud operations
 async getTeams(){
@@ -1156,23 +1312,38 @@ async getTeams(){
         .createQueryBuilder('team')
         .leftJoinAndSelect('team.givenTheme','givenTheme')
         .loadRelationCountAndMap('team.membersCount','team.students')
+        .leftJoinAndSelect('team.promotion','promotion')
+        .getMany();
         
-        .getMany()
-        
+       
+      
+     
+
+      
+
+
+       
+
+
+
 
         //@ts-ignore
-        return teams.map(({nickName,givenTheme,membersCount,id})=>{
+        return teams.map(({nickName,givenTheme,membersCount,id,promotion})=>{
+           Logger.error(nickName,promotion,"debug")
             return {
                 id,
                 pseudo:nickName,
                 theme:givenTheme,
-                nombre:membersCount
+                nombre:membersCount,
+                promotion:promotion.name,
+                validated: membersCount >= promotion.minTeam && membersCount <=  promotion.maxTeam
             }
         }) ;
     }catch(err){
         Logger.error(err,'UserService/getTeams')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
+
 
 }
 
@@ -1196,13 +1367,29 @@ async getTeam(teamId){
             rules
         } = team;
         
+        const configs = await manager.getRepository(ConfigEntity)
+        .createQueryBuilder('config')
+        .where('config.key = "minTeam" or config.key = "maxTeam"')
+        .getMany();
+     
+        let minTeam:any = configs.find(el=>el.key === 'minTeam' )?.value
+        let maxTeam:any =  configs.find(el=>el.key === 'maxTeam')?.value
 
-    
+        if(!minTeam || !maxTeam){
+            Logger.error("minTeam and maxTeam configuration variables are not defined !!!","UserService/getTeams")
+            throw new HttpException("internal  server error",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+        minTeam = parseInt(minTeam);
+        maxTeam = parseInt(maxTeam);
+        const membersCount = students.length;
             return {
                 id,
                 pseudo:nickName,
                 theme:givenTheme,
                 members:students,
+                validated:membersCount >= minTeam && membersCount <= maxTeam,
                 description,
                 rules
             }
@@ -1235,4 +1422,65 @@ async getTeamMessages(userId){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
+
+
+async createNewConfig(key:string,value:string){
+    try{
+        const manager = getManager();
+        const sql =   manager.getRepository(ConfigEntity)
+         .createQueryBuilder()
+         .insert()
+         .values({key,value}).getSql()
+     
+         await manager.getRepository(ConfigEntity)
+         .createQueryBuilder()
+         .insert()
+         .values({key,value})
+         .execute()
+
+         Logger.error(sql,"userService/createNewConfig")
+
+    }catch(err){
+        Logger.error(err,'UserService/createNewConfig')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }  
 }
+
+//promotion
+async createNewPromotion(name:string){
+    try{
+        const manager = getManager();
+
+        await manager.getRepository(PromotionEntity)
+        .createQueryBuilder()
+        .insert()
+        .values({name})
+        .execute();
+
+    }catch(err){
+        Logger.error(err,'UserService/createNewPromotion')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
+
+async getAllPromotions(){
+    try{
+        const manager = getManager();
+
+        return await manager.getRepository(PromotionEntity)
+        .createQueryBuilder()
+        .getMany()
+
+    }catch(err){
+        Logger.error(err,'UserService/getAllPromotions')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+
+}
+
+
+}
+

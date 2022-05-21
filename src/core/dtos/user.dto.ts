@@ -17,6 +17,13 @@ export class UserRO{
 export class TeacherDTO{
     ssn:string;
     email:string;
+    firstName:string;
+    lastName:string;
+    speciality:string;
+}
+export class TeacherTestDTO{
+    ssn:string;
+    email:string;
     password:string;
     firstName:string;
     lastName:string;
@@ -29,6 +36,8 @@ export class StudentDTO{
     lastName:string;
     code:string;
     dob:Date;
+    promotionId:string;
+
 }
 export class StudentTestDTO{
     email:string;
@@ -37,8 +46,14 @@ export class StudentTestDTO{
     lastName:string;
     code:string;
     dob:Date;
+    promotionId:string;
 }
 export class EnterpriseDTO{
+    email:string;
+    name:string;
+  
+}
+export class EnterpriseTestDTO{
     email:string;
     password:string;
     name:string;
@@ -87,7 +102,7 @@ export class TeamAnnoncementDocDto{
     name:string;
 }
 
-export class ThemeSuggestionDocDto{
+export class ThemeDocDto{
     url:string;
     name:string;
 

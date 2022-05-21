@@ -4,7 +4,7 @@ import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto ,ThemeSuggestionDocDto} from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto} from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
  
@@ -324,26 +324,36 @@ export class UserController{
     async createThemeSuggestion(@GetCurrentUserId() userId:string,
                                 @Body('title') title:string,
                                 @Body('description') description:string,
-                                @Body('documents') documents:ThemeSuggestionDocDto[]
-                              
-                                
+                                @Body('documents') documents:ThemeDocDto[],
+                                @Body('promotionId') promotionId:string
                                 ){        
                                     Logger.error(documents,"*****555****")
         try{
-            return await this.userService.createThemeSuggestion(userId,title,description,documents);
+            return await this.userService.createThemeSuggestion(userId,title,description,documents,promotionId);
         }catch(err){
-            Logger.error(err,'UsrController/ThemeSuggestionDocDto')
+            Logger.error(err,'UsrController/createThemeSuggestion')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Get('getThemeSuggestions/:promotionId')
+    async getThemeSuggestions(@Param('promotionId') promotionId:string){
+        try{
+            return await this.userService.getThemeSuggestions(promotionId)
+        }catch(err){
+            Logger.error(err,'UsrController/getThemeSuggestions')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
 
     @Public()
     @Get('getThemeSuggestions')
-    async getThemeSuggestions(@GetCurrentUserId() userId:string){
+    async getAllThemeSuggestions(){
         try{
-            return await this.userService.getThemeSuggestions()
+            return await this.userService.getAllThemeSuggestions()
         }catch(err){
-            Logger.error(err,'UsrController/getThemeSuggestions')
+            Logger.error(err,'UsrController/getAllThemeSuggestions')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
@@ -357,6 +367,17 @@ export class UserController{
             Logger.error(err,'UsrController/getThemeSuggestion')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Post('validateThemeSuggestion')
+    async validateThemeSuggestion(@GetCurrentUserId() userId:string,@Body('themeId') themeId:string){
+        try{
+            return await this.userService.validateThemeSuggestion(userId,themeId)
+        }catch(err){
+            Logger.error(err,'UsrController/validateThemeSuggestion')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Public()
@@ -389,18 +410,56 @@ export class UserController{
     async getTeamMessages(@GetCurrentUserId() userId:string){
         return await this.userService.getTeamMessages(userId)
     }
+
+    @Public()
+    @Get('getAllPromotions')
+    async getAllPromotions(){
+          try{
+            return await this.userService.getAllPromotions()
+        }catch(err){
+            Logger.error(err,'UserController/getAllPromotions')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+       
+    }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
-    async sendNotification(@Body('studentId') studentId:string, @Body('description') description:string){
+    async sendNotification(@Body('userId') userId:string, @Body('description') description:string){
         try{
-            return await this.userService._sendNotfication(studentId,description);
+            return await this.userService._sendNotfication(userId,description);
         }catch(err){
             Logger.error(err,'UserController/sendNotifications')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
+ 
     }
 
   
 
+    @Public()
+    @Post('test/createNewConfig')
+    async createNewConfig(
+            @Body('key') key:string,
+            @Body('value') value:string
+            ){
+        try{
+            console.log(key,value)
+            return await this.userService.createNewConfig(key,value)
+        }catch(err){
+            Logger.error(err,'UserController/createNewConfig')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Post('test/createNewPromotion')
+    async createNewPromotion(@Body('name') name:string) {
+    try{
+        return await this.userService.createNewPromotion(name)
+    }catch(err){
+        Logger.error(err,'UserController/createNewPromotion')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 }

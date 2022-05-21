@@ -14,15 +14,24 @@ import { AccessTokenStrategy } from "./strategies/access.token.strategy";
 import { LocalStrategy } from "./strategies/local.startegy";
 import { PassportModule } from "@nestjs/passport";
 import { SessionSerializer } from "./utils/SessionSerializer";
+import { UserModule } from "src/user/user.module";
+import { UserService } from "src/user/user.service";
 
 
 
 @Module({
     imports:[TypeOrmModule.forFeature([UserEntity,UserRepository,StudentEntity,TeamEntity,StudentRepository,RestPasswordTokenRepository]),
-    JwtModule.register({}),PassportModule.register({session:true} /*for session */),],
+    JwtModule.register({}),PassportModule.register({session:true} /*for session */),
+    UserModule
+
+],
     controllers:[AuthController],
-    providers:[AuthService,AccessTokenStrategy,RefrechTokenStrategy,LocalStrategy,
-        SessionSerializer
+    providers:[AuthService,
+        // AccessTokenStrategy,
+        // RefrechTokenStrategy,
+        LocalStrategy,
+        SessionSerializer,
+        UserService
     ]
 })
 export class Auth {}

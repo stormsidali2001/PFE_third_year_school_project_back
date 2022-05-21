@@ -2,7 +2,7 @@ import {  Check, Column, Entity, JoinColumn, Long, OneToMany, OneToOne, PrimaryC
 import { EncadrementEntity } from "./encadrement.entity";
 import { TeamCommitReviewEntity } from "./team.commit.review.entity";
 import { TeamTeacherChatMessage } from "./team.teacher.message.entity";
-import { ThemeSuggestionEntity } from "./theme.suggestion";
+import { ThemeEntity } from "./theme.entity";
 import { UserEntity } from "./user.entity";
 
 
@@ -43,8 +43,8 @@ export class TeacherEntity{
     commitReviews:TeamCommitReviewEntity[];
 
     //to theme suggestion
-    @OneToMany(type=>ThemeSuggestionEntity,themeSuggestion=>themeSuggestion.teacher)
-    themeSuggestions:ThemeSuggestionEntity[];
+    @OneToMany(type=>ThemeEntity,theme=>theme.suggestedByTeacher)
+    suggestedThemes:ThemeEntity[];
     
 
 

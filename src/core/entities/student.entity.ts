@@ -2,6 +2,7 @@ import {  Column, CreateDateColumn, Entity, JoinColumn, Long, ManyToOne, OneToMa
 import { InvitationEntity } from "./invitation.entity";
 import { MeetAbsentEntity } from "./meet.absent.entity";
 import { NotificationEntity } from "./Notification.entity";
+import { PromotionEntity } from "./promotion.entity";
 import { SurveyParticipantEntity } from "./survey.participant.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
@@ -14,7 +15,9 @@ export class StudentEntity{
     @PrimaryGeneratedColumn('uuid')
     id:string;
     
-    @PrimaryColumn('')
+    @PrimaryColumn({
+        unique:true
+    })
     code:string;
 
 
@@ -55,6 +58,9 @@ export class StudentEntity{
     //to meetAbsent
     @OneToMany(type=>MeetAbsentEntity,meetAbsent=>meetAbsent.student)
     meetAbsences:MeetAbsentEntity[];
+
+    @ManyToOne(type=>PromotionEntity,promotion=>promotion.students)
+    promotion:PromotionEntity;
 
   
 

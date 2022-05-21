@@ -2,10 +2,12 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 
 @Entity('config')
 export class ConfigEntity{
-    @PrimaryGeneratedColumn('uuid')
-    id:string;
+    @PrimaryGeneratedColumn('increment')
+    id:number;
 
-    @Column()
+    @Column({
+        unique:true
+    })
     key:string;
 
     @Column()
@@ -13,6 +15,8 @@ export class ConfigEntity{
 
     @CreateDateColumn()
     createdAt:Date;
+    
+
 
     
 }

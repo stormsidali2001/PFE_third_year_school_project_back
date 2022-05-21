@@ -33,8 +33,6 @@ import { TeamDocumentCommit } from './core/entities/team.document.commit.entity'
 import { TeamCommitReviewEntity } from './core/entities/team.commit.review.entity';
 import { NotificationEntity } from './core/entities/Notification.entity';
 import { DiscusedPointEntity } from './core/entities/pv.meet.descused.point.entity';
-import { ThemeSuggestionEntity } from './core/entities/theme.suggestion';
-import { ThemeSuggestionDocumentEntity } from './core/entities/theme.suggestion.document.entity';
 import { RestPasswordTokenEntity } from './core/entities/resetPasswordToken.entity';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/http.error.filter';
@@ -47,6 +45,8 @@ import { SocketModule } from './socket/socket.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { SessionEntity } from './core/entities/session.entity';
 import { ConfigEntity } from './core/entities/config.entity';
+import { ConfigMigration } from 'migrations/config.migration';
+import { PromotionEntity } from './core/entities/promotion.entity';
 
 
 @Module({
@@ -89,16 +89,21 @@ import { ConfigEntity } from './core/entities/config.entity';
               TeamDocumentEntity,
               TeamCommitReviewEntity,
               NotificationEntity,
-              ThemeSuggestionEntity,
-              ThemeSuggestionDocumentEntity,
               RestPasswordTokenEntity,
               SessionEntity,
-              ConfigEntity
+              ConfigEntity,
+              PromotionEntity
             
             
  
 
             ],
+
+   
+  
+    
+
+
   
 
   }),

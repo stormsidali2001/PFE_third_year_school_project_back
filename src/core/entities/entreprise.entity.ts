@@ -1,5 +1,6 @@
 import {  Column, Entity, JoinColumn, Long, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { NotificationEntity } from "./Notification.entity";
+import { ThemeEntity } from "./theme.entity";
 import { UserEntity } from "./user.entity";
 
 
@@ -17,6 +18,9 @@ export class EntrepriseEntity{
     //relation
     @OneToOne(type=>UserEntity) @JoinColumn()
     user:UserEntity;
+
+    @OneToMany(type=>ThemeEntity,theme=>theme.suggestedByEntreprise)
+    suggestedThemes:ThemeEntity[];
 
   
 

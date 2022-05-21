@@ -82,27 +82,36 @@ import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entit
         throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
        }
        //@ts-ignore
-      const userId = client.request.session.passport.user.id;
+      const userId = client?.request?.session?.passport?.user?.id;
       const manager = getManager();
       const user =  await manager.getRepository(UserEntity).createQueryBuilder('user')
       .where('user.id = :userId',{userId})
       .getOne();
-      if(user.userType != UserType.STUDENT){
-        Logger.error('not student','MessageGateway/handleConnection')
-        throw new HttpException("not student",HttpStatus.FORBIDDEN)
-      }
-      const student  =  await manager.getRepository(StudentEntity).createQueryBuilder('student')
-      .where('student.userId = :userId',{userId})
-      .leftJoinAndSelect('student.team','team')
-      .getOne();
+      if(user.userType === UserType.STUDENT){
+      
+        const student  =  await manager.getRepository(StudentEntity).createQueryBuilder('student')
+        .where('student.userId = :userId',{userId})
+        .leftJoinAndSelect('student.team','team')
+        .getOne();
+        
+        if(student?.team){
+          const teamId = student?.team?.id;
+         
+                //@ts-ignore
+          Logger.error(`user:${userId} joined the room teamId ${teamId} and room ${userId}`,"MessageGateWay/subscribe(joinTeamRoom)")
+          client.join(teamId);
 
-
-      const teamId = student.team.id;
+        }
+  
        
-            //@ts-ignore
-      Logger.log(`user:${userId} joined the room teamId ${teamId}`,"MessageGateWay/subscribe(joinTeamRoom)")
-       client.join(teamId);
-       client.join(student.id)
+      
+     
+      }
+
+      Logger.error(`user:${userId} joined the room  ${userId}`,"MessageGateWay/subscribe(joinTeamRoom)")
+   
+      client.join(userId)
+    
 
        
       

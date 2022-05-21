@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserRepository } from "src/core/repositories/user.repository";
-import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, UserDTO, UserRO } from "../core/dtos/user.dto";
+import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, TeacherTestDTO, UserDTO, UserRO } from "../core/dtos/user.dto";
 import {  UserEntity, UserType } from "../core/entities/user.entity";
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -14,11 +14,13 @@ import * as nodemailer from 'nodemailer';
 import { JwtService } from "@nestjs/jwt";
 import { jwtPayload } from "./types/jwtPayload.type";
 import { Tokens } from "./types/tokens";
-import { getManager } from "typeorm";
+import { getConnection, getManager, getRepository } from "typeorm";
 import * as argon from 'argon2'
 import { SocketService } from "src/socket/socket.service";
 import { AdminEntity } from "src/core/entities/admin.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
+import { PromotionEntity } from "src/core/entities/promotion.entity";
+import { UserService } from "src/user/user.service";
 
 
 
@@ -29,7 +31,8 @@ export class AuthService{
         private studentRepository:StudentRepository,
         private resetPasswordTokenRepository:RestPasswordTokenRepository,
         private jwtService:JwtService,
-        private socketService:SocketService
+        private socketService:SocketService,
+        private userService:UserService
         ){}
     async signin(data:UserDTO){
         
@@ -64,12 +67,32 @@ export class AuthService{
 
         
     }
-   
-    async signupStudent(data:StudentDTO){
-        try{
 
+    async signupStudent(userId:string,data:StudentDTO){
+        try{
+        const manager = getManager()
+        const connectedUser = await manager.getRepository(UserEntity).createQueryBuilder('cuser')
+        .where('cuser.id = :userId',{userId})
+        .getOne()
+
+        if(connectedUser.userType !== UserType.ADMIN){
+            Logger.error("permission denied","signupStudent")
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+
+        }
         
-        const {email,firstName,lastName,dob,code} = data;
+        const {email,firstName,lastName,dob,code,promotionId} = data;
+        const promotion = await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .where('promotion.id = :promotionId',{promotionId})
+        .getOne();
+
+        if(!promotion){
+            Logger.error("promotion not found","signupStudent")
+            throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST);
+
+        }
+
         let user:UserEntity = await this.userRepository.findOne({where:{email}})
         const name = email?.split('@')[0]?.split('.')[0];
         const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
@@ -91,13 +114,16 @@ export class AuthService{
         }) 
         user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
         user.password = await bcrypt.hash(user.password,10);
-        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code});
+        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
         student.user = user;
-        user = await this.userRepository.save(user);
-        await this.studentRepository.save(student);
+        await getConnection().transaction(async manager=>{
 
-        // const tokens:Tokens = await this._getTokens(user.id,user.email);
-        // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+            user = await manager.getRepository(UserEntity).save(user);
+              await manager.getRepository(StudentEntity).save(student);
+        })
+        await this.userService._sendNotfication(connectedUser.id,`etudiant: ${student.firstName} ${student.lastName} ajouter avec success`)
+
+       
 
         //     return tokens;
         }catch(err){
@@ -105,15 +131,41 @@ export class AuthService{
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
     }
-    async signupStudents(data:StudentDTO[]){
+    async signupStudents(userId:string,data:StudentDTO[]){
         try{
-        const manager = getManager()
-        const students = [];
-        const users = [];
+
+            const manager = getManager()
+            const connectedUser = await manager.getRepository(UserEntity).createQueryBuilder('cuser')
+            .where('cuser.id = :userId',{userId})
+            .getOne()
+    
+            if(connectedUser.userType !== UserType.ADMIN){
+                Logger.error("permission denied","signupStudent")
+                throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+    
+            }
+
+            const students = [];
+            const users = [];
+
+        
+      
         for(let key in data){
             const studentData = data[key];
             console.log("student data",studentData)
-            const {email,firstName,lastName,dob,code} = studentData;
+            const {email,firstName,lastName,dob,code,promotionId} = studentData;
+
+            const promotion = await manager.getRepository(PromotionEntity)
+            .createQueryBuilder('promotion')
+            .where('promotion.id = :promotionId',{promotionId})
+            .getOne();
+    
+            if(!promotion){
+                Logger.error("promotion not found","signupStudentTest")
+                throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST);
+    
+            }
+
             let user:UserEntity = await this.userRepository.findOne({where:{email}})
             const name = email?.split('@')[0]?.split('.')[0];
             const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
@@ -135,7 +187,7 @@ export class AuthService{
             }) 
             user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
             user.password = await bcrypt.hash(user.password,10);
-            const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code});
+            const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
             student.user = user;
             users.push(user)
             students.push(student)
@@ -143,60 +195,35 @@ export class AuthService{
          
 
         Logger.log("starting exevuting db save","AuthService/signupStudents")
+      await  getConnection().transaction(async manager=>{
         await manager.getRepository(UserEntity).save(users)
         await manager.getRepository(StudentEntity).save(students);
+    })
         
 
         Logger.log(students,"AuthService/signupStudents")
         return students;
+        
         }catch(err){
             Logger.error(err,"AuthService/signupStudents")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
     }
-     async signupStudentTest(data:StudentTestDTO){
-        try{
-
-        
-        const {email,password,firstName,lastName,dob,code} = data;
-        let user:UserEntity = await this.userRepository.findOne({where:{email}})
-        const name = email?.split('@')[0]?.split('.')[0];
-        const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
-        const service = email?.split('@')[1]?.split('.')[0];
-        const domain = email?.split('@')[1]?.split('.')[1];
-        
-        if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
-            throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
-        }
-        if(user){
-            throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
-        }
-        // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
-        const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if(password.match(regex)==null){
-            throw new HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters',HttpStatus.BAD_REQUEST); 
-        }
      
-        user =  this.userRepository.create({email,password,userType:UserType.STUDENT});
-        user.password = await bcrypt.hash(user.password,10);
-        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code});
-        student.user = user;
-        user = await this.userRepository.save(user);
-        await this.studentRepository.save(student);
-
-        // const tokens:Tokens = await this._getTokens(user.id,user.email);
-        // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
-
-        //     return tokens;
-        }catch(err){
-            Logger.error(err,"AuthService/signupStudent")
-            throw new HttpException(err,HttpStatus.BAD_REQUEST)
-        }
-    }
-    async signupTeacher(data:TeacherDTO){
+    async signupTeacher(userId:string,data:TeacherDTO){
         try{
 
             const manager = getManager()
+            const connectedUser = await manager.getRepository(UserEntity).createQueryBuilder('cuser')
+            .where('cuser.id = :userId',{userId})
+            .getOne()
+    
+            if(connectedUser.userType !== UserType.ADMIN){
+                Logger.error("permission denied","signupStudent")
+                throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+    
+            }
+
             const {email,firstName,lastName,ssn,speciality} = data;
             let user:UserEntity = await this.userRepository.findOne({where:{email}})
             const name = email?.split('@')[0]?.split('.')[0];
@@ -217,7 +244,7 @@ export class AuthService{
                     resolve(buf.toString('hex'))
                 })
             }) 
-            user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+            user =  this.userRepository.create({email,password:randomPassword,userType:UserType.TEACHER});
             user.password = await bcrypt.hash(user.password,10);
             const teacherRepository = manager.getRepository(TeacherEntity);
             const teacher:TeacherEntity = teacherRepository.create({firstName,lastName,ssn,speciality});
@@ -230,9 +257,19 @@ export class AuthService{
             }
         
     }
-    async signupTeachers(data:TeacherDTO[]){
+    async signupTeachers(userId,data:TeacherDTO[]){
         try{
             const manager = getManager()
+            const connectedUser = await manager.getRepository(UserEntity).createQueryBuilder('cuser')
+            .where('cuser.id = :userId',{userId})
+            .getOne()
+    
+            if(connectedUser.userType !== UserType.ADMIN){
+                Logger.error("permission denied","signupStudent")
+                throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+    
+            }
+
             const teachers = [];
             const users = [];
             for(let key in data){
@@ -258,7 +295,7 @@ export class AuthService{
                         resolve(buf.toString('hex'))
                     })
                 }) 
-                user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
+                user =  this.userRepository.create({email,password:randomPassword,userType:UserType.TEACHER});
                 user.password = await bcrypt.hash(user.password,10);
                 const teacher:TeacherEntity = manager.getRepository(TeacherEntity).create({firstName,lastName,ssn,speciality});
                 teacher.user = user;
@@ -268,8 +305,12 @@ export class AuthService{
              
     
             Logger.log("starting exevuting db save","AuthService/signupStudents")
-            await manager.getRepository(UserEntity).save(users)
-            await manager.getRepository(TeacherEntity).save(teachers);
+           await getConnection().transaction(async manager =>{
+                await manager.getRepository(UserEntity).save(users)
+                await manager.getRepository(TeacherEntity).save(teachers);
+
+            })
+          
             
     
             Logger.log(teachers,"AuthService/signupteachers")
@@ -409,6 +450,134 @@ export class AuthService{
         await this.resetPasswordTokenRepository.delete(resetPasswordToken.id);
         return `${user.email} password has been reset succesfully`;
     }
+
+    /**
+     * 
+     * test functions
+     */
+     async signupStudentTest(data:StudentTestDTO){
+        try{
+
+        const manager = getManager()
+        const {email,password,firstName,lastName,dob,code,promotionId} = data;
+        const promotion = await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .where('promotion.id = :promotionId',{promotionId})
+        .getOne();
+
+        if(!promotion){
+            Logger.error("promotion not found","signupStudentTest")
+            throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST);
+
+        }
+
+        let user:UserEntity = await this.userRepository.findOne({where:{email}})
+        const name = email?.split('@')[0]?.split('.')[0];
+        const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+        const service = email?.split('@')[1]?.split('.')[0];
+        const domain = email?.split('@')[1]?.split('.')[1];
+        
+        if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+            throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+        }
+        if(user){
+            throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+        }
+        // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
+        const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if(password.match(regex)==null){
+            throw new HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters',HttpStatus.BAD_REQUEST); 
+        }
+     
+        user =  this.userRepository.create({email,password,userType:UserType.STUDENT});
+        user.password = await bcrypt.hash(user.password,10);
+        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
+        student.user = user;
+        user = await this.userRepository.save(user);
+        await this.studentRepository.save(student);
+
+        // const tokens:Tokens = await this._getTokens(user.id,user.email);
+        // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
+
+        //     return tokens;
+        }catch(err){
+            Logger.error(err,"AuthService/signupStudent")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+    }
+    async signupTeacherTest(data:TeacherTestDTO){
+        try{
+
+            const manager = getManager()
+            const {email,firstName,lastName,ssn,speciality,password} = data;
+            let user:UserEntity = await this.userRepository.findOne({where:{email}})
+            const name = email?.split('@')[0]?.split('.')[0];
+            const lastNameEmail =  email?.split('@')[0]?.split('.')[1]
+            const service = email?.split('@')[1]?.split('.')[0];
+            const domain = email?.split('@')[1]?.split('.')[1];
+            
+            if(name?.length > 0 && lastNameEmail?.length>0 && service!== 'esi-sba' && domain !='dz'){
+                throw new HttpException("le mail doit etre un mail scholaire!",HttpStatus.BAD_REQUEST);
+            }
+            if(user){
+                throw new HttpException('Email already exists',HttpStatus.BAD_REQUEST);
+            }
+              // regex to check if a password contain at least a special character,at least a capital letter,at least a number and at least 8 characters
+        const regex =  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if(password.match(regex)==null){
+            throw new HttpException('Password must contain at least a special character,at least a capital letter,at least a number and at least 8 characters',HttpStatus.BAD_REQUEST); 
+        }
+     
+        user =  this.userRepository.create({email,password,userType:UserType.TEACHER});
+        user.password = await bcrypt.hash(user.password,10);
+          
+        
+            const teacherRepository = manager.getRepository(TeacherEntity);
+            const teacher:TeacherEntity = teacherRepository.create({firstName,lastName,ssn,speciality});
+            teacher.user = user;
+            user = await this.userRepository.save(user);
+            await teacherRepository.save(teacher);
+            }catch(err){
+                Logger.error(err,"AuthService/signupStudent")
+                throw new HttpException(err,HttpStatus.BAD_REQUEST)
+            }
+        
+    }
+    
+   
+
+
+
+/**
+ * 
+ * @param userId 
+ * 
+ * @param refrechToken 
+ * 
+ * just for refference
+ * @returns 
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     async refrechToken(userId:string,refrechToken:string):Promise<Tokens>{
         try{
