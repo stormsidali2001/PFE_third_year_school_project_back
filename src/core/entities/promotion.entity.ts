@@ -17,12 +17,27 @@ export class PromotionEntity{
     @Column({
         default:4
     })
-    minTeam:number;
+    minMembersInTeam:number;
 
     @Column({
         default:6
     })
+    maxMembersInTeam:number;
+
+    @Column({
+        default:5
+    })
+    minTeam:number;
+
+    @Column({
+        default:20
+    })
     maxTeam:number;
+
+    @Column({
+        default:false
+    })
+    wishListSent:boolean;
 
     //relations
 

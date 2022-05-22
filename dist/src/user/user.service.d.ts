@@ -134,6 +134,10 @@ export declare class UserService {
     getAllThemeSuggestions(): Promise<ThemeEntity[]>;
     getThemeSuggestion(themeId: string): Promise<ThemeEntity>;
     validateThemeSuggestion(userId: string, themeId: string): Promise<void>;
+    getAllThemes(): Promise<ThemeEntity[]>;
+    getThemes(promotionId: string): Promise<ThemeEntity[]>;
+    sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
+    completeTeams(userId: string, promotionId: string): Promise<void>;
     getTeams(): Promise<{
         id: string;
         pseudo: string;
@@ -142,15 +146,7 @@ export declare class UserService {
         promotion: string;
         validated: boolean;
     }[]>;
-    getTeam(teamId: any): Promise<{
-        id: string;
-        pseudo: string;
-        theme: ThemeEntity;
-        members: StudentEntity[];
-        validated: boolean;
-        description: string;
-        rules: string;
-    }>;
+    getTeam(teamId: any): Promise<string>;
     getTeamMessages(userId: any): Promise<TeamChatMessageEntity[]>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string): Promise<void>;

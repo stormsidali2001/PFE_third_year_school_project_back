@@ -17,6 +17,7 @@ const promotion_entity_1 = require("./promotion.entity");
 const teacher_entity_1 = require("./teacher.entity");
 const team_entity_1 = require("./team.entity");
 const theme_document_entity_1 = require("./theme.document.entity");
+const wish_entity_1 = require("./wish.entity");
 let ThemeEntity = class ThemeEntity {
 };
 __decorate([
@@ -61,6 +62,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => promotion_entity_1.PromotionEntity, promotion => promotion.themes),
     __metadata("design:type", promotion_entity_1.PromotionEntity)
 ], ThemeEntity.prototype, "promotion", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => wish_entity_1.WishEntity, wish => wish.theme),
+    __metadata("design:type", Array)
+], ThemeEntity.prototype, "wishes", void 0);
 ThemeEntity = __decorate([
     (0, typeorm_1.Entity)('theme')
 ], ThemeEntity);

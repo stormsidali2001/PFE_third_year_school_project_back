@@ -31,13 +31,31 @@ __decorate([
         default: 4
     }),
     __metadata("design:type", Number)
-], PromotionEntity.prototype, "minTeam", void 0);
+], PromotionEntity.prototype, "minMembersInTeam", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         default: 6
     }),
     __metadata("design:type", Number)
+], PromotionEntity.prototype, "maxMembersInTeam", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: 5
+    }),
+    __metadata("design:type", Number)
+], PromotionEntity.prototype, "minTeam", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: 20
+    }),
+    __metadata("design:type", Number)
 ], PromotionEntity.prototype, "maxTeam", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], PromotionEntity.prototype, "wishListSent", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(type => team_entity_1.TeamEntity, team => team.promotion),
     __metadata("design:type", Array)

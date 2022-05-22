@@ -8,6 +8,7 @@ import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
+import { WishEntity } from "./wish.entity";
 export declare class TeamEntity {
     id: string;
     nickName: string;
@@ -25,4 +26,5 @@ export declare class TeamEntity {
     meets: MeetEntity[];
     documentCommits: TeamDocumentCommit[];
     promotion: PromotionEntity;
+    wishes: WishEntity[];
 }

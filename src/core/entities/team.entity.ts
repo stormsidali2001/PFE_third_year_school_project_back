@@ -9,6 +9,7 @@ import { TeamChatMessageEntity } from "./team.chat.message.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
+import { WishEntity } from "./wish.entity";
 
 
 @Entity('team')
@@ -71,6 +72,8 @@ export class TeamEntity{
     @ManyToOne(type=>PromotionEntity,promotion=>promotion.teams)
     promotion:PromotionEntity;
 
+    @OneToMany(type=>WishEntity,wish=>wish.team)
+    wishes:WishEntity[];
   
     
 

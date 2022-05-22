@@ -47,6 +47,7 @@ import { SessionEntity } from './core/entities/session.entity';
 import { ConfigEntity } from './core/entities/config.entity';
 import { ConfigMigration } from 'migrations/config.migration';
 import { PromotionEntity } from './core/entities/promotion.entity';
+import { WishEntity } from './core/entities/wish.entity';
 
 
 @Module({
@@ -92,7 +93,8 @@ import { PromotionEntity } from './core/entities/promotion.entity';
               RestPasswordTokenEntity,
               SessionEntity,
               ConfigEntity,
-              PromotionEntity
+              PromotionEntity,
+              WishEntity
             
             
  

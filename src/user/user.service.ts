@@ -29,6 +29,7 @@ import { ThemeEntity } from "src/core/entities/theme.entity";
 import { ThemeDocumentEntity } from "src/core/entities/theme.document.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import {QueryBuilder} from  'typeorm'
+import { WishEntity } from "src/core/entities/wish.entity";
 
 @Injectable()
 export class UserService{
@@ -1220,7 +1221,7 @@ async getThemeSuggestions(promotionId:string){
         const manager = getManager();
         const themeSuggestions:ThemeEntity[] = await manager.getRepository(ThemeEntity)
         .createQueryBuilder('theme')
-        .andWhere('theme.promotionId = :promotionId',{promotionId})
+        .where('theme.promotionId = :promotionId',{promotionId})
         .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher','theme.suggestedByTeacher IS NOT NULL')
         .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise','theme.suggestedByEntreprise IS NOT NULL')
         .getMany()
@@ -1302,6 +1303,233 @@ async validateThemeSuggestion(userId:string,themeId:string){
     }
 }
 
+//themes
+async getAllThemes(){
+    try{
+        const manager = getManager();
+        const themeSuggestions:ThemeEntity[] = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .where('theme.validated = true')
+        .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher','theme.suggestedByTeacher IS NOT NULL')
+        .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise','theme.suggestedByEntreprise IS NOT NULL')
+        .leftJoinAndSelect('theme.promotion','promotion')
+        .getMany()
+
+        return themeSuggestions;
+
+     
+       
+    }catch(err){
+        Logger.error(err,'UserService/getAllThemeSuggestions')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+async getThemes(promotionId:string){
+    try{
+        const manager = getManager();
+        const themeSuggestions:ThemeEntity[] = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .where('theme.validated = true')
+        .andWhere('theme.promotionId = :promotionId',{promotionId})
+        .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher','theme.suggestedByTeacher IS NOT NULL')
+        .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise','theme.suggestedByEntreprise IS NOT NULL')
+        .getMany()
+       
+
+       return themeSuggestions
+        
+
+       
+
+       
+    }catch(err){
+        Logger.error(err,'UserService/getThemes')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+//wish list 
+async sendWishList(userId:string,promotionId:string){
+    try{
+        const manager = getManager();
+
+        const user = manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where("user.id = :userId",{userId})
+        .andWhere("user.userType = :userType",{userType:UserType.ADMIN})
+        .getOne();
+        const promotion = await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .where('promotion.id = :promotionId',{promotionId})
+        .leftJoinAndSelect("promotion.teams","team")
+        .loadRelationCountAndMap("team.membersCount","team.students")
+        .getOne();
+
+        if(!user){
+            Logger.log("permission denied","UserService/submitWishList")
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
+        } 
+        if(!promotion){
+            Logger.log("promotion not found","UserService/submitWishList")
+            throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
+        }  
+       
+
+      
+       const allTeamsAreValid =  promotion.teams.every(team=>{
+            //@ts-ignore
+            return  team.membersCount >= promotion.minMembersInTeam && team.membersCount <= promotion.maxMembersInTeam
+            
+        })
+        if(!allTeamsAreValid){
+            Logger.log("il existe des equipe non valide","UserService/submitWishList")
+            throw new HttpException("il existe des equipe non valide",HttpStatus.BAD_REQUEST)
+        }
+
+        const students = await manager.getRepository(StudentEntity)
+        .createQueryBuilder('student')
+        .where('student.promotionId = :promotionId',{promotionId})
+        .andWhere('student.teamId IS NULL')
+        .getMany();
+        if(students?.length >0){
+            Logger.log("il existe des etudiants sans equipes","UserService/submitWishList")
+            throw new HttpException("il existe des etudiants sans equipes",HttpStatus.BAD_REQUEST)
+        }
+
+
+
+
+
+     return   await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .update()
+        .set({wishListSent:true})
+        .where('promotion.id = :pomotionId',{promotionId})
+        .execute();  
+
+    }catch(err){
+        Logger.log(err,"UserService/submitWishList")
+        throw new HttpException(err,HttpStatus.BAD_REQUEST)
+    }
+  
+}
+// completer les equipes
+async completeTeams(userId:string,promotionId:string){
+    try{
+      
+
+        const manager = getManager();
+
+        const user = manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where("user.id = :userId",{userId})
+        .andWhere("user.userType = :userType",{userType:UserType.ADMIN})
+        .getOne();
+
+        const promotion = await manager.getRepository(PromotionEntity)
+        .createQueryBuilder('promotion')
+        .where('promotion.id = :promotionId',{promotionId})
+        .leftJoinAndSelect("promotion.teams","team")
+        .loadRelationCountAndMap("team.membersCount","team.students")
+        .getOne();
+
+        if(!user){
+            Logger.log("permission denied","UserService/submitWishList")
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
+        } 
+        if(!promotion){
+            Logger.log("promotion not found","UserService/submitWishList")
+            throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
+        }  
+        let teamsExtraMembers:TeamEntity[] = [];
+        let teamsNeedMembers:TeamEntity[]  = [];
+        let TeamRemainingMembers = {}
+        let TeamExtraMembers = {}
+
+        promotion.teams.forEach(team=>{
+            //@ts-ignore
+           
+
+            if(team.membersCount > promotion.minMembersInTeam ){
+                teamsExtraMembers.push(team)
+            //@ts-ignore
+            const extra:number =  team.membersCount - promotion.minMembersInTeam ;
+            TeamExtraMembers[team.id] = extra;
+             //@ts-ignore
+            }else if(team.membersCount < promotion.minMembersInTeam) {
+                teamsNeedMembers.push(team)
+                //@ts-ignore
+                const toBeCompleted:number =  promotion.minMembersInTeam -team.membersCount;
+                TeamRemainingMembers[team.id] = toBeCompleted;
+            }
+        })
+       
+
+        const students = await manager.getRepository(StudentEntity)
+        .createQueryBuilder('student')
+        .where('student.promotionId = :promotionId',{promotionId})
+        .andWhere('student.teamId IS NULL')
+        .getMany();
+
+        const studentsAddToTeamLater = []
+        let i =0;
+        let j = 0;
+    
+        //inserting students into the teams starting from  those who  have less students first
+         //@ts-ignore
+         teamsNeedMembers = teamsNeedMembers.sort((a,b)=>a.membersCount-b.membersCount)
+
+                while(i<teamsNeedMembers.length && j<students.length){
+                    const teamNeedMembers = teamsNeedMembers[i];
+                    while( TeamRemainingMembers[teamNeedMembers.id]  > 0 && j<students.length){
+                        TeamRemainingMembers[teamNeedMembers.id]--;
+                        studentsAddToTeamLater.push({student:students[j],team:teamNeedMembers})
+                        if(TeamRemainingMembers[teamNeedMembers.id] ===0){
+
+                            teamsNeedMembers = teamsNeedMembers.filter(el=>el.id ===teamNeedMembers.id)
+                        }
+
+                        j++;
+                    }
+                  
+                }
+        const remainingStudents:number =  students.length -studentsAddToTeamLater.length ;
+        if(teamsNeedMembers.length === 0){ 
+           
+            if(remainingStudents >0){
+
+                 /*
+                   inserting the student into  a not completed team or create a new team for them
+                 */
+
+
+            }
+            //cool 
+           
+          
+        }else{
+          
+            //lopping through the teamsExtraMembers array and modifying the team of an extra member into the 
+            // team that needs it
+
+          
+           
+
+        }
+
+            
+            
+      
+       
+       
+
+
+    }catch(err){
+        Logger.log(err,"UserService/completeTeams")
+        throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        
+    }
+}
 
 
 //team crud operations
@@ -1315,18 +1543,6 @@ async getTeams(){
         .leftJoinAndSelect('team.promotion','promotion')
         .getMany();
         
-       
-      
-     
-
-      
-
-
-       
-
-
-
-
         //@ts-ignore
         return teams.map(({nickName,givenTheme,membersCount,id,promotion})=>{
            Logger.error(nickName,promotion,"debug")
@@ -1336,7 +1552,7 @@ async getTeams(){
                 theme:givenTheme,
                 nombre:membersCount,
                 promotion:promotion.name,
-                validated: membersCount >= promotion.minTeam && membersCount <=  promotion.maxTeam
+                validated: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam
             }
         }) ;
     }catch(err){
@@ -1348,57 +1564,7 @@ async getTeams(){
 }
 
 async getTeam(teamId){
-    try{
-        const manager = getManager();
-        const team = await manager.getRepository(TeamEntity)
-        .createQueryBuilder('team')
-        .where('team.id = :teamId',{teamId})
-        .leftJoinAndSelect('team.givenTheme','givenTheme')
-        .leftJoinAndSelect('team.students','students')
-        .getOne()
-      
-        const {
-            id,
-           nickName,
-            givenTheme,
-              //@ts-ignore
-            students,
-            description,
-            rules
-        } = team;
-        
-        const configs = await manager.getRepository(ConfigEntity)
-        .createQueryBuilder('config')
-        .where('config.key = "minTeam" or config.key = "maxTeam"')
-        .getMany();
-     
-        let minTeam:any = configs.find(el=>el.key === 'minTeam' )?.value
-        let maxTeam:any =  configs.find(el=>el.key === 'maxTeam')?.value
-
-        if(!minTeam || !maxTeam){
-            Logger.error("minTeam and maxTeam configuration variables are not defined !!!","UserService/getTeams")
-            throw new HttpException("internal  server error",HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-
-        minTeam = parseInt(minTeam);
-        maxTeam = parseInt(maxTeam);
-        const membersCount = students.length;
-            return {
-                id,
-                pseudo:nickName,
-                theme:givenTheme,
-                members:students,
-                validated:membersCount >= minTeam && membersCount <= maxTeam,
-                description,
-                rules
-            }
-      
-    }catch(err){
-        Logger.error(err,'UserService/getTeams')
-        throw new HttpException(err,HttpStatus.BAD_REQUEST);
-    }
-
+   return "akhayi mahich tmchi doka"
 }
 //messages crud operations
 

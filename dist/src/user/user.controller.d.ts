@@ -81,6 +81,8 @@ export declare class UserController {
     getAllThemeSuggestions(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
     getThemeSuggestion(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
     validateThemeSuggestion(userId: string, themeId: string): Promise<void>;
+    getAllThemes(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
+    getThemes(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
     getTeams(): Promise<{
         id: string;
         pseudo: string;
@@ -89,15 +91,7 @@ export declare class UserController {
         promotion: string;
         validated: boolean;
     }[]>;
-    getTeam(teamId: string): Promise<{
-        id: string;
-        pseudo: string;
-        theme: import("../core/entities/theme.entity").ThemeEntity;
-        members: import("../core/entities/student.entity").StudentEntity[];
-        validated: boolean;
-        description: string;
-        rules: string;
-    }>;
+    getTeam(teamId: string): Promise<string>;
     getUser(userId: string): Promise<{
         [x: string]: string | {
             id: string;

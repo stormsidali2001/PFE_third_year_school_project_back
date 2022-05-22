@@ -52,6 +52,7 @@ const platform_express_1 = require("@nestjs/platform-express");
 const session_entity_1 = require("./core/entities/session.entity");
 const config_entity_1 = require("./core/entities/config.entity");
 const promotion_entity_1 = require("./core/entities/promotion.entity");
+const wish_entity_1 = require("./core/entities/wish.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -98,7 +99,8 @@ AppModule = __decorate([
                     resetPasswordToken_entity_1.RestPasswordTokenEntity,
                     session_entity_1.SessionEntity,
                     config_entity_1.ConfigEntity,
-                    promotion_entity_1.PromotionEntity
+                    promotion_entity_1.PromotionEntity,
+                    wish_entity_1.WishEntity
                 ],
             }),
             auth_module_1.Auth,

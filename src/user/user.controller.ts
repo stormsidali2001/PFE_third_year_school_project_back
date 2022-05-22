@@ -379,6 +379,31 @@ export class UserController{
         }
 
     }
+    //themes
+    @Public()
+    @Get('getThemes')
+    async getAllThemes(){
+        try{
+            return await this.userService.getAllThemes()
+        }catch(err){
+            Logger.error(err,'UsrController/getAllThemes')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Public()
+    @Get('getThemes/:themeId')
+    async getThemes(@Param('themeId') themeId:string){
+        try{
+            return await this.userService.getThemes(themeId)
+        }catch(err){
+            Logger.error(err,'UsrController/getThemes')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+   
+
 
     @Public()
     @Get('getTeams')
@@ -422,6 +447,7 @@ export class UserController{
         }
        
     }
+    
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')

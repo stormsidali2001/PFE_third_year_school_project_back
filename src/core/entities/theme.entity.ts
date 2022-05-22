@@ -5,6 +5,7 @@ import { PromotionEntity } from "./promotion.entity";
 import { TeacherEntity } from "./teacher.entity";
 import { TeamEntity } from "./team.entity";
 import { ThemeDocumentEntity } from "./theme.document.entity";
+import { WishEntity } from "./wish.entity";
 
 @Entity('theme')
 export class ThemeEntity{
@@ -41,6 +42,9 @@ export class ThemeEntity{
 
     @ManyToOne(type=>PromotionEntity,promotion=>promotion.themes)
     promotion:PromotionEntity;
+
+    @OneToMany(type=>WishEntity,wish=>wish.theme)
+    wishes:WishEntity[];
 
 
 
