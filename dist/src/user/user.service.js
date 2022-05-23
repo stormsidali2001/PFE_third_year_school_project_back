@@ -1106,7 +1106,8 @@ let UserService = class UserService {
                 .createQueryBuilder('promotion')
                 .where('promotion.id = :promotionId', { promotionId })
                 .leftJoinAndSelect("promotion.teams", "team")
-                .loadRelationCountAndMap("team.membersCount", "team.students")
+                .leftJoinAndSelect('team.students', 'students')
+                .leftJoinAndSelect('team.teamLeader', 'teamLeader')
                 .getOne();
             if (!user) {
                 common_1.Logger.log("permission denied", "UserService/submitWishList");
@@ -1118,18 +1119,14 @@ let UserService = class UserService {
             }
             let teamsExtraMembers = [];
             let teamsNeedMembers = [];
-            let TeamRemainingMembers = {};
-            let TeamExtraMembers = {};
+            const studentsAddToTeamLater = [];
+            const studentsModifiedTeams = [];
             promotion.teams.forEach(team => {
-                if (team.membersCount > promotion.minMembersInTeam) {
+                if (team.students.length >= promotion.minMembersInTeam) {
                     teamsExtraMembers.push(team);
-                    const extra = team.membersCount - promotion.minMembersInTeam;
-                    TeamExtraMembers[team.id] = extra;
                 }
-                else if (team.membersCount < promotion.minMembersInTeam) {
+                else if (team.students.length < promotion.minMembersInTeam) {
                     teamsNeedMembers.push(team);
-                    const toBeCompleted = promotion.minMembersInTeam - team.membersCount;
-                    TeamRemainingMembers[team.id] = toBeCompleted;
                 }
             });
             const students = await manager.getRepository(student_entity_1.StudentEntity)
@@ -1137,20 +1134,22 @@ let UserService = class UserService {
                 .where('student.promotionId = :promotionId', { promotionId })
                 .andWhere('student.teamId IS NULL')
                 .getMany();
-            const studentsAddToTeamLater = [];
             let i = 0;
             let j = 0;
             teamsNeedMembers = teamsNeedMembers.sort((a, b) => a.membersCount - b.membersCount);
             while (i < teamsNeedMembers.length && j < students.length) {
                 const teamNeedMembers = teamsNeedMembers[i];
-                while (TeamRemainingMembers[teamNeedMembers.id] > 0 && j < students.length) {
-                    TeamRemainingMembers[teamNeedMembers.id]--;
+                let toBeCompleted = promotion.minMembersInTeam - teamNeedMembers.students.length;
+                while (toBeCompleted > 0 && j < students.length) {
+                    teamNeedMembers.students.push(students[j]);
                     studentsAddToTeamLater.push({ student: students[j], team: teamNeedMembers });
-                    if (TeamRemainingMembers[teamNeedMembers.id] === 0) {
+                    toBeCompleted = promotion.minMembersInTeam - teamNeedMembers.students.length;
+                    if (toBeCompleted === 0) {
                         teamsNeedMembers = teamsNeedMembers.filter(el => el.id === teamNeedMembers.id);
                     }
                     j++;
                 }
+                i++;
             }
             const remainingStudents = students.length - studentsAddToTeamLater.length;
             if (teamsNeedMembers.length === 0) {
@@ -1158,6 +1157,15 @@ let UserService = class UserService {
                 }
             }
             else {
+                let i = 0;
+                while (i < teamsExtraMembers.length && teamsNeedMembers.length > 0) {
+                    const teamExtraMembers = teamsExtraMembers[i];
+                    const extraStudent = teamExtraMembers.students.find(st => teamExtraMembers.teamLeader.id !== st.id);
+                    teamExtraMembers.students = teamExtraMembers.students.filter(st => st.id !== extraStudent.id);
+                    studentsModifiedTeams.push({ student: extraStudent, from: teamExtraMembers, to: teamsNeedMembers[teamsNeedMembers.length - 1] });
+                    teamsNeedMembers.pop();
+                    i++;
+                }
             }
         }
         catch (err) {

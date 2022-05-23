@@ -1416,10 +1416,7 @@ async sendWishList(userId:string,promotionId:string){
 // completer les equipes
 async completeTeams(userId:string,promotionId:string){
     try{
-      
-
         const manager = getManager();
-
         const user = manager.getRepository(UserEntity)
         .createQueryBuilder('user')
         .where("user.id = :userId",{userId})
@@ -1430,7 +1427,8 @@ async completeTeams(userId:string,promotionId:string){
         .createQueryBuilder('promotion')
         .where('promotion.id = :promotionId',{promotionId})
         .leftJoinAndSelect("promotion.teams","team")
-        .loadRelationCountAndMap("team.membersCount","team.students")
+        .leftJoinAndSelect('team.students','students')
+        .leftJoinAndSelect('team.teamLeader','teamLeader')
         .getOne();
 
         if(!user){
@@ -1443,24 +1441,19 @@ async completeTeams(userId:string,promotionId:string){
         }  
         let teamsExtraMembers:TeamEntity[] = [];
         let teamsNeedMembers:TeamEntity[]  = [];
-        let TeamRemainingMembers = {}
-        let TeamExtraMembers = {}
+        
+        const studentsAddToTeamLater:{team:TeamEntity,student:StudentEntity}[] = []
+        const studentsModifiedTeams = []
+
+        let studentsToBeInsertedInNewTeam:StudentEntity[] = [];
+     
+
 
         promotion.teams.forEach(team=>{
-            //@ts-ignore
-           
-
-            if(team.membersCount > promotion.minMembersInTeam ){
+            if(team.students.length >= promotion.minMembersInTeam ){
                 teamsExtraMembers.push(team)
-            //@ts-ignore
-            const extra:number =  team.membersCount - promotion.minMembersInTeam ;
-            TeamExtraMembers[team.id] = extra;
-             //@ts-ignore
-            }else if(team.membersCount < promotion.minMembersInTeam) {
+            }else if(team.students.length < promotion.minMembersInTeam) {
                 teamsNeedMembers.push(team)
-                //@ts-ignore
-                const toBeCompleted:number =  promotion.minMembersInTeam -team.membersCount;
-                TeamRemainingMembers[team.id] = toBeCompleted;
             }
         })
        
@@ -1469,52 +1462,90 @@ async completeTeams(userId:string,promotionId:string){
         .createQueryBuilder('student')
         .where('student.promotionId = :promotionId',{promotionId})
         .andWhere('student.teamId IS NULL')
+        
         .getMany();
 
-        const studentsAddToTeamLater = []
-        let i =0;
-        let j = 0;
+    
     
         //inserting students into the teams starting from  those who  have less students first
          //@ts-ignore
          teamsNeedMembers = teamsNeedMembers.sort((a,b)=>a.membersCount-b.membersCount)
+         let i =0;
+         let j = 0;
 
                 while(i<teamsNeedMembers.length && j<students.length){
                     const teamNeedMembers = teamsNeedMembers[i];
-                    while( TeamRemainingMembers[teamNeedMembers.id]  > 0 && j<students.length){
-                        TeamRemainingMembers[teamNeedMembers.id]--;
+                    let toBeCompleted:number =  promotion.minMembersInTeam -teamNeedMembers.students.length;
+                   
+                    while( toBeCompleted  > 0 && j<students.length){
+                        teamNeedMembers.students.push(students[j])
                         studentsAddToTeamLater.push({student:students[j],team:teamNeedMembers})
-                        if(TeamRemainingMembers[teamNeedMembers.id] ===0){
-
-                            teamsNeedMembers = teamsNeedMembers.filter(el=>el.id ===teamNeedMembers.id)
+                        toBeCompleted =  promotion.minMembersInTeam -teamNeedMembers.students.length;
+                        if(toBeCompleted ===0){
+                            teamsNeedMembers = teamsNeedMembers.filter(el=>el.id === teamNeedMembers.id)
                         }
 
                         j++;
                     }
-                  
+                  i++;
                 }
-        const remainingStudents:number =  students.length -studentsAddToTeamLater.length ;
+        
+        let studentsNotYetInserted = students.slice(j,students.length)
         if(teamsNeedMembers.length === 0){ 
            
-            if(remainingStudents >0){
-
                  /*
                    inserting the student into  a not completed team or create a new team for them
                  */
 
+                let i = 0;
+                let j = 0;
+                while(i<promotion.teams.length && j<studentsNotYetInserted.length){
+                        const tm = promotion.teams[i];
+                        const  nb:number = studentsAddToTeamLater.filter(({team}) =>team.id === tm.id).length
+                        let numberOfStudents = tm.students.length + nb;
+                        let toBeFull = promotion.maxMembersInTeam - numberOfStudents;
+                    while(toBeFull>0 && j<studentsNotYetInserted.length){
+                        studentsAddToTeamLater.push({student:studentsNotYetInserted[j],team:tm})
+                        toBeFull--;
+                        j++;
+                    }
+                    
 
-            }
-            //cool 
+                    i++;
+                }
+
+                studentsNotYetInserted = studentsNotYetInserted.slice(j,studentsNotYetInserted.length)
+
+                if(studentsNotYetInserted.length >0){
+                    studentsToBeInsertedInNewTeam = [...studentsNotYetInserted];
+                }
+                
+                
+                
+
+          
            
           
         }else{
           
             //lopping through the teamsExtraMembers array and modifying the team of an extra member into the 
             // team that needs it
+            let i = 0;
+            while(i<teamsExtraMembers.length && teamsNeedMembers.length >0){
+                const extra:number = teamsExtraMembers[i].students.length - promotion.minMembersInTeam;
+                if(extra !==0){
+                  
+              
+                const teamExtraMembers = teamsExtraMembers[i];
+                const extraStudent = teamExtraMembers.students.find(st=>teamExtraMembers.teamLeader.id !==st.id)          
+                teamExtraMembers.students = teamExtraMembers.students.filter(st=>st.id !==extraStudent.id)
+                studentsModifiedTeams.push({student:extraStudent,from:teamExtraMembers,to:teamsNeedMembers[teamsNeedMembers.length -1]})
+                teamsNeedMembers.pop()
+              }
 
-          
-           
+                i++;
 
+            }
         }
 
             
@@ -1522,7 +1553,11 @@ async completeTeams(userId:string,promotionId:string){
       
        
        
-
+        return {
+            studentsAddToTeamLater,
+            studentsModifiedTeams,
+            studentsToBeInsertedInNewTeam
+        }
 
     }catch(err){
         Logger.log(err,"UserService/completeTeams")
@@ -1530,8 +1565,6 @@ async completeTeams(userId:string,promotionId:string){
         
     }
 }
-
-
 //team crud operations
 async getTeams(){
     try{
