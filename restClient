@@ -249,10 +249,10 @@ POST http://localhost:8080/signupAdmin/afsjsfajgdlgdjdsgljlgjdjgdajsgj;lgdssgd
 Content-Type:application/json
 
 {
-    "email":"d.admin@esi-sba.dz",
+    "email":"d.admin1@esi-sba.dz",
     "password":"1@2@4@abC",
-    "firstName":"Bensaber",
-    "lastName":"amar"
+    "firstName":"sm",
+    "lastName":"sm"
 }
 
 ### team crud operations
