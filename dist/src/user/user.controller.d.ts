@@ -11,6 +11,7 @@ export declare class UserController {
     createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createSurvey(userId: string, survey: SurveyDto): Promise<string>;
+    getSurveyParticipantsArguments(userId: string, surveyId: string, optionId: string): Promise<import("../core/entities/survey.participant.entity").SurveyParticipantEntity[]>;
     getAnnouncement(userId: string): Promise<{
         id: string;
         title: string;
@@ -99,6 +100,7 @@ export declare class UserController {
             firstName: string;
             lastName: string;
             dob: Date;
+            moy: number;
             team: import("../core/entities/team.entity").TeamEntity;
             user: import("../core/entities/user.entity").UserEntity;
             sentInvitations: import("../core/entities/invitation.entity").InvitationEntity[];

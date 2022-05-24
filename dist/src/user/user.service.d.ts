@@ -26,6 +26,7 @@ export declare class UserService {
             firstName: string;
             lastName: string;
             dob: Date;
+            moy: number;
             team: TeamEntity;
             user: UserEntity;
             sentInvitations: InvitationEntity[];
@@ -94,6 +95,7 @@ export declare class UserService {
         options: SurveyOptionEntity[];
         participants: SurveyParticipantEntity[];
     }>;
+    getSurveyParticipantsArguments(userId: string, surveyId: string, optionId: string): Promise<SurveyParticipantEntity[]>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     getStudentsWithoutTeam(userId: string): Promise<StudentEntity[]>;
@@ -137,7 +139,14 @@ export declare class UserService {
     getAllThemes(): Promise<ThemeEntity[]>;
     getThemes(promotionId: string): Promise<ThemeEntity[]>;
     sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
-    completeTeams(userId: string, promotionId: string): Promise<void>;
+    completeTeams(userId: string, promotionId: string): Promise<{
+        studentsAddToTeamLater: {
+            team: TeamEntity;
+            student: StudentEntity;
+        }[];
+        studentsModifiedTeams: any[];
+        studentsToBeInsertedInNewTeam: StudentEntity[];
+    }>;
     getTeams(): Promise<{
         id: string;
         pseudo: string;

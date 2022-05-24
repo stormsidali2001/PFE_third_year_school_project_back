@@ -746,6 +746,37 @@ async getSurvey(userId:string,surveyId:string){
 
     }
 }
+
+async getSurveyParticipantsArguments(userId:string,surveyId:string,optionId:string){
+    try{
+        const manager = getManager();
+
+
+        return await manager.getRepository(SurveyParticipantEntity)
+        .createQueryBuilder('participant')
+        .where(qb=>{
+            const subQuery = qb.subQuery()
+            .select('survey.id')
+            .from(StudentEntity,'student')
+            .where('student.userId = :userId',{userId})
+            .leftJoin('student.team','team')
+            .leftJoin('team.surveys','survey')
+            .andWhere('survey.id = :surveyId',{surveyId})
+           .getQuery()
+           return 'participant.surveyId IN '+subQuery;
+        })
+        .andWhere('participant.answerId = :optionId',{optionId})
+        .leftJoinAndSelect('participant.student','student')
+        .getMany()
+
+        
+
+    }catch(err){
+        Logger.error(err,'UserService/getSurveyParticipantsArguments')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
 //meet
 async createNormalTeamMeet(studentId:string,meet:NormalTeamMeetDto){
     try{

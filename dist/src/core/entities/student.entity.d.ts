@@ -12,6 +12,7 @@ export declare class StudentEntity {
     firstName: string;
     lastName: string;
     dob: Date;
+    moy: number;
     team: TeamEntity;
     user: UserEntity;
     sentInvitations: InvitationEntity[];

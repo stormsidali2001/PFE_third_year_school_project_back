@@ -86,6 +86,20 @@ export class UserController{
             Logger.error(err,'UsrController/createSurvey')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
+
+    }
+    @Get('getSurveyParticipantsArguments/:surveyId/:optionId')
+    async getSurveyParticipantsArguments(
+        @GetCurrentUserId() userId:string,
+        @Param('surveyId') surveyId:string,
+        @Param('optionId') optionId:string
+    ){
+        try{
+            return await this.userService.getSurveyParticipantsArguments(userId,surveyId,optionId);
+        }catch(err){
+            Logger.error(err,'UsrController/createSurvey')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
     }
     @Get('getAnnouncement')
     async getAnnouncement(@GetCurrentUserId() userId:string){

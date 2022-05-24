@@ -558,6 +558,31 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSurveyParticipantsArguments(userId, surveyId, optionId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            return await manager.getRepository(survey_participant_entity_1.SurveyParticipantEntity)
+                .createQueryBuilder('participant')
+                .where(qb => {
+                const subQuery = qb.subQuery()
+                    .select('survey.id')
+                    .from(student_entity_1.StudentEntity, 'student')
+                    .where('student.userId = :userId', { userId })
+                    .leftJoin('student.team', 'team')
+                    .leftJoin('team.surveys', 'survey')
+                    .andWhere('survey.id = :surveyId', { surveyId })
+                    .getQuery();
+                return 'participant.surveyId IN ' + subQuery;
+            })
+                .andWhere('participant.answerId = :optionId', { optionId })
+                .leftJoinAndSelect('participant.student', 'student')
+                .getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getSurveyParticipantsArguments');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async createNormalTeamMeet(studentId, meet) {
         try {
             const { title, description, weekDay, hour, minute, second } = meet;
@@ -1121,6 +1146,7 @@ let UserService = class UserService {
             let teamsNeedMembers = [];
             const studentsAddToTeamLater = [];
             const studentsModifiedTeams = [];
+            let studentsToBeInsertedInNewTeam = [];
             promotion.teams.forEach(team => {
                 if (team.students.length >= promotion.minMembersInTeam) {
                     teamsExtraMembers.push(team);
@@ -1134,9 +1160,9 @@ let UserService = class UserService {
                 .where('student.promotionId = :promotionId', { promotionId })
                 .andWhere('student.teamId IS NULL')
                 .getMany();
+            teamsNeedMembers = teamsNeedMembers.sort((a, b) => a.membersCount - b.membersCount);
             let i = 0;
             let j = 0;
-            teamsNeedMembers = teamsNeedMembers.sort((a, b) => a.membersCount - b.membersCount);
             while (i < teamsNeedMembers.length && j < students.length) {
                 const teamNeedMembers = teamsNeedMembers[i];
                 let toBeCompleted = promotion.minMembersInTeam - teamNeedMembers.students.length;
@@ -1151,22 +1177,46 @@ let UserService = class UserService {
                 }
                 i++;
             }
-            const remainingStudents = students.length - studentsAddToTeamLater.length;
+            let studentsNotYetInserted = students.slice(j, students.length);
             if (teamsNeedMembers.length === 0) {
-                if (remainingStudents > 0) {
+                let i = 0;
+                let j = 0;
+                while (i < promotion.teams.length && j < studentsNotYetInserted.length) {
+                    const tm = promotion.teams[i];
+                    const nb = studentsAddToTeamLater.filter(({ team }) => team.id === tm.id).length;
+                    let numberOfStudents = tm.students.length + nb;
+                    let toBeFull = promotion.maxMembersInTeam - numberOfStudents;
+                    while (toBeFull > 0 && j < studentsNotYetInserted.length) {
+                        studentsAddToTeamLater.push({ student: studentsNotYetInserted[j], team: tm });
+                        toBeFull--;
+                        j++;
+                    }
+                    i++;
+                }
+                studentsNotYetInserted = studentsNotYetInserted.slice(j, studentsNotYetInserted.length);
+                if (studentsNotYetInserted.length > 0) {
+                    studentsToBeInsertedInNewTeam = [...studentsNotYetInserted];
                 }
             }
             else {
                 let i = 0;
                 while (i < teamsExtraMembers.length && teamsNeedMembers.length > 0) {
-                    const teamExtraMembers = teamsExtraMembers[i];
-                    const extraStudent = teamExtraMembers.students.find(st => teamExtraMembers.teamLeader.id !== st.id);
-                    teamExtraMembers.students = teamExtraMembers.students.filter(st => st.id !== extraStudent.id);
-                    studentsModifiedTeams.push({ student: extraStudent, from: teamExtraMembers, to: teamsNeedMembers[teamsNeedMembers.length - 1] });
-                    teamsNeedMembers.pop();
+                    const extra = teamsExtraMembers[i].students.length - promotion.minMembersInTeam;
+                    if (extra !== 0) {
+                        const teamExtraMembers = teamsExtraMembers[i];
+                        const extraStudent = teamExtraMembers.students.find(st => teamExtraMembers.teamLeader.id !== st.id);
+                        teamExtraMembers.students = teamExtraMembers.students.filter(st => st.id !== extraStudent.id);
+                        studentsModifiedTeams.push({ student: extraStudent, from: teamExtraMembers, to: teamsNeedMembers[teamsNeedMembers.length - 1] });
+                        teamsNeedMembers.pop();
+                    }
                     i++;
                 }
             }
+            return {
+                studentsAddToTeamLater,
+                studentsModifiedTeams,
+                studentsToBeInsertedInNewTeam
+            };
         }
         catch (err) {
             common_1.Logger.log(err, "UserService/completeTeams");

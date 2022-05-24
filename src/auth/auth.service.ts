@@ -81,7 +81,7 @@ export class AuthService{
 
         }
         
-        const {email,firstName,lastName,dob,code,promotionId} = data;
+        const {email,firstName,lastName,dob,code,promotionId,moy} = data;
         const promotion = await manager.getRepository(PromotionEntity)
         .createQueryBuilder('promotion')
         .where('promotion.id = :promotionId',{promotionId})
@@ -114,14 +114,14 @@ export class AuthService{
         }) 
         user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
         user.password = await bcrypt.hash(user.password,10);
-        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
+        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion,moy});
         student.user = user;
         await getConnection().transaction(async manager=>{
 
             user = await manager.getRepository(UserEntity).save(user);
               await manager.getRepository(StudentEntity).save(student);
         })
-        await this.userService._sendNotfication(connectedUser.id,`etudiant: ${student.firstName} ${student.lastName} ajouter avec success`)
+        await this.userService._sendNotfication(connectedUser.id,`etudiant: ${student.firstName} ${student.lastName} ajoutés avec success`)
 
        
 
@@ -153,7 +153,7 @@ export class AuthService{
         for(let key in data){
             const studentData = data[key];
             console.log("student data",studentData)
-            const {email,firstName,lastName,dob,code,promotionId} = studentData;
+            const {email,firstName,lastName,dob,code,promotionId,moy} = studentData;
 
             const promotion = await manager.getRepository(PromotionEntity)
             .createQueryBuilder('promotion')
@@ -187,7 +187,7 @@ export class AuthService{
             }) 
             user =  this.userRepository.create({email,password:randomPassword,userType:UserType.STUDENT});
             user.password = await bcrypt.hash(user.password,10);
-            const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
+            const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion,moy});
             student.user = user;
             users.push(user)
             students.push(student)
@@ -199,6 +199,7 @@ export class AuthService{
         await manager.getRepository(UserEntity).save(users)
         await manager.getRepository(StudentEntity).save(students);
     })
+    await this.userService._sendNotfication(connectedUser.id,`${students.length} etudiants sont ajoutés avec success`)
         
 
         Logger.log(students,"AuthService/signupStudents")
@@ -249,8 +250,15 @@ export class AuthService{
             const teacherRepository = manager.getRepository(TeacherEntity);
             const teacher:TeacherEntity = teacherRepository.create({firstName,lastName,ssn,speciality});
             teacher.user = user;
-            user = await this.userRepository.save(user);
-            await teacherRepository.save(teacher);
+            await getConnection().transaction(async manager=>{
+                user = await manager.getRepository(UserEntity).save(user);
+                await manager.getRepository(TeacherEntity).save(teacher);
+
+            })
+
+            await this.userService._sendNotfication(connectedUser.id,`ensiegnant ${teacher.id} est ajouté.`)
+
+          
             }catch(err){
                 Logger.error(err,"AuthService/signupStudent")
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)
@@ -312,7 +320,8 @@ export class AuthService{
             })
           
             
-    
+            await this.userService._sendNotfication(connectedUser.id,` ${teachers.length} ensiegnats sont ajoutés.`)
+
             Logger.log(teachers,"AuthService/signupteachers")
             return teachers;
             }catch(err){
@@ -459,7 +468,7 @@ export class AuthService{
         try{
 
         const manager = getManager()
-        const {email,password,firstName,lastName,dob,code,promotionId} = data;
+        const {email,password,firstName,lastName,dob,code,promotionId,moy} = data;
         const promotion = await manager.getRepository(PromotionEntity)
         .createQueryBuilder('promotion')
         .where('promotion.id = :promotionId',{promotionId})
@@ -491,7 +500,7 @@ export class AuthService{
      
         user =  this.userRepository.create({email,password,userType:UserType.STUDENT});
         user.password = await bcrypt.hash(user.password,10);
-        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion});
+        const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion,moy});
         student.user = user;
         user = await this.userRepository.save(user);
         await this.studentRepository.save(student);

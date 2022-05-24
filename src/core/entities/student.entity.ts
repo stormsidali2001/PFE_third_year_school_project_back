@@ -30,6 +30,9 @@ export class StudentEntity{
     @Column('date')
     dob:Date; 
 
+    @Column()
+    moy:number;
+
  
     //relations
     @ManyToOne(type=>TeamEntity,team=>team.students)

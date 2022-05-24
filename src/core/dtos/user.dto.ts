@@ -34,6 +34,7 @@ export class StudentDTO{
     email:string;
     firstName:string;
     lastName:string;
+    moy:number;
     code:string;
     dob:Date;
     promotionId:string;
@@ -44,6 +45,7 @@ export class StudentTestDTO{
     password:string;
     firstName:string;
     lastName:string;
+    moy:number;
     code:string;
     dob:Date;
     promotionId:string;

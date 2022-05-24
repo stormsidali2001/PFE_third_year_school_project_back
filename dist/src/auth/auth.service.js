@@ -62,7 +62,7 @@ let AuthService = class AuthService {
                 common_1.Logger.error("permission denied", "signupStudent");
                 throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
             }
-            const { email, firstName, lastName, dob, code, promotionId } = data;
+            const { email, firstName, lastName, dob, code, promotionId, moy } = data;
             const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
                 .createQueryBuilder('promotion')
                 .where('promotion.id = :promotionId', { promotionId })
@@ -91,13 +91,13 @@ let AuthService = class AuthService {
             });
             user = this.userRepository.create({ email, password: randomPassword, userType: user_entity_1.UserType.STUDENT });
             user.password = await bcrypt.hash(user.password, 10);
-            const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion });
+            const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion, moy });
             student.user = user;
             await (0, typeorm_1.getConnection)().transaction(async (manager) => {
                 user = await manager.getRepository(user_entity_1.UserEntity).save(user);
                 await manager.getRepository(student_entity_1.StudentEntity).save(student);
             });
-            await this.userService._sendNotfication(connectedUser.id, `etudiant: ${student.firstName} ${student.lastName} ajouter avec success`);
+            await this.userService._sendNotfication(connectedUser.id, `etudiant: ${student.firstName} ${student.lastName} ajoutés avec success`);
         }
         catch (err) {
             common_1.Logger.error(err, "AuthService/signupStudent");
@@ -120,7 +120,7 @@ let AuthService = class AuthService {
             for (let key in data) {
                 const studentData = data[key];
                 console.log("student data", studentData);
-                const { email, firstName, lastName, dob, code, promotionId } = studentData;
+                const { email, firstName, lastName, dob, code, promotionId, moy } = studentData;
                 const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
                     .createQueryBuilder('promotion')
                     .where('promotion.id = :promotionId', { promotionId })
@@ -149,7 +149,7 @@ let AuthService = class AuthService {
                 });
                 user = this.userRepository.create({ email, password: randomPassword, userType: user_entity_1.UserType.STUDENT });
                 user.password = await bcrypt.hash(user.password, 10);
-                const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion });
+                const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion, moy });
                 student.user = user;
                 users.push(user);
                 students.push(student);
@@ -159,6 +159,7 @@ let AuthService = class AuthService {
                 await manager.getRepository(user_entity_1.UserEntity).save(users);
                 await manager.getRepository(student_entity_1.StudentEntity).save(students);
             });
+            await this.userService._sendNotfication(connectedUser.id, `${students.length} etudiants sont ajoutés avec success`);
             common_1.Logger.log(students, "AuthService/signupStudents");
             return students;
         }
@@ -202,8 +203,11 @@ let AuthService = class AuthService {
             const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
             const teacher = teacherRepository.create({ firstName, lastName, ssn, speciality });
             teacher.user = user;
-            user = await this.userRepository.save(user);
-            await teacherRepository.save(teacher);
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                user = await manager.getRepository(user_entity_1.UserEntity).save(user);
+                await manager.getRepository(teacher_entity_1.TeacherEntity).save(teacher);
+            });
+            await this.userService._sendNotfication(connectedUser.id, `ensiegnant ${teacher.id} est ajouté.`);
         }
         catch (err) {
             common_1.Logger.error(err, "AuthService/signupStudent");
@@ -256,6 +260,7 @@ let AuthService = class AuthService {
                 await manager.getRepository(user_entity_1.UserEntity).save(users);
                 await manager.getRepository(teacher_entity_1.TeacherEntity).save(teachers);
             });
+            await this.userService._sendNotfication(connectedUser.id, ` ${teachers.length} ensiegnats sont ajoutés.`);
             common_1.Logger.log(teachers, "AuthService/signupteachers");
             return teachers;
         }
@@ -368,7 +373,7 @@ let AuthService = class AuthService {
         var _a, _b, _c, _d;
         try {
             const manager = (0, typeorm_1.getManager)();
-            const { email, password, firstName, lastName, dob, code, promotionId } = data;
+            const { email, password, firstName, lastName, dob, code, promotionId, moy } = data;
             const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
                 .createQueryBuilder('promotion')
                 .where('promotion.id = :promotionId', { promotionId })
@@ -394,7 +399,7 @@ let AuthService = class AuthService {
             }
             user = this.userRepository.create({ email, password, userType: user_entity_1.UserType.STUDENT });
             user.password = await bcrypt.hash(user.password, 10);
-            const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion });
+            const student = this.studentRepository.create({ firstName, lastName, dob, code, promotion, moy });
             student.user = user;
             user = await this.userRepository.save(user);
             await this.studentRepository.save(student);

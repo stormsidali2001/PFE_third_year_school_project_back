@@ -27,6 +27,7 @@ export declare class StudentDTO {
     email: string;
     firstName: string;
     lastName: string;
+    moy: number;
     code: string;
     dob: Date;
     promotionId: string;
@@ -36,6 +37,7 @@ export declare class StudentTestDTO {
     password: string;
     firstName: string;
     lastName: string;
+    moy: number;
     code: string;
     dob: Date;
     promotionId: string;
