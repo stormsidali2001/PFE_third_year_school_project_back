@@ -116,3 +116,12 @@ export class Wish{
 export class WishListDTO{
     wishes:Wish[];
 }
+
+
+class ThemeToTeamEntry {
+   idTheme:string;
+   teamIds:string[]
+}
+export class ThemeToTeamDTO{
+    themeToTeam:ThemeToTeamEntry[]
+}

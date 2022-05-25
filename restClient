@@ -55,8 +55,8 @@ POST http://localhost:8080/signin
 content-type:application/json
 
 {
-    "email":"s.assoul@esi-sba.dz",
-    "password":"1@2@3@abC"
+    "email":"d.admin@esi-sba.dz",
+    "password":"1@2@4@abC"
    
 }
 
@@ -300,4 +300,14 @@ Content-Type:application/json
     "firstName":"teacher",
     "lastName":"teacher",
     "speciality":"Web"
+}
+
+### asign theme to team 
+POST http://localhost:8080/asignThemesToTeams
+Content-Type:application/json
+
+{
+    "promotionId":"02bc8fb0-6ebb-4331-87ca-58c449e42277",
+    "method":"random"
+
 }

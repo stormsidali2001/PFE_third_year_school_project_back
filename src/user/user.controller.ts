@@ -4,7 +4,7 @@ import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO} from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO, ThemeToTeamDTO} from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
  
@@ -471,9 +471,27 @@ export class UserController{
         }
        
     }
-    
-    
    
+    @Post('asignThemesToTeams')
+    async asignThemesToTeams(@GetCurrentUserId() userId:string,@Body('promotionId') promotionId:string,@Body('method') method:string){
+        try{
+            return await this.userService.asignThemesToTeams(userId,promotionId,method)
+        }catch(err){
+            Logger.error(err,'UserController/asignThemesToTeams')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @Post('applyThemesToTeamsAssignements')
+    async applyThemesToTeamsAssignements(userId:string,@Body()data:ThemeToTeamDTO){
+        try{
+            return await this.userService.applyThemesToTeamsAssignements(userId,data)
+        }catch(err){
+            Logger.error(err,'UserController/applyThemesToTeamsAssignements')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+
+    }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
