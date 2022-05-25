@@ -4,7 +4,7 @@ import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto} from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO} from "src/core/dtos/user.dto";
 
 import { UserService } from "./user.service";
  
@@ -373,7 +373,7 @@ export class UserController{
     }
 
     @Public()
-    @Get('getThemeSuggestions/:themeId')
+    @Get('getThemeSuggestion/:themeId')
     async getThemeSuggestion(@Param('themeId') themeId:string){
         try{
             return await this.userService.getThemeSuggestion(themeId)
@@ -450,6 +450,16 @@ export class UserController{
         return await this.userService.getTeamMessages(userId)
     }
 
+    @Post('submitWishList')
+    async submitWishList(@GetCurrentUserId() userId:string,@Body() data:WishListDTO){
+        try{
+            return await this.userService.submitWishList(userId,data)
+        }catch(err){
+            Logger.error(err,'UserController/submitWishList')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @Public()
     @Get('getAllPromotions')
     async getAllPromotions(){
@@ -462,6 +472,8 @@ export class UserController{
        
     }
     
+    
+   
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')

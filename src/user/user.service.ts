@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { NormalTeamMeetDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, UrgentTeamMeetDto } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -56,6 +56,7 @@ export class UserService{
              .where('student.userId = :userId',{userId})
              .leftJoinAndSelect('student.team','team')
              .leftJoinAndSelect('team.teamLeader','teamLeader')
+             .leftJoinAndSelect('student.promotion','promotion')
              .getOne()
              
             }else if(user.userType === UserType.ADMIN){
@@ -1290,13 +1291,15 @@ async getAllThemeSuggestions(){
 }
 async getThemeSuggestion(themeId:string){
     try{
+
         const manager = getManager();
         const themeSuggestion = await manager.getRepository(ThemeEntity)
         .createQueryBuilder('theme')
         .where("theme.id = :themeId",{themeId})
         .leftJoinAndSelect('theme.suggestedByTeacher','suggestedByTeacher')
         .leftJoinAndSelect('theme.suggestedByEntreprise','suggestedByEntreprise')
-        .leftJoinAndSelect('theme.docuements','documents')
+        .leftJoinAndSelect('theme.documents','documents')
+        .leftJoinAndSelect('theme.promotion','promotion')
         .getOne()
 
        
@@ -1443,6 +1446,83 @@ async sendWishList(userId:string,promotionId:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST)
     }
   
+}
+async submitWishList(userId:string,wishList:WishListDTO){
+try{
+    const manager = getManager();
+    Logger.error(wishList,'DEbuuuug')
+
+    const student = await manager.getRepository(StudentEntity)
+    .createQueryBuilder('student')
+    .where("student.userId = :userId",{userId})
+    .innerJoinAndSelect('student.team','team')
+    .innerJoin('team.teamLeader','teamLeader')
+    .leftJoinAndSelect('student.promotion','promotion')
+    .leftJoinAndSelect('promotion.themes','themes')
+    .andWhere('themes.validated = true')
+    .getOne();
+
+  
+    if(!student){
+        Logger.error("Permission denied",'UserService/submitWishList')
+        throw new HttpException("Permission denied",HttpStatus.BAD_REQUEST);
+    }
+    const {wishes} = wishList;
+   
+    if(wishes?.length ==0){
+        Logger.error("wishes not found",'UserService/submitWishList')
+        throw new HttpException("wishes not found",HttpStatus.BAD_REQUEST);
+
+    }
+     const newWishList =[]
+    
+
+     await getConnection().transaction(async manager =>{
+        const themeIds = wishes.map(el=>el.themeId);
+       
+        const themes = await manager.getRepository(ThemeEntity)
+        .createQueryBuilder('theme')
+        .where('theme.id  in (:...themeIds)',{themeIds:themeIds})
+        .getOne();
+       
+        if(themeIds.length !== student.promotion.themes.length){
+            Logger.error("wrong number of themes",'UserService/submitWishList')
+            throw new HttpException("wrong number of themes",HttpStatus.BAD_REQUEST);
+        }
+
+
+        wishes.forEach( async (el,index)=>{
+          
+          
+            if(Number.isInteger(el.order)) {
+                Logger.error("order not found",'UserService/submitWishList')
+                throw new HttpException("order not found",HttpStatus.BAD_REQUEST);
+            }
+    
+    
+             newWishList.push({
+                order:el.order,
+                team:student.team,
+                theme:themes[index]
+                
+            }) 
+        })
+      
+        await manager.getRepository(WishEntity)
+        .save(newWishList)
+         
+     })
+      
+
+
+}catch(err){
+    Logger.error(err,'UserService/submitWishList')
+    throw new HttpException(err,HttpStatus.BAD_REQUEST);
+}
+}
+
+async encadrerTheme(userId:string,themeId:string,teacherId:string){
+
 }
 // completer les equipes
 async completeTeams(userId:string,promotionId:string){
@@ -1595,6 +1675,96 @@ async completeTeams(userId:string,promotionId:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST)
         
     }
+}
+
+async asignThemesToTeams(userId:string,promotionId:string,method:string){
+        try{
+            const manager = getManager();
+            const user = manager.getRepository(UserEntity)
+            .createQueryBuilder('user')
+            .where("user.id = :userId",{userId})
+            .andWhere("user.userType = :userType",{userType:UserType.ADMIN})
+            .getOne();
+
+            if(!user){
+                Logger.log("permission denied","UserService/asignThemeToTeams")
+                throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
+            } 
+
+            const Themes = await manager.getRepository(ThemeEntity)
+            .createQueryBuilder('theme')
+            .leftJoinAndSelect('theme.promotion','promotion')
+            .where('promotion.id = :promotionId',{promotionId})
+            .andWhere('theme.validated = true')
+            .leftJoinAndSelect('theme.wishes','wish')
+            .leftJoinAndSelect('wish.team','team')
+            .orderBy('wish.order','ASC')
+            .leftJoinAndSelect('team.students','student')
+            .getMany();
+
+            const af_team_to_th = {};
+            const ignoreTeam = new Set()
+            Themes.forEach(theme=>{
+                af_team_to_th[theme.id] = []
+               
+                const {maxTeamForTheme} =theme.promotion;
+
+                let wishes = theme.wishes;
+                if(method === 'moy'){
+                    wishes = theme.wishes.sort((a,b)=>{
+                        const getMoyTeam = team =>{
+                            let sum = 0;
+                            team.students.forEach(st=>{
+                                sum += st.moy;
+                            })
+                            return sum /team.students.length;
+                        }
+    
+                        return (a.order === b.order)? getMoyTeam(a.team) - getMoyTeam(b.team):0;
+                    })
+
+                }else if(method === 'random'){
+                    wishes = theme.wishes.sort((a,b)=>{
+                      
+    
+                        return (a.order === b.order)? 0.5 - Math.random():0;
+                    })
+                }else if(method === 'time'){
+                    wishes = theme.wishes.sort((a,b)=>{
+                      
+    
+                        return (a.order === b.order)? (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()):0;
+                    })
+                }
+               
+                for(let k in wishes){
+                    const wish =  wishes[k];
+                    const {team,order} = wish;
+                    if(ignoreTeam.has(team.id)){
+                        continue;
+                    }
+                  
+                    if(af_team_to_th[theme.id].length <=maxTeamForTheme){
+                        af_team_to_th[theme.id].push(team)
+                       ignoreTeam.add(team.id)
+                    }
+                    
+                }
+              
+              
+
+            })
+
+            return af_team_to_th;
+
+
+
+        }catch(err){
+        Logger.log(err,"UserService/asignThemeToTeams")
+        throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        
+    }
+
 }
 //team crud operations
 async getTeams(){

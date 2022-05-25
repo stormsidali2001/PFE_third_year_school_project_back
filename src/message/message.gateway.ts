@@ -45,7 +45,7 @@ import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entit
       //@ts-ignore
       if(!client.request.isAuthenticated()){
         Logger.error('not authenticated','MessageGateway/teamMessageToServer')
-        throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
+      return
        }
        //@ts-ignore
       const userId = client.request.session.passport.user.id;
@@ -138,7 +138,7 @@ import { TeamChatMessageEntity } from 'src/core/entities/team.chat.message.entit
         //@ts-ignore
        if(!client.request.isAuthenticated()){
         Logger.error('not authenticated','MessageGateway/handleConnection')
-        throw new HttpException("not authenticated",HttpStatus.FORBIDDEN)
+       return
        }
         //@ts-ignore
        const userId = client.request.session.passport.user.id;

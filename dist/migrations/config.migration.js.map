@@ -1,1 +1,0 @@
-{"version":3,"file":"config.migration.js","sourceRoot":"","sources":["../../migrations/config.migration.ts"],"names":[],"mappings":";;;AAGA,MAAa,eAAe;IAExB,KAAK,CAAC,EAAE,CAAC,WAAwB;QAC7B,MAAM,WAAW,CAAC,KAAK,CAAC;;SAEvB,CAAC,CAAA;IACN,CAAC;IACF,KAAK,CAAE,IAAI,CAAC,WAAwB;QACnC,MAAM,WAAW,CAAC,KAAK,CAAC;;KAEvB,CAAC,CAAA;IACF,CAAC;CAEJ;AAbD,0CAaC"}

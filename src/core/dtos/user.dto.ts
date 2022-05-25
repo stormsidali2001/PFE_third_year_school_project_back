@@ -109,3 +109,10 @@ export class ThemeDocDto{
     name:string;
 
 }
+export class Wish{
+    order:number;
+    themeId:string;
+}
+export class WishListDTO{
+    wishes:Wish[];
+}
