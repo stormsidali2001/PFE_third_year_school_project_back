@@ -145,7 +145,7 @@ export declare class UserService {
     sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
     submitWishList(userId: string, wishList: WishListDTO): Promise<void>;
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
-    assignTeamToTeacher(userId: string, teamId: string, teacherId: string): Promise<void>;
+    assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
     completeTeams(userId: string, promotionId: string): Promise<{
         studentsAddToTeamLater: {
             team: TeamEntity;

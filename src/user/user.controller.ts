@@ -502,7 +502,7 @@ export class UserController{
         }
 
     }
-    
+
     @Post('encadrerTheme')
     async encadrerTheme(@GetCurrentUserId() userId:string,@Body('themeId') themeId:string,@Body('teacherId')teacherId:string){
         try{
@@ -512,6 +512,16 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @Post('assignTeamsToTeacher')
+    async assignTeamsToTeacher(@GetCurrentUserId() userId:string,@Body('teamIds') teamIds:string[],@Body('teacherId') teacherId:string){
+            try{
+                return await this.userService.assignTeamsToTeacher(userId,teamIds,teacherId)
+            }catch(err){
+                Logger.error(err,'UserController/assignTeamsToTeacher')
+                throw new HttpException(err,HttpStatus.BAD_REQUEST);
+            }
     }
     //test routes---------------------------
     @Public()
