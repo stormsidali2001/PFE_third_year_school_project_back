@@ -406,12 +406,22 @@ export class UserController{
     }
 
     @Public()
-    @Get('getThemes/:themeId')
-    async getThemes(@Param('themeId') themeId:string){
+    @Get('getThemes/:promotionId')
+    async getThemes(@Param('promotionId') promotionId:string){
         try{
-            return await this.userService.getThemes(themeId)
+            return await this.userService.getThemes(promotionId)
         }catch(err){
             Logger.error(err,'UsrController/getThemes')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Public()
+    @Get('getTheme/:themeId')
+    async getTheme(@Param('themeId') themeId:string){
+        try{
+            return await this.userService.getTheme(themeId)
+        }catch(err){
+            Logger.error(err,'UsrController/getTheme')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
@@ -488,6 +498,17 @@ export class UserController{
             return await this.userService.applyThemesToTeamsAssignements(userId,data)
         }catch(err){
             Logger.error(err,'UserController/applyThemesToTeamsAssignements')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+
+    }
+    
+    @Post('encadrerTheme')
+    async encadrerTheme(@GetCurrentUserId() userId:string,@Body('themeId') themeId:string,@Body('teacherId')teacherId:string){
+        try{
+            return await this.userService.encadrerTheme(userId,themeId,teacherId)
+        }catch(err){
+            Logger.error(err,'UserController/encadrerTheme')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
 

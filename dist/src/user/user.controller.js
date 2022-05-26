@@ -311,12 +311,21 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getThemes(themeId) {
+    async getThemes(promotionId) {
         try {
-            return await this.userService.getThemes(themeId);
+            return await this.userService.getThemes(promotionId);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/getThemes');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTheme(themeId) {
+        try {
+            return await this.userService.getTheme(themeId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/getTheme');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -377,6 +386,15 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/applyThemesToTeamsAssignements');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async encadrerTheme(userId, themeId, teacherId) {
+        try {
+            return await this.userService.encadrerTheme(userId, themeId, teacherId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/encadrerTheme');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -698,12 +716,20 @@ __decorate([
 ], UserController.prototype, "getAllThemes", null);
 __decorate([
     (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemes/:themeId'),
-    __param(0, (0, common_1.Param)('themeId')),
+    (0, common_1.Get)('getThemes/:promotionId'),
+    __param(0, (0, common_1.Param)('promotionId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getThemes", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTheme/:themeId'),
+    __param(0, (0, common_1.Param)('themeId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTheme", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getTeams'),
@@ -764,6 +790,15 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.ThemeToTeamDTO]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "applyThemesToTeamsAssignements", null);
+__decorate([
+    (0, common_1.Post)('encadrerTheme'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('themeId')),
+    __param(2, (0, common_1.Body)('teacherId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "encadrerTheme", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

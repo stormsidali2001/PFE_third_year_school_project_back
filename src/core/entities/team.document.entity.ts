@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "type
 import { DoucmentData } from "../abstracts/document.data";
 import { EvaluationEntity } from "./evaluation.entity";
 import { ModificationActionEntity } from "./modification.action.entity";
+import { ResponsibleEntity } from "./responsible.entity";
 import { StudentEntity } from "./student.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamEntity } from "./team.entity";
@@ -10,13 +11,12 @@ import { TeamEntity } from "./team.entity";
 @Entity('team_document')
 export class TeamDocumentEntity extends DoucmentData{
     
-    @Column({default:false})
-    deleted:boolean;
-
+ 
     @Column({
         default:''
     })
     description:string;
+
 
     //relations
 
@@ -34,5 +34,9 @@ export class TeamDocumentEntity extends DoucmentData{
 
     @ManyToOne(type=>TeamDocumentCommit,teamDocumentCommit=>teamDocumentCommit.documents)
     teamDocumentCommit:TeamDocumentCommit;
+
+  
+
+
 
 }

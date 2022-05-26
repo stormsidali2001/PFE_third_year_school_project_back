@@ -48,6 +48,7 @@ import { ConfigEntity } from './core/entities/config.entity';
 import { ConfigMigration } from 'migrations/config.migration';
 import { PromotionEntity } from './core/entities/promotion.entity';
 import { WishEntity } from './core/entities/wish.entity';
+import { ResponsibleEntity } from './core/entities/responsible.entity';
 
 
 @Module({
@@ -94,7 +95,8 @@ import { WishEntity } from './core/entities/wish.entity';
               SessionEntity,
               ConfigEntity,
               PromotionEntity,
-              WishEntity
+              WishEntity,
+              ResponsibleEntity
             
             
  

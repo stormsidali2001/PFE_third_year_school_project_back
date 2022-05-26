@@ -38,6 +38,8 @@ const theme_entity_1 = require("../core/entities/theme.entity");
 const theme_document_entity_1 = require("../core/entities/theme.document.entity");
 const promotion_entity_1 = require("../core/entities/promotion.entity");
 const wish_entity_1 = require("../core/entities/wish.entity");
+const encadrement_entity_1 = require("../core/entities/encadrement.entity");
+const responsible_entity_1 = require("../core/entities/responsible.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -1072,6 +1074,27 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getTheme(themeId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const theme = await manager.getRepository(theme_entity_1.ThemeEntity)
+                .createQueryBuilder('theme')
+                .where("theme.id = :themeId", { themeId })
+                .leftJoinAndSelect('theme.suggestedByTeacher', 'suggestedByTeacher')
+                .leftJoinAndSelect('theme.suggestedByEntreprise', 'suggestedByEntreprise')
+                .leftJoinAndSelect('theme.documents', 'documents')
+                .leftJoinAndSelect('theme.promotion', 'promotion')
+                .leftJoinAndSelect('theme.teams', 'teams')
+                .leftJoinAndSelect('theme.encadrement', 'encadrement')
+                .leftJoinAndSelect('encadrement.teacher', 'teacher')
+                .getOne();
+            return theme;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTheme');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async sendWishList(userId, promotionId) {
         try {
             const manager = (0, typeorm_1.getManager)();
@@ -1179,6 +1202,83 @@ let UserService = class UserService {
         }
     }
     async encadrerTheme(userId, themeId, teacherId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where("user.id = :userId", { userId })
+                .andWhere("user.userType = :userType", { userType: user_entity_1.UserType.ADMIN })
+                .getOne();
+            if (!user) {
+                common_1.Logger.log("permission denied", "UserService/encadrerTheme");
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const theme = await manager.getRepository(theme_entity_1.ThemeEntity)
+                .createQueryBuilder('theme')
+                .where('theme.id = :themeId', { themeId })
+                .andWhere('theme.validated = true')
+                .getOne();
+            if (!theme) {
+                common_1.Logger.log("theme not found", "UserService/encadrerTheme");
+                throw new common_1.HttpException("theme not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const teacher = await manager.getRepository(teacher_entity_1.TeacherEntity)
+                .createQueryBuilder('teacher')
+                .where('teacher.id = :teacherId', { teacherId })
+                .getOne();
+            if (!teacher) {
+                common_1.Logger.log("teacher not found", "UserService/encadrerTheme");
+                throw new common_1.HttpException("teacher not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const encadrement = await manager.getRepository(encadrement_entity_1.EncadrementEntity)
+                .createQueryBuilder('encadrement')
+                .where('encadrement.teacherId = :teacherId and encadrement.themeId = :themeId', { teacherId, themeId })
+                .getOne();
+            if (encadrement) {
+                common_1.Logger.log("l'ensiegnant est deja un encadreur de ce theme", "UserService/encadrerTheme");
+                throw new common_1.HttpException("l'ensiegnant est deja un encadreur de ce theme", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(encadrement_entity_1.EncadrementEntity)
+                .createQueryBuilder('')
+                .insert()
+                .values({ theme, teacher })
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.log(err, "UserService/encadrerTheme");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async assignTeamToTeacher(userId, teamId, teacherId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where("user.id = :userId", { userId })
+                .andWhere("user.userType = :userType", { userType: user_entity_1.UserType.ADMIN })
+                .getOne();
+            if (!user) {
+                common_1.Logger.log("permission denied", "UserService/assignTeamToTeacher");
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const encadrement = await manager.getRepository(encadrement_entity_1.EncadrementEntity)
+                .createQueryBuilder('encadrement')
+                .where('encadrement.teacherId = :teacherId', { teacherId })
+                .innerJoinAndSelect('encadrement.theme', 'theme')
+                .innerJoinAndSelect('theme.teams', 'team')
+                .andWhere('team.id = :teamId', { teamId })
+                .getOne();
+            if (!encadrement) {
+                common_1.Logger.log("l'ensiegnant doit encadrer le theme affecter a l'equipe", "UserService/assignTeamToTeacher");
+                throw new common_1.HttpException("l'ensiegnant doit encadrer le theme affecter a l'equipe", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(responsible_entity_1.ResponsibleEntity)
+                .save({ teacher: encadrement.teacher, team: encadrement.theme.teams[0] });
+        }
+        catch (err) {
+            common_1.Logger.log(err, "UserService/assignTeamToTeacher");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async completeTeams(userId, promotionId) {
         try {

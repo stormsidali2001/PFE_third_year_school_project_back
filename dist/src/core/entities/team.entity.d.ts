@@ -2,6 +2,7 @@ import { AnnouncementEntity } from "./announcement.entity";
 import { MeetEntity } from "./meet.entity";
 import { ModificationActionEntity } from "./modification.action.entity";
 import { PromotionEntity } from "./promotion.entity";
+import { ResponsibleEntity } from "./responsible.entity";
 import { StudentEntity } from "./student.entity";
 import { SurveyEntity } from "./survey.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
@@ -27,4 +28,5 @@ export declare class TeamEntity {
     documentCommits: TeamDocumentCommit[];
     promotion: PromotionEntity;
     wishes: WishEntity[];
+    responsibleTeachers: ResponsibleEntity[];
 }

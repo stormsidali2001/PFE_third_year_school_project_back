@@ -1,5 +1,6 @@
 import {  Check, Column, Entity, JoinColumn, Long, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { EncadrementEntity } from "./encadrement.entity";
+import { ResponsibleEntity } from "./responsible.entity";
 import { TeamCommitReviewEntity } from "./team.commit.review.entity";
 import { TeamTeacherChatMessage } from "./team.teacher.message.entity";
 import { ThemeEntity } from "./theme.entity";
@@ -45,6 +46,9 @@ export class TeacherEntity{
     //to theme suggestion
     @OneToMany(type=>ThemeEntity,theme=>theme.suggestedByTeacher)
     suggestedThemes:ThemeEntity[];
+
+    @OneToMany(type=>ResponsibleEntity,res=>res.teacher)
+    teamsInCharge:ResponsibleEntity[];
     
 
 

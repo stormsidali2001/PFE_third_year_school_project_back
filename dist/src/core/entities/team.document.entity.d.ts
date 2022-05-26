@@ -5,7 +5,6 @@ import { StudentEntity } from "./student.entity";
 import { TeamDocumentCommit } from "./team.document.commit.entity";
 import { TeamEntity } from "./team.entity";
 export declare class TeamDocumentEntity extends DoucmentData {
-    deleted: boolean;
     description: string;
     team: TeamEntity;
     owner: StudentEntity;

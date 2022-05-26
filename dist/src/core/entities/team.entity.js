@@ -15,6 +15,7 @@ const announcement_entity_1 = require("./announcement.entity");
 const meet_entity_1 = require("./meet.entity");
 const modification_action_entity_1 = require("./modification.action.entity");
 const promotion_entity_1 = require("./promotion.entity");
+const responsible_entity_1 = require("./responsible.entity");
 const student_entity_1 = require("./student.entity");
 const survey_entity_1 = require("./survey.entity");
 const team_chat_message_entity_1 = require("./team.chat.message.entity");
@@ -98,6 +99,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => wish_entity_1.WishEntity, wish => wish.team),
     __metadata("design:type", Array)
 ], TeamEntity.prototype, "wishes", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => responsible_entity_1.ResponsibleEntity, res => res.team),
+    __metadata("design:type", Array)
+], TeamEntity.prototype, "responsibleTeachers", void 0);
 TeamEntity = __decorate([
     (0, typeorm_1.Entity)('team')
 ], TeamEntity);

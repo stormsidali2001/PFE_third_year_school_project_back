@@ -83,7 +83,8 @@ export declare class UserController {
     getThemeSuggestion(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
     validateThemeSuggestion(userId: string, themeId: string): Promise<void>;
     getAllThemes(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
-    getThemes(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
+    getThemes(promotionId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
+    getTheme(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
     getTeams(): Promise<{
         id: string;
         pseudo: string;
@@ -129,6 +130,7 @@ export declare class UserController {
             encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
+            teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
         } | {
             id: String;
             firstName: String;
@@ -155,6 +157,7 @@ export declare class UserController {
         teams: any;
     }[]>;
     applyThemesToTeamsAssignements(userId: string, data: ThemeToTeamDTO): Promise<any>;
+    encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string): Promise<void>;

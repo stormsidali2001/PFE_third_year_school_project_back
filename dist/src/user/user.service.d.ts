@@ -15,6 +15,8 @@ import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
+import { EncadrementEntity } from "src/core/entities/encadrement.entity";
+import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -44,9 +46,10 @@ export declare class UserService {
             lastName: string;
             user: UserEntity;
             teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
-            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
+            encadrements: EncadrementEntity[];
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: ThemeEntity[];
+            teamsInCharge: ResponsibleEntity[];
         } | {
             id: String;
             firstName: String;
@@ -138,9 +141,11 @@ export declare class UserService {
     validateThemeSuggestion(userId: string, themeId: string): Promise<void>;
     getAllThemes(): Promise<ThemeEntity[]>;
     getThemes(promotionId: string): Promise<ThemeEntity[]>;
+    getTheme(themeId: string): Promise<ThemeEntity>;
     sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
     submitWishList(userId: string, wishList: WishListDTO): Promise<void>;
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
+    assignTeamToTeacher(userId: string, teamId: string, teacherId: string): Promise<void>;
     completeTeams(userId: string, promotionId: string): Promise<{
         studentsAddToTeamLater: {
             team: TeamEntity;
