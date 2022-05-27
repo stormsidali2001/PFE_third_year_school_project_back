@@ -20,7 +20,11 @@ const get_current_user_id_decorator_1 = require("../common/decorators/get-curren
 const public_decorator_1 = require("../common/decorators/public.decorator");
 const files_middalewares_1 = require("../common/utils/files-middalewares");
 const user_dto_1 = require("../core/dtos/user.dto");
+const fs = require("fs");
+const path = require("path");
 const user_service_1 = require("./user.service");
+const typeorm_1 = require("typeorm");
+const user_entity_1 = require("../core/entities/user.entity");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
@@ -170,6 +174,25 @@ let UserController = class UserController {
         common_1.Logger.warn("file uploaded", response);
         return response;
     }
+    async downlaodFile(url, userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id = ', { userId })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("permission denied", 'UserController/downlaodFile');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const file = fs.readFileSync(path.resolve('./files/' + url));
+            return new common_1.StreamableFile(file);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/downlaodFile');
+            return "file not found";
+        }
+    }
     seeUploadedFile(path, res) {
         res.set({
             'Content-Disposition': 'attachment; filename="package.json"',
@@ -222,6 +245,24 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/commitDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamsTeacherResponsibleFor(userId) {
+        try {
+            return await this.userService.getTeamsTeacherResponsibleFor(userId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamCommits(userId, teamId) {
+        try {
+            return await this.userService.getTeamCommits(userId, teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -607,6 +648,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "uploadFile", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('files/:url'),
+    __param(0, (0, common_1.Param)('url')),
+    __param(1, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "downlaodFile", null);
+__decorate([
     (0, common_1.Get)('getFile/:path'),
     __param(0, (0, common_1.Param)('path')),
     __param(1, (0, common_1.Res)()),
@@ -663,6 +713,21 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "commitDocs", null);
+__decorate([
+    (0, common_1.Get)('getTeamsTeacherResponsibleFor'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeamsTeacherResponsibleFor", null);
+__decorate([
+    (0, common_1.Get)('getTeamCommits/:teamId'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeamCommits", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getStudents'),

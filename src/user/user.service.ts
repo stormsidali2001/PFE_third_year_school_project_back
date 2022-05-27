@@ -1198,6 +1198,31 @@ async getTeamsTeacherResponsibleFor(userId:string){
 
     }
 }
+async getTeamCommits(userId:string,teamId:string){
+    try{
+        const manager = getManager()
+
+   
+
+        return   await manager.getRepository(CommitEntity)
+        .createQueryBuilder('commit')
+        .where('commit.teamId = :teamId',{teamId})
+        .leftJoinAndSelect('commit.documents','documents')
+        .leftJoinAndSelect('documents.type','type')
+        .innerJoin('commit.team','team')
+        .innerJoin('team.responsibleTeachers','responsibleTeachers')
+        .innerJoin('responsibleTeachers.teacher','teacher')
+        .andWhere('teacher.userId = :userId',{userId})
+        .getMany()
+
+
+   
+    }catch(err){
+        Logger.error(err,'UserService/getTeamsTeacherResponsibleFor')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
 //crud operations student----------------------------------------
 async getStudents(){
     try{

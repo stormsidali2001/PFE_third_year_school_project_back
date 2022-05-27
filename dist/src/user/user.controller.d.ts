@@ -1,6 +1,8 @@
 /// <reference types="multer" />
+import { StreamableFile } from "@nestjs/common";
 import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
+import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -66,12 +68,15 @@ export declare class UserController {
         filename: string;
         destination: string;
     }>;
+    downlaodFile(url: string, userId: string): Promise<StreamableFile | "file not found">;
     seeUploadedFile(path: any, res: any): any;
     uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
     addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getDocuments(userId: string): Promise<import("../core/entities/team.document.entity").TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
+    getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
+    getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
     getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(): Promise<void>;
@@ -112,7 +117,7 @@ export declare class UserController {
             dob: Date;
             moy: number;
             team: import("../core/entities/team.entity").TeamEntity;
-            user: import("../core/entities/user.entity").UserEntity;
+            user: UserEntity;
             sentInvitations: import("../core/entities/invitation.entity").InvitationEntity[];
             receivedInvitations: import("../core/entities/invitation.entity").InvitationEntity[];
             teamChatMessages: import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[];
@@ -126,7 +131,7 @@ export declare class UserController {
             firstName: string;
             speciality: string;
             lastName: string;
-            user: import("../core/entities/user.entity").UserEntity;
+            user: UserEntity;
             teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
             encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
@@ -136,15 +141,15 @@ export declare class UserController {
             id: String;
             firstName: String;
             lastName: String;
-            user: import("../core/entities/user.entity").UserEntity;
+            user: UserEntity;
         } | {
             id: string;
             code: string;
             name: string;
-            user: import("../core/entities/user.entity").UserEntity;
+            user: UserEntity;
             suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
         };
-        userType: import("../core/entities/user.entity").UserType;
+        userType: UserType;
         email: string;
     }>;
     getTeamMessages(userId: string): Promise<import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[]>;

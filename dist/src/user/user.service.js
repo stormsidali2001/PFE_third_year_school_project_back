@@ -910,6 +910,25 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getTeamCommits(userId, teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            return await manager.getRepository(commit_entity_1.CommitEntity)
+                .createQueryBuilder('commit')
+                .where('commit.teamId = :teamId', { teamId })
+                .leftJoinAndSelect('commit.documents', 'documents')
+                .leftJoinAndSelect('documents.type', 'type')
+                .innerJoin('commit.team', 'team')
+                .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
+                .innerJoin('responsibleTeachers.teacher', 'teacher')
+                .andWhere('teacher.userId = :userId', { userId })
+                .getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeamsTeacherResponsibleFor');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             const manager = (0, typeorm_1.getManager)();

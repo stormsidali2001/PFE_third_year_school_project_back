@@ -1,12 +1,16 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post, Put, Res, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseBoolPipe, ParseIntPipe, Post, Put, Res, StreamableFile, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
 import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO, ThemeToTeamDTO} from "src/core/dtos/user.dto";
+import * as fs from 'fs';
+import * as path from "path";
 
 import { UserService } from "./user.service";
+import { getManager } from "typeorm";
+import { UserEntity, UserType } from "src/core/entities/user.entity";
  
 @Controller()
 export class UserController{
@@ -210,6 +214,32 @@ export class UserController{
         Logger.warn("file uploaded",response);
         return response;
     }
+
+    @Public()
+    @Get('files/:url')
+    async downlaodFile(@Param('url') url:string,@GetCurrentUserId() userId:string){
+   
+        try{
+            const manager = getManager()
+
+            const user = await manager.getRepository(UserEntity)
+            .createQueryBuilder('user')
+            .where('user.id = ',{userId})
+            .getOne()
+            if(!user){
+                Logger.error("permission denied",'UserController/downlaodFile')
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+            }
+            const file = fs.readFileSync(path.resolve('./files/'+url))
+            return new StreamableFile(file)
+
+        }catch(err){
+            Logger.error(err,'UserController/downlaodFile')
+            return "file not found"
+
+        }
+      
+    }
     
     @Get('getFile/:path')
     seeUploadedFile(@Param('path') path, @Res() res) {
@@ -291,6 +321,25 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @Get('getTeamsTeacherResponsibleFor')
+    async getTeamsTeacherResponsibleFor(@GetCurrentUserId() userId:string){
+        try{
+            return await this.userService.getTeamsTeacherResponsibleFor(userId)
+        }catch(err){
+            Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @Get('getTeamCommits/:teamId')
+    async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
+        try{
+            return await this.userService.getTeamCommits(userId,teamId)
+        }catch(err){
+            Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
     }
     //crud operations student
     @Public()

@@ -18,6 +18,7 @@ import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { EncadrementEntity } from "src/core/entities/encadrement.entity";
 import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
+import { CommitEntity } from "src/core/entities/commit.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -131,6 +132,7 @@ export declare class UserService {
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
     getTeamsTeacherResponsibleFor(userId: string): Promise<TeamEntity[]>;
+    getTeamCommits(userId: string, teamId: string): Promise<CommitEntity[]>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
