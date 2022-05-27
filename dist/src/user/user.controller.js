@@ -426,9 +426,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createNewPromotion(name) {
+    async createNewPromotion(name, documentTypes) {
         try {
-            return await this.userService.createNewPromotion(name);
+            return await this.userService.createNewPromotion(name, documentTypes);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/createNewPromotion');
@@ -839,8 +839,9 @@ __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/createNewPromotion'),
     __param(0, (0, common_1.Body)('name')),
+    __param(1, (0, common_1.Body)('documentTypes')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createNewPromotion", null);
 UserController = __decorate([

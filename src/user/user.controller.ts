@@ -555,9 +555,9 @@ export class UserController{
 
     @Public()
     @Post('test/createNewPromotion')
-    async createNewPromotion(@Body('name') name:string) {
+    async createNewPromotion(@Body('name') name:string,@Body('documentTypes') documentTypes:string[]) {
     try{
-        return await this.userService.createNewPromotion(name)
+        return await this.userService.createNewPromotion(name,documentTypes)
     }catch(err){
         Logger.error(err,'UserController/createNewPromotion')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

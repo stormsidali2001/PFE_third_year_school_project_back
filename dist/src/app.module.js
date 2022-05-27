@@ -54,6 +54,7 @@ const config_entity_1 = require("./core/entities/config.entity");
 const promotion_entity_1 = require("./core/entities/promotion.entity");
 const wish_entity_1 = require("./core/entities/wish.entity");
 const responsible_entity_1 = require("./core/entities/responsible.entity");
+const document_types_entity_1 = require("./core/entities/document-types.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -102,7 +103,8 @@ AppModule = __decorate([
                     config_entity_1.ConfigEntity,
                     promotion_entity_1.PromotionEntity,
                     wish_entity_1.WishEntity,
-                    responsible_entity_1.ResponsibleEntity
+                    responsible_entity_1.ResponsibleEntity,
+                    document_types_entity_1.DocumentTypeEntity
                 ],
             }),
             auth_module_1.Auth,

@@ -49,6 +49,7 @@ import { ConfigMigration } from 'migrations/config.migration';
 import { PromotionEntity } from './core/entities/promotion.entity';
 import { WishEntity } from './core/entities/wish.entity';
 import { ResponsibleEntity } from './core/entities/responsible.entity';
+import { DocumentTypeEntity } from './core/entities/document-types.entity';
 
 
 @Module({
@@ -96,8 +97,8 @@ import { ResponsibleEntity } from './core/entities/responsible.entity';
               ConfigEntity,
               PromotionEntity,
               WishEntity,
-              ResponsibleEntity
-            
+              ResponsibleEntity,
+              DocumentTypeEntity
             
  
 

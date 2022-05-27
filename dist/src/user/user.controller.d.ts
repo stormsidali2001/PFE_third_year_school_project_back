@@ -161,5 +161,5 @@ export declare class UserController {
     assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
-    createNewPromotion(name: string): Promise<void>;
+    createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
 }

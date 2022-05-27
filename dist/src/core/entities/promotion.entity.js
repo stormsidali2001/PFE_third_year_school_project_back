@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PromotionEntity = void 0;
 const typeorm_1 = require("typeorm");
+const document_types_entity_1 = require("./document-types.entity");
 const student_entity_1 = require("./student.entity");
 const team_entity_1 = require("./team.entity");
 const theme_entity_1 = require("./theme.entity");
@@ -62,6 +63,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => theme_entity_1.ThemeEntity, theme => theme.promotion),
     __metadata("design:type", Array)
 ], PromotionEntity.prototype, "themes", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => document_types_entity_1.DocumentTypeEntity, doctp => doctp.promotion),
+    __metadata("design:type", Array)
+], PromotionEntity.prototype, "documentTypes", void 0);
 PromotionEntity = __decorate([
     (0, typeorm_1.Entity)('promotion')
 ], PromotionEntity);
