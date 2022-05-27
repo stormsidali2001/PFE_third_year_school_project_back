@@ -221,10 +221,10 @@ export class UserController{
    
         try{
             const manager = getManager()
-
+            console.log(url)
             const user = await manager.getRepository(UserEntity)
             .createQueryBuilder('user')
-            .where('user.id = ',{userId})
+            .where('user.id = :userId',{userId})
             .getOne()
             if(!user){
                 Logger.error("permission denied",'UserController/downlaodFile')

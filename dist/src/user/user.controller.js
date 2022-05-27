@@ -177,9 +177,10 @@ let UserController = class UserController {
     async downlaodFile(url, userId) {
         try {
             const manager = (0, typeorm_1.getManager)();
+            console.log(url);
             const user = await manager.getRepository(user_entity_1.UserEntity)
                 .createQueryBuilder('user')
-                .where('user.id = ', { userId })
+                .where('user.id = :userId', { userId })
                 .getOne();
             if (!user) {
                 common_1.Logger.error("permission denied", 'UserController/downlaodFile');
