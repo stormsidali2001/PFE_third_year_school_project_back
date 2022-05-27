@@ -34,8 +34,9 @@ export class PromotionEntity{
     @Column({
         default:false
     })
-    wishListSent:boolean;
     
+    wishListSent:boolean;
+
     //relations
 
     @OneToMany(type=>TeamEntity,team=>team.promotion)

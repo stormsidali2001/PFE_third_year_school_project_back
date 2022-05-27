@@ -35,7 +35,6 @@ const survey_participant_entity_1 = require("./core/entities/survey.participant.
 const pv_meet_entity_1 = require("./core/entities/pv.meet.entity");
 const pv_meet_task_todo_entity_1 = require("./core/entities/pv.meet.task.todo.entity");
 const meet_absent_entity_1 = require("./core/entities/meet.absent.entity");
-const team_document_commit_entity_1 = require("./core/entities/team.document.commit.entity");
 const team_commit_review_entity_1 = require("./core/entities/team.commit.review.entity");
 const Notification_entity_1 = require("./core/entities/Notification.entity");
 const pv_meet_descused_point_entity_1 = require("./core/entities/pv.meet.descused.point.entity");
@@ -55,6 +54,8 @@ const promotion_entity_1 = require("./core/entities/promotion.entity");
 const wish_entity_1 = require("./core/entities/wish.entity");
 const responsible_entity_1 = require("./core/entities/responsible.entity");
 const document_types_entity_1 = require("./core/entities/document-types.entity");
+const commit_entity_1 = require("./core/entities/commit.entity");
+const commit_document_entity_1 = require("./core/entities/commit.document.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -94,7 +95,6 @@ AppModule = __decorate([
                     pv_meet_task_todo_entity_1.TaskTodoPvMeetEntity,
                     pv_meet_descused_point_entity_1.DiscusedPointEntity,
                     meet_absent_entity_1.MeetAbsentEntity,
-                    team_document_commit_entity_1.TeamDocumentCommit,
                     team_document_entity_1.TeamDocumentEntity,
                     team_commit_review_entity_1.TeamCommitReviewEntity,
                     Notification_entity_1.NotificationEntity,
@@ -104,7 +104,9 @@ AppModule = __decorate([
                     promotion_entity_1.PromotionEntity,
                     wish_entity_1.WishEntity,
                     responsible_entity_1.ResponsibleEntity,
-                    document_types_entity_1.DocumentTypeEntity
+                    document_types_entity_1.DocumentTypeEntity,
+                    commit_entity_1.CommitEntity,
+                    commit_document_entity_1.CommitDocumentEntity
                 ],
             }),
             auth_module_1.Auth,

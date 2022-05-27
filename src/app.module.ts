@@ -29,7 +29,6 @@ import { SurveyParticipantEntity } from './core/entities/survey.participant.enti
 import { PvMeetEntity } from './core/entities/pv.meet.entity';
 import { TaskTodoPvMeetEntity } from './core/entities/pv.meet.task.todo.entity';
 import { MeetAbsentEntity } from './core/entities/meet.absent.entity';
-import { TeamDocumentCommit } from './core/entities/team.document.commit.entity';
 import { TeamCommitReviewEntity } from './core/entities/team.commit.review.entity';
 import { NotificationEntity } from './core/entities/Notification.entity';
 import { DiscusedPointEntity } from './core/entities/pv.meet.descused.point.entity';
@@ -50,6 +49,8 @@ import { PromotionEntity } from './core/entities/promotion.entity';
 import { WishEntity } from './core/entities/wish.entity';
 import { ResponsibleEntity } from './core/entities/responsible.entity';
 import { DocumentTypeEntity } from './core/entities/document-types.entity';
+import { CommitEntity } from './core/entities/commit.entity';
+import { CommitDocumentEntity } from './core/entities/commit.document.entity';
 
 
 @Module({
@@ -88,7 +89,6 @@ import { DocumentTypeEntity } from './core/entities/document-types.entity';
               TaskTodoPvMeetEntity,
               DiscusedPointEntity,
               MeetAbsentEntity,
-              TeamDocumentCommit,
               TeamDocumentEntity,
               TeamCommitReviewEntity,
               NotificationEntity,
@@ -98,10 +98,13 @@ import { DocumentTypeEntity } from './core/entities/document-types.entity';
               PromotionEntity,
               WishEntity,
               ResponsibleEntity,
-              DocumentTypeEntity
+              DocumentTypeEntity,
+              CommitEntity,
+              CommitDocumentEntity
             
  
-
+ 
+              
             ],
 
    

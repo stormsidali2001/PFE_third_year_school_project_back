@@ -250,10 +250,11 @@ export class UserController{
         @GetCurrentUserId() userId:string,
         @Body('name') name:string,
         @Body('url') url:string,
-        @Body('description') description:string
+        @Body('description') description:string,
+        @Body('typeDocId') typeDocId:string
     ){
         try{
-            return await this.userService.addTeamDocument(userId,name,url,description);
+            return await this.userService.addTeamDocument(userId,name,url,description,typeDocId);
         }catch(err){
             Logger.error(err,'UserController/addTeamDocument')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -522,6 +523,15 @@ export class UserController{
                 Logger.error(err,'UserController/assignTeamsToTeacher')
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
+    }
+    @Get('getPromotionDocumentTypes')
+    async getPromotionDocumentTypes(@GetCurrentUserId() userId){
+        try{
+            return await this.userService.getPromotionDocumentTypes(userId)
+        }catch(err){
+            Logger.error(err,'UserController/getPromotionDocumentTypes')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
     }
     //test routes---------------------------
     @Public()

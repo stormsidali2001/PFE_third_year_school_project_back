@@ -40,6 +40,7 @@ const promotion_entity_1 = require("../core/entities/promotion.entity");
 const wish_entity_1 = require("../core/entities/wish.entity");
 const encadrement_entity_1 = require("../core/entities/encadrement.entity");
 const responsible_entity_1 = require("../core/entities/responsible.entity");
+const document_types_entity_1 = require("../core/entities/document-types.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -737,7 +738,7 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async addTeamDocument(userId, name, url, description) {
+    async addTeamDocument(userId, name, url, description, typeDocId) {
         try {
             const manager = (0, typeorm_1.getManager)();
             const team = await manager.getRepository(team_entity_1.TeamEntity)
@@ -749,8 +750,16 @@ let UserService = class UserService {
                 common_1.Logger.error("user not found", 'UserService/addTeamDocument');
                 throw new common_1.HttpException("user not found", common_1.HttpStatus.BAD_REQUEST);
             }
+            const type = await manager.getRepository(document_types_entity_1.DocumentTypeEntity)
+                .createQueryBuilder('type')
+                .where('type.id = :typeDocId', { typeDocId })
+                .getOne();
+            if (!type) {
+                common_1.Logger.error("type not found", 'UserService/addTeamDocument');
+                throw new common_1.HttpException("type not found", common_1.HttpStatus.BAD_REQUEST);
+            }
             const teamDocumentRepository = manager.getRepository(team_document_entity_1.TeamDocumentEntity);
-            const teamDocument = teamDocumentRepository.create({ name, url, team, description, owner: team.students[0] });
+            const teamDocument = teamDocumentRepository.create({ name, url, team, description, owner: team.students[0], type });
             manager.getRepository(team_document_entity_1.TeamDocumentEntity)
                 .createQueryBuilder('teamDoc')
                 .insert()
@@ -771,6 +780,7 @@ let UserService = class UserService {
                 .where('student.userId = :userId', { userId })
                 .leftJoinAndSelect('team.documents', 'document')
                 .leftJoinAndSelect('document.owner', 'owner')
+                .leftJoinAndSelect('document.type', 'type')
                 .getOne();
             if (!team) {
                 common_1.Logger.error("team not found", 'UserService/getTeamDocuments');
@@ -817,6 +827,59 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/deleteTeamDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async commitDocs(userId, docsIds) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const student = await manager.getRepository(student_entity_1.StudentEntity)
+                .createQueryBuilder('student')
+                .where('student.userId = :userId', { userId })
+                .innerJoinAndSelect('student.team', 'team')
+                .innerJoin('team.teamLeader', 'teamLeader')
+                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
+                .andWhere('teamLeader.id = student.id')
+                .getOne();
+            if (!student) {
+                common_1.Logger.error("permission denied", 'UserService/commitDocs');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const responsibles = await manager.getRepository(responsible_entity_1.ResponsibleEntity)
+                .createQueryBuilder('res')
+                .where('res.teamId = :teamId', { teamId: student.team.id })
+                .innerJoinAndSelect('res.team', 'team')
+                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
+                .innerJoinAndSelect('givenTheme.encadrement', 'encadrement')
+                .andWhere('encadrement.teacherId = res.teacherId')
+                .getMany();
+            if (responsibles.length === 0) {
+                common_1.Logger.error("aucun ensignant est responsable de cette equipe", 'UserService/commitDocs');
+                throw new common_1.HttpException("aucun ensignant est responsable de cette equipe", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const teamDocs = await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
+                .createQueryBuilder('doc')
+                .where('doc.id in (:...docsIds)', { docsIds })
+                .andWhere('doc.teamId = :teamId', { teamId: student.team.id })
+                .getMany();
+            if (teamDocs.length !== docsIds.length) {
+                common_1.Logger.error("wrong doc ids", 'UserService/commitDocs');
+                throw new common_1.HttpException("wrong doc ids", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const docsToCommit = [];
+            teamDocs.forEach(teamDoc => {
+                const url = teamDoc.url + Date.now();
+                fs.copyFile(path.resolve(teamDoc.url), path.resolve(url), (err) => {
+                    if (err) {
+                        common_1.Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`, 'UserService/commitDocs ');
+                        console.log(err);
+                    }
+                });
+                docsToCommit.push({ name: teamDoc.name, url, type: teamDoc.type });
+            });
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/commitDocs');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -1658,14 +1721,27 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createNewPromotion(name) {
+    async createNewPromotion(name, documentTypes) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            await manager.getRepository(promotion_entity_1.PromotionEntity)
-                .createQueryBuilder()
-                .insert()
-                .values({ name })
-                .execute();
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                const promotion = manager.getRepository(promotion_entity_1.PromotionEntity).create({ name });
+                await manager.getRepository(promotion_entity_1.PromotionEntity)
+                    .createQueryBuilder()
+                    .insert()
+                    .values(promotion)
+                    .execute();
+                let docTypes = [];
+                const docType = manager.getRepository(document_types_entity_1.DocumentTypeEntity).create({ name: 'autres', promotion });
+                docTypes.push(docType);
+                for (let k in documentTypes) {
+                    const docnName = documentTypes[k];
+                    const docType = manager.getRepository(document_types_entity_1.DocumentTypeEntity).create({ name: docnName, promotion });
+                    docTypes.push(docType);
+                }
+                await manager.getRepository(document_types_entity_1.DocumentTypeEntity)
+                    .save(docTypes);
+            });
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createNewPromotion');
@@ -1681,6 +1757,26 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getAllPromotions');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getPromotionDocumentTypes(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const student = await manager.getRepository(student_entity_1.StudentEntity)
+                .createQueryBuilder('student')
+                .where('student.userId = :userId', { userId })
+                .leftJoinAndSelect('student.promotion', 'promotion')
+                .leftJoinAndSelect('promotion.documentTypes', 'documentTypes')
+                .getOne();
+            if (!student) {
+                common_1.Logger.error("permession denied", 'UserService/getPromotionDocumentTypes');
+                throw new common_1.HttpException("permession denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            return student.promotion.documentTypes;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getPromotionDocumentTypes');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

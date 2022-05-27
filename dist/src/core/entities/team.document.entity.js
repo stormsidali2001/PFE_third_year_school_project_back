@@ -9,25 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TeamDocumentEntity = exports.DocumentType = void 0;
+exports.TeamDocumentEntity = void 0;
 const typeorm_1 = require("typeorm");
 const document_data_1 = require("../abstracts/document.data");
+const document_types_entity_1 = require("./document-types.entity");
 const evaluation_entity_1 = require("./evaluation.entity");
 const modification_action_entity_1 = require("./modification.action.entity");
 const student_entity_1 = require("./student.entity");
-const team_document_commit_entity_1 = require("./team.document.commit.entity");
 const team_entity_1 = require("./team.entity");
-var DocumentType;
-(function (DocumentType) {
-    DocumentType["CAHIER_CHARGE"] = "cahier_charge";
-    DocumentType["CAHIER_ANALYSE"] = "cahier_analyse";
-    DocumentType["CAHIER_CONCEPTION"] = "cahier_conception";
-    DocumentType["CAHIER_ARCHITECTURE"] = "cahier_architecture";
-    DocumentType["CHARTE_NOMAGE_DOCUMENT"] = "charte_nomage_document";
-    DocumentType["CHARTE_NOMAGE_CODE"] = "charte_nomage_code";
-    DocumentType["PROFIL_MEMBRE"] = "profil_membre";
-    DocumentType["OTHERS"] = "others";
-})(DocumentType = exports.DocumentType || (exports.DocumentType = {}));
 let TeamDocumentEntity = class TeamDocumentEntity extends document_data_1.DoucmentData {
 };
 __decorate([
@@ -36,14 +25,6 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], TeamDocumentEntity.prototype, "description", void 0);
-__decorate([
-    (0, typeorm_1.Column)({
-        enum: DocumentType,
-        default: DocumentType.OTHERS,
-        type: 'enum'
-    }),
-    __metadata("design:type", String)
-], TeamDocumentEntity.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.documents),
     __metadata("design:type", team_entity_1.TeamEntity)
@@ -62,9 +43,10 @@ __decorate([
     __metadata("design:type", Array)
 ], TeamDocumentEntity.prototype, "modificationActions", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(type => team_document_commit_entity_1.TeamDocumentCommit, teamDocumentCommit => teamDocumentCommit.documents),
-    __metadata("design:type", team_document_commit_entity_1.TeamDocumentCommit)
-], TeamDocumentEntity.prototype, "teamDocumentCommit", void 0);
+    (0, typeorm_1.OneToOne)(type => document_types_entity_1.DocumentTypeEntity),
+    (0, typeorm_1.JoinColumn)(),
+    __metadata("design:type", document_types_entity_1.DocumentTypeEntity)
+], TeamDocumentEntity.prototype, "type", void 0);
 TeamDocumentEntity = __decorate([
     (0, typeorm_1.Entity)('team_document')
 ], TeamDocumentEntity);

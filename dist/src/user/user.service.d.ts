@@ -17,6 +17,7 @@ import { ThemeEntity } from "src/core/entities/theme.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { EncadrementEntity } from "src/core/entities/encadrement.entity";
 import { ResponsibleEntity } from "src/core/entities/responsible.entity";
+import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -125,9 +126,10 @@ export declare class UserService {
         };
         senderTeam?: undefined;
     })[]>;
-    addTeamDocument(userId: string, name: string, url: string, description: string): Promise<void>;
+    addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
+    commitDocs(userId: string, docsIds: string[]): Promise<void>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
@@ -181,6 +183,7 @@ export declare class UserService {
     }>;
     getTeamMessages(userId: any): Promise<TeamChatMessageEntity[]>;
     createNewConfig(key: string, value: string): Promise<void>;
-    createNewPromotion(name: string): Promise<void>;
+    createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
     getAllPromotions(): Promise<PromotionEntity[]>;
+    getPromotionDocumentTypes(userId: string): Promise<DocumentTypeEntity[]>;
 }

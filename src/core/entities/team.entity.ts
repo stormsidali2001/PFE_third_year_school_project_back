@@ -7,7 +7,7 @@ import { ResponsibleEntity } from "./responsible.entity";
 import { StudentEntity } from "./student.entity";
 import { SurveyEntity } from "./survey.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
-import { TeamDocumentCommit } from "./team.document.commit.entity";
+import { CommitEntity } from "./commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
 import { WishEntity } from "./wish.entity";
@@ -67,8 +67,8 @@ export class TeamEntity{
     @OneToMany(type=>MeetEntity,meet=>meet.team)
     meets:MeetEntity[];
 
-    @OneToMany(type=>TeamDocumentCommit,teamDocumentCommit=>teamDocumentCommit.team)
-    documentCommits:TeamDocumentCommit[];
+    @OneToMany(type=>CommitEntity,teamDocumentCommit=>teamDocumentCommit.team)
+    commits:CommitEntity[];
 
     @ManyToOne(type=>PromotionEntity,promotion=>promotion.teams)
     promotion:PromotionEntity;

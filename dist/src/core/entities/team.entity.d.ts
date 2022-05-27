@@ -6,7 +6,7 @@ import { ResponsibleEntity } from "./responsible.entity";
 import { StudentEntity } from "./student.entity";
 import { SurveyEntity } from "./survey.entity";
 import { TeamChatMessageEntity } from "./team.chat.message.entity";
-import { TeamDocumentCommit } from "./team.document.commit.entity";
+import { CommitEntity } from "./commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
 import { WishEntity } from "./wish.entity";
@@ -25,7 +25,7 @@ export declare class TeamEntity {
     modificationActions: ModificationActionEntity[];
     givenTheme: ThemeEntity;
     meets: MeetEntity[];
-    documentCommits: TeamDocumentCommit[];
+    commits: CommitEntity[];
     promotion: PromotionEntity;
     wishes: WishEntity[];
     responsibleTeachers: ResponsibleEntity[];

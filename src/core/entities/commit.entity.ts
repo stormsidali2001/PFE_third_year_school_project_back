@@ -1,10 +1,10 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { CommitDocumentEntity } from "./commit.document.entity";
 import { TeamCommitReviewEntity } from "./team.commit.review.entity";
-import { TeamDocumentEntity } from "./team.document.entity";
 import { TeamEntity } from "./team.entity";
 
-@Entity('team_document_commit')
-export class TeamDocumentCommit{
+@Entity('commit')
+export class CommitEntity{
     @PrimaryGeneratedColumn('uuid')
     id:string;
     
@@ -19,13 +19,13 @@ export class TeamDocumentCommit{
 
     //relations
 
-    @ManyToOne(type=>TeamEntity,team=>team.documentCommits)
+    @ManyToOne(type=>TeamEntity,team=>team.commits)
     team:TeamEntity;
 
-    @OneToMany(type=>TeamDocumentEntity,teamDocument=>teamDocument.teamDocumentCommit)
-    documents:TeamDocumentCommit[];
+    @OneToMany(type=>CommitDocumentEntity,cd=>cd.commit)
+    documents:CommitDocumentEntity[];
 
-    @OneToMany(type=>TeamCommitReviewEntity,teamCommitReviw=>teamCommitReviw.teamDocumentCommit)
+    @OneToMany(type=>TeamCommitReviewEntity,teamCommitReviw=>teamCommitReviw.commit)
     reviews:TeamCommitReviewEntity[];
 
 

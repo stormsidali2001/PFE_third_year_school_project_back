@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeamCommitReviewEntity = void 0;
 const typeorm_1 = require("typeorm");
 const teacher_entity_1 = require("./teacher.entity");
-const team_document_commit_entity_1 = require("./team.document.commit.entity");
+const commit_entity_1 = require("./commit.entity");
 let TeamCommitReviewEntity = class TeamCommitReviewEntity {
 };
 __decorate([
@@ -32,9 +32,9 @@ __decorate([
     __metadata("design:type", teacher_entity_1.TeacherEntity)
 ], TeamCommitReviewEntity.prototype, "teacher", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(type => team_document_commit_entity_1.TeamDocumentCommit, teamDocumentCommit => teamDocumentCommit.reviews),
-    __metadata("design:type", team_document_commit_entity_1.TeamDocumentCommit)
-], TeamCommitReviewEntity.prototype, "teamDocumentCommit", void 0);
+    (0, typeorm_1.ManyToOne)(type => commit_entity_1.CommitEntity, c => c.reviews),
+    __metadata("design:type", commit_entity_1.CommitEntity)
+], TeamCommitReviewEntity.prototype, "commit", void 0);
 TeamCommitReviewEntity = __decorate([
     (0, typeorm_1.Entity)('team_commit_review')
 ], TeamCommitReviewEntity);

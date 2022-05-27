@@ -19,7 +19,7 @@ const responsible_entity_1 = require("./responsible.entity");
 const student_entity_1 = require("./student.entity");
 const survey_entity_1 = require("./survey.entity");
 const team_chat_message_entity_1 = require("./team.chat.message.entity");
-const team_document_commit_entity_1 = require("./team.document.commit.entity");
+const commit_entity_1 = require("./commit.entity");
 const team_document_entity_1 = require("./team.document.entity");
 const theme_entity_1 = require("./theme.entity");
 const wish_entity_1 = require("./wish.entity");
@@ -88,9 +88,9 @@ __decorate([
     __metadata("design:type", Array)
 ], TeamEntity.prototype, "meets", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(type => team_document_commit_entity_1.TeamDocumentCommit, teamDocumentCommit => teamDocumentCommit.team),
+    (0, typeorm_1.OneToMany)(type => commit_entity_1.CommitEntity, teamDocumentCommit => teamDocumentCommit.team),
     __metadata("design:type", Array)
-], TeamEntity.prototype, "documentCommits", void 0);
+], TeamEntity.prototype, "commits", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(type => promotion_entity_1.PromotionEntity, promotion => promotion.teams),
     __metadata("design:type", promotion_entity_1.PromotionEntity)

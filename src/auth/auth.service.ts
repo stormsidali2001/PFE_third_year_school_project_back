@@ -360,9 +360,11 @@ export class AuthService{
             const adminRepository = manager.getRepository(AdminEntity);
             const admin = adminRepository.create({firstName,lastName})
             admin.user = user;
-            user = await this.userRepository.save(user);
+            await getConnection().transaction(async manager =>{
 
-            await adminRepository.save(admin);
+                user = await manager.getRepository(UserEntity).save(user);
+                await await manager.getRepository(AdminEntity).save(admin);
+            })
             
             return {...admin,user}
         }catch(err){
@@ -502,8 +504,12 @@ export class AuthService{
         user.password = await bcrypt.hash(user.password,10);
         const student:StudentEntity = this.studentRepository.create({firstName,lastName,dob,code,promotion,moy});
         student.user = user;
-        user = await this.userRepository.save(user);
-        await this.studentRepository.save(student);
+
+        await getConnection().transaction(async manager=>{
+
+            user = await manager.getRepository(UserEntity).save(user);
+            await manager.getRepository(StudentEntity).save(student);
+        })
 
         // const tokens:Tokens = await this._getTokens(user.id,user.email);
         // await this._updateRefrechTokenHash(user.id,tokens.refrechToken)
@@ -544,8 +550,11 @@ export class AuthService{
             const teacherRepository = manager.getRepository(TeacherEntity);
             const teacher:TeacherEntity = teacherRepository.create({firstName,lastName,ssn,speciality});
             teacher.user = user;
-            user = await this.userRepository.save(user);
-            await teacherRepository.save(teacher);
+            await getConnection().transaction(async manager=>{
+
+                user = await manager.getRepository(UserEntity).save(user);
+                await manager.getRepository(TeacherEntity).save(teacher);
+            })
             }catch(err){
                 Logger.error(err,"AuthService/signupStudent")
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)

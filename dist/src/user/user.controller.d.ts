@@ -68,7 +68,7 @@ export declare class UserController {
     }>;
     seeUploadedFile(path: any, res: any): any;
     uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
-    addTeamDocument(userId: string, name: string, url: string, description: string): Promise<void>;
+    addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getDocuments(userId: string): Promise<import("../core/entities/team.document.entity").TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
@@ -121,6 +121,12 @@ export declare class UserController {
             promotion: import("../core/entities/promotion.entity").PromotionEntity;
         } | {
             id: string;
+            code: string;
+            name: string;
+            user: import("../core/entities/user.entity").UserEntity;
+            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
+        } | {
+            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -136,12 +142,6 @@ export declare class UserController {
             firstName: String;
             lastName: String;
             user: import("../core/entities/user.entity").UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: import("../core/entities/user.entity").UserEntity;
-            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
         };
         userType: import("../core/entities/user.entity").UserType;
         email: string;
@@ -159,6 +159,7 @@ export declare class UserController {
     applyThemesToTeamsAssignements(userId: string, data: ThemeToTeamDTO): Promise<any>;
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
     assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
+    getPromotionDocumentTypes(userId: any): Promise<import("../core/entities/document-types.entity").DocumentTypeEntity[]>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
