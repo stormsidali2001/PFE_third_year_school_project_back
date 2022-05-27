@@ -22,8 +22,7 @@ __decorate([
     __metadata("design:type", theme_entity_1.ThemeEntity)
 ], CommitDocumentEntity.prototype, "commit", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(type => document_types_entity_1.DocumentTypeEntity),
-    (0, typeorm_1.JoinColumn)(),
+    (0, typeorm_1.ManyToOne)(type => document_types_entity_1.DocumentTypeEntity, dt => dt.commitsDocs),
     __metadata("design:type", document_types_entity_1.DocumentTypeEntity)
 ], CommitDocumentEntity.prototype, "type", void 0);
 CommitDocumentEntity = __decorate([

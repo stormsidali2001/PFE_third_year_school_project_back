@@ -862,18 +862,22 @@ let UserService = class UserService {
                 .createQueryBuilder('doc')
                 .where('doc.id in (:...docsIds)', { docsIds })
                 .andWhere('doc.teamId = :teamId', { teamId: student.team.id })
+                .leftJoinAndSelect('doc.type', 'type')
                 .getMany();
             if (teamDocs.length !== docsIds.length) {
                 common_1.Logger.error("wrong doc ids", 'UserService/commitDocs');
                 throw new common_1.HttpException("wrong doc ids", common_1.HttpStatus.BAD_REQUEST);
             }
             const commit = manager.getRepository(commit_entity_1.CommitEntity)
-                .create({ title, description });
+                .create({ title, description, team: student.team });
             await (0, typeorm_1.getConnection)().transaction(async (manager) => {
                 await manager.getRepository(commit_entity_1.CommitEntity).save(commit);
                 const docsToCommit = [];
                 teamDocs.forEach(teamDoc => {
-                    const url = teamDoc.url + Date.now();
+                    const splited = teamDoc.name.split('.');
+                    const extension = splited[splited.length - 1];
+                    const name = splited.slice(0, splited.length - 1);
+                    const url = './files/' + name + Date.now() + '.' + extension;
                     fs.copyFile(path.resolve(teamDoc.url), path.resolve(url), (err) => {
                         if (err) {
                             common_1.Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`, 'UserService/commitDocs ');
@@ -888,6 +892,21 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/commitDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamsTeacherResponsibleFor(userId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            return await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .leftJoinAndSelect('team.responsibleTeachers', 'responsibleTeachers')
+                .leftJoinAndSelect('responsibleTeachers.teacher', 'teacher')
+                .where('teacher.userId = :userId', { userId })
+                .getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeamsTeacherResponsibleFor');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -1350,6 +1369,7 @@ let UserService = class UserService {
             const responsible = await manager.getRepository(responsible_entity_1.ResponsibleEntity)
                 .createQueryBuilder('responsible')
                 .where('responsible.teamId in (:...teamIds)', { teamIds })
+                .andWhere('responsible.teacherId = :teacherId', { teacherId })
                 .getMany();
             if (responsible.length > 0) {
                 common_1.Logger.log("l(es) equipe(s) sont deja sous la responsabilite de l'ensiegnant", "UserService/assignTeamsToTeacher");

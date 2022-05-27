@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from 'typeorm';
 import { DoucmentData } from '../abstracts/document.data';
 import { CommitEntity } from './commit.entity';
 import { DocumentTypeEntity } from './document-types.entity';
@@ -11,8 +11,10 @@ export class CommitDocumentEntity extends DoucmentData{
     commit:ThemeEntity;
 
     
-    @OneToOne(type=>DocumentTypeEntity) @JoinColumn()
+    @ManyToOne(type=>DocumentTypeEntity,dt=>dt.commitsDocs) 
     type:DocumentTypeEntity;
+
+  
 
 
 }

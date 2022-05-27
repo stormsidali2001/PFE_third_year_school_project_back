@@ -282,6 +282,16 @@ export class UserController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
         }
+    @Post('commitDocs')
+    async commitDocs(@GetCurrentUserId() userId:string,@Body('title') title:string,@Body('description') description:string,@Body('docsIds')docsIds:string[]){
+        try{
+            return await this.userService.commitDocs(userId,title,description,docsIds);
+        }catch(err){
+            Logger.error(err,'UserController/commitDocs')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+
+    }
     //crud operations student
     @Public()
     @Get('getStudents')

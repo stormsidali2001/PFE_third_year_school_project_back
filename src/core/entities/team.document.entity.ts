@@ -38,7 +38,7 @@ export class TeamDocumentEntity extends DoucmentData{
     modificationActions:ModificationActionEntity[];
 
   
-    @OneToOne(type=>DocumentTypeEntity) @JoinColumn()
+    @ManyToOne(type=>DocumentTypeEntity,td=>td.teamDocs) 
     type:DocumentTypeEntity;
     
 

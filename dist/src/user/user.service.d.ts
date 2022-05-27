@@ -130,6 +130,7 @@ export declare class UserService {
     getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
+    getTeamsTeacherResponsibleFor(userId: string): Promise<TeamEntity[]>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;

@@ -43,8 +43,7 @@ __decorate([
     __metadata("design:type", Array)
 ], TeamDocumentEntity.prototype, "modificationActions", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(type => document_types_entity_1.DocumentTypeEntity),
-    (0, typeorm_1.JoinColumn)(),
+    (0, typeorm_1.ManyToOne)(type => document_types_entity_1.DocumentTypeEntity, td => td.teamDocs),
     __metadata("design:type", document_types_entity_1.DocumentTypeEntity)
 ], TeamDocumentEntity.prototype, "type", void 0);
 TeamDocumentEntity = __decorate([

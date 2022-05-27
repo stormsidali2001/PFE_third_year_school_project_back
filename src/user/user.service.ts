@@ -1105,6 +1105,7 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
             Logger.error("permission denied",'UserService/commitDocs')
             throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
         }
+       
         const responsibles = await manager.getRepository(ResponsibleEntity)
         .createQueryBuilder('res')
         .where('res.teamId = :teamId',{teamId:student.team.id})
@@ -1113,6 +1114,7 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
         .innerJoinAndSelect('givenTheme.encadrement','encadrement')
         .andWhere('encadrement.teacherId = res.teacherId')
         .getMany();
+      
         if(responsibles.length === 0){
             Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",'UserService/commitDocs')
             throw new HttpException("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",HttpStatus.BAD_REQUEST);
@@ -1122,6 +1124,7 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
         .createQueryBuilder('doc')
         .where('doc.id in (:...docsIds)',{docsIds})
         .andWhere('doc.teamId = :teamId',{teamId:student.team.id})
+        .leftJoinAndSelect('doc.type','type')
         .getMany()
      
         if(teamDocs.length !== docsIds.length){
@@ -1129,7 +1132,7 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
             throw new HttpException("wrong doc ids",HttpStatus.BAD_REQUEST);
         }
         const commit =  manager.getRepository(CommitEntity)
-        .create({title,description})
+        .create({title,description,team:student.team})
 
       await getConnection().transaction(async manager=>{
 
@@ -1139,7 +1142,10 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
             const docsToCommit:CommitDocumentEntity[] = [];
             teamDocs.forEach(
                 teamDoc=>{
-                    const url = teamDoc.url+Date.now();
+                    const  splited = teamDoc.name.split('.')
+                    const extension = splited[splited.length-1]
+                    const name = splited.slice(0,splited.length-1)
+                    const url = './files/'+name+Date.now()+'.'+extension;
                     fs.copyFile(
                         path.resolve(teamDoc.url),
                         path.resolve(url),
@@ -1170,6 +1176,24 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
 
     }catch(err){
         Logger.error(err,'UserService/commitDocs')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
+
+async getTeamsTeacherResponsibleFor(userId:string){
+    try{
+        const manager = getManager()
+
+        return await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.responsibleTeachers','responsibleTeachers')
+        .leftJoinAndSelect('responsibleTeachers.teacher','teacher')
+        .where('teacher.userId = :userId',{userId})
+        .getMany()
+
+    }catch(err){
+        Logger.error(err,'UserService/getTeamsTeacherResponsibleFor')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
     }
@@ -1746,6 +1770,7 @@ async assignTeamsToTeacher(userId:string,teamIds:string[],teacherId:string){
         const responsible = await manager.getRepository(ResponsibleEntity)
         .createQueryBuilder('responsible')
         .where('responsible.teamId in (:...teamIds)',{teamIds})
+        .andWhere('responsible.teacherId = :teacherId',{teacherId})
         .getMany()
         if(responsible.length >0){
             Logger.log("l(es) equipe(s) sont deja sous la responsabilite de l'ensiegnant","UserService/assignTeamsToTeacher")

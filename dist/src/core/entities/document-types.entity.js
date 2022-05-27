@@ -11,7 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DocumentTypeEntity = void 0;
 const typeorm_1 = require("typeorm");
+const commit_document_entity_1 = require("./commit.document.entity");
 const promotion_entity_1 = require("./promotion.entity");
+const team_document_entity_1 = require("./team.document.entity");
 let DocumentTypeEntity = class DocumentTypeEntity {
 };
 __decorate([
@@ -26,6 +28,14 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => promotion_entity_1.PromotionEntity, promotion => promotion.documentTypes),
     __metadata("design:type", promotion_entity_1.PromotionEntity)
 ], DocumentTypeEntity.prototype, "promotion", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(type => commit_document_entity_1.CommitDocumentEntity, cmd => cmd.type),
+    __metadata("design:type", Array)
+], DocumentTypeEntity.prototype, "commitsDocs", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(type => team_document_entity_1.TeamDocumentEntity, tmd => tmd.type),
+    __metadata("design:type", Array)
+], DocumentTypeEntity.prototype, "teamDocs", void 0);
 DocumentTypeEntity = __decorate([
     (0, typeorm_1.Entity)('document_type')
 ], DocumentTypeEntity);

@@ -216,6 +216,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async commitDocs(userId, title, description, docsIds) {
+        try {
+            return await this.userService.commitDocs(userId, title, description, docsIds);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/commitDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             return await this.userService.getStudents();
@@ -644,6 +653,16 @@ __decorate([
     __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteTeamDocs", null);
+__decorate([
+    (0, common_1.Post)('commitDocs'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('title')),
+    __param(2, (0, common_1.Body)('description')),
+    __param(3, (0, common_1.Body)('docsIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, Array]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "commitDocs", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getStudents'),
