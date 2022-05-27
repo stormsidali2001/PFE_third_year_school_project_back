@@ -33,6 +33,8 @@ import { WishEntity } from "src/core/entities/wish.entity";
 import { EncadrementEntity } from "src/core/entities/encadrement.entity";
 import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
+import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
+import { CommitEntity } from "src/core/entities/commit.entity";
 
 @Injectable()
 export class UserService{
@@ -1087,7 +1089,7 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
     }
 
 }
-async commitDocs(userId:string,docsIds:string[]){
+async commitDocs(userId:string,title:string,description:string,docsIds:string[]){
     try{
         const manager = getManager();
 
@@ -1096,7 +1098,6 @@ async commitDocs(userId:string,docsIds:string[]){
         .where('student.userId = :userId',{userId})
         .innerJoinAndSelect('student.team','team')
         .innerJoin('team.teamLeader','teamLeader')
-        .innerJoinAndSelect('team.givenTheme','givenTheme')
         .andWhere('teamLeader.id = student.id')
         .getOne();
 
@@ -1113,8 +1114,8 @@ async commitDocs(userId:string,docsIds:string[]){
         .andWhere('encadrement.teacherId = res.teacherId')
         .getMany();
         if(responsibles.length === 0){
-            Logger.error("aucun ensignant est responsable de cette equipe",'UserService/commitDocs')
-            throw new HttpException("aucun ensignant est responsable de cette equipe",HttpStatus.BAD_REQUEST);
+            Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",'UserService/commitDocs')
+            throw new HttpException("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",HttpStatus.BAD_REQUEST);
         }
 
         const teamDocs = await manager.getRepository(TeamDocumentEntity)
@@ -1127,29 +1128,42 @@ async commitDocs(userId:string,docsIds:string[]){
             Logger.error("wrong doc ids",'UserService/commitDocs')
             throw new HttpException("wrong doc ids",HttpStatus.BAD_REQUEST);
         }
-        const docsToCommit = [];
-        teamDocs.forEach(
-            teamDoc=>{
-                const url = teamDoc.url+Date.now();
-                fs.copyFile(
-                    path.resolve(teamDoc.url),
-                    path.resolve(url),
-                    (err)=>{
-                        
-                        if(err){
+        const commit =  manager.getRepository(CommitEntity)
+        .create({title,description})
+
+      await getConnection().transaction(async manager=>{
+
+    
+            await manager.getRepository(CommitEntity).save(commit)
         
-                            Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`,'UserService/commitDocs ')
-                            console.log(err)
-                        
-                            
-                        }
-                    }
-                ) 
-                docsToCommit.push({name:teamDoc.name,url,type:teamDoc.type})
+            const docsToCommit:CommitDocumentEntity[] = [];
+            teamDocs.forEach(
+                teamDoc=>{
+                    const url = teamDoc.url+Date.now();
+                    fs.copyFile(
+                        path.resolve(teamDoc.url),
+                        path.resolve(url),
+                        (err)=>{
+
+                            if(err){
             
-              
-            }
-        )
+                                Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`,'UserService/commitDocs ')
+                                console.log(err)
+                            
+                                
+                            }
+                        }
+                    ) 
+                    const doc = manager.getRepository(CommitDocumentEntity).create({name:teamDoc.name,url,type:teamDoc.type,commit})
+                    docsToCommit.push(doc)
+                
+                
+                }
+            )
+
+            await manager.getRepository(CommitDocumentEntity).save(docsToCommit)
+
+    })
      
 
 

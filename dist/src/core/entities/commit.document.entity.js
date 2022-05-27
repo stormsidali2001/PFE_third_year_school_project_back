@@ -13,6 +13,7 @@ exports.CommitDocumentEntity = void 0;
 const typeorm_1 = require("typeorm");
 const document_data_1 = require("../abstracts/document.data");
 const commit_entity_1 = require("./commit.entity");
+const document_types_entity_1 = require("./document-types.entity");
 const theme_entity_1 = require("./theme.entity");
 let CommitDocumentEntity = class CommitDocumentEntity extends document_data_1.DoucmentData {
 };
@@ -20,6 +21,11 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => commit_entity_1.CommitEntity, commit => commit.documents),
     __metadata("design:type", theme_entity_1.ThemeEntity)
 ], CommitDocumentEntity.prototype, "commit", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(type => document_types_entity_1.DocumentTypeEntity),
+    (0, typeorm_1.JoinColumn)(),
+    __metadata("design:type", document_types_entity_1.DocumentTypeEntity)
+], CommitDocumentEntity.prototype, "type", void 0);
 CommitDocumentEntity = __decorate([
     (0, typeorm_1.Entity)('commit_document')
 ], CommitDocumentEntity);

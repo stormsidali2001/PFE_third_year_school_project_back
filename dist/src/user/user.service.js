@@ -41,6 +41,8 @@ const wish_entity_1 = require("../core/entities/wish.entity");
 const encadrement_entity_1 = require("../core/entities/encadrement.entity");
 const responsible_entity_1 = require("../core/entities/responsible.entity");
 const document_types_entity_1 = require("../core/entities/document-types.entity");
+const commit_document_entity_1 = require("../core/entities/commit.document.entity");
+const commit_entity_1 = require("../core/entities/commit.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -830,7 +832,7 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async commitDocs(userId, docsIds) {
+    async commitDocs(userId, title, description, docsIds) {
         try {
             const manager = (0, typeorm_1.getManager)();
             const student = await manager.getRepository(student_entity_1.StudentEntity)
@@ -838,7 +840,6 @@ let UserService = class UserService {
                 .where('student.userId = :userId', { userId })
                 .innerJoinAndSelect('student.team', 'team')
                 .innerJoin('team.teamLeader', 'teamLeader')
-                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
                 .andWhere('teamLeader.id = student.id')
                 .getOne();
             if (!student) {
@@ -854,8 +855,8 @@ let UserService = class UserService {
                 .andWhere('encadrement.teacherId = res.teacherId')
                 .getMany();
             if (responsibles.length === 0) {
-                common_1.Logger.error("aucun ensignant est responsable de cette equipe", 'UserService/commitDocs');
-                throw new common_1.HttpException("aucun ensignant est responsable de cette equipe", common_1.HttpStatus.BAD_REQUEST);
+                common_1.Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ", 'UserService/commitDocs');
+                throw new common_1.HttpException("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ", common_1.HttpStatus.BAD_REQUEST);
             }
             const teamDocs = await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
                 .createQueryBuilder('doc')
@@ -866,16 +867,23 @@ let UserService = class UserService {
                 common_1.Logger.error("wrong doc ids", 'UserService/commitDocs');
                 throw new common_1.HttpException("wrong doc ids", common_1.HttpStatus.BAD_REQUEST);
             }
-            const docsToCommit = [];
-            teamDocs.forEach(teamDoc => {
-                const url = teamDoc.url + Date.now();
-                fs.copyFile(path.resolve(teamDoc.url), path.resolve(url), (err) => {
-                    if (err) {
-                        common_1.Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`, 'UserService/commitDocs ');
-                        console.log(err);
-                    }
+            const commit = manager.getRepository(commit_entity_1.CommitEntity)
+                .create({ title, description });
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                await manager.getRepository(commit_entity_1.CommitEntity).save(commit);
+                const docsToCommit = [];
+                teamDocs.forEach(teamDoc => {
+                    const url = teamDoc.url + Date.now();
+                    fs.copyFile(path.resolve(teamDoc.url), path.resolve(url), (err) => {
+                        if (err) {
+                            common_1.Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`, 'UserService/commitDocs ');
+                            console.log(err);
+                        }
+                    });
+                    const doc = manager.getRepository(commit_document_entity_1.CommitDocumentEntity).create({ name: teamDoc.name, url, type: teamDoc.type, commit });
+                    docsToCommit.push(doc);
                 });
-                docsToCommit.push({ name: teamDoc.name, url, type: teamDoc.type });
+                await manager.getRepository(commit_document_entity_1.CommitDocumentEntity).save(docsToCommit);
             });
         }
         catch (err) {
