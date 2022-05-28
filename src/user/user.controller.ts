@@ -332,15 +332,17 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
-    @Get('getTeamsTeacherResponsibleForWithMembers')
-    async getTeamsTeacherResponsibleForWithMembers(@GetCurrentUserId() userId:string){
+    @Get('getTeamsTeacherResponsibleForWithMembers/:promotionId')
+    async getTeamsTeacherResponsibleForWithMembers(@GetCurrentUserId() userId:string,@Param('promotionId') promotionId:string){
         try{
-            return await this.userService.getTeamsTeacherResponsibleForWithMembers(userId)
+          
+            return await this.userService.getTeamsTeacherResponsibleForWithMembers(userId,promotionId)
         }catch(err){
             Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+    
 
     @Get('getTeamCommits/:teamId')
     async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){

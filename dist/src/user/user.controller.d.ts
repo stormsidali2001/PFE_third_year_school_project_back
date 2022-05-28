@@ -76,7 +76,7 @@ export declare class UserController {
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
     getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
-    getTeamsTeacherResponsibleForWithMembers(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
+    getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
     getAllCommitsDocs(userId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;

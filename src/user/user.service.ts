@@ -1199,18 +1199,28 @@ async getTeamsTeacherResponsibleFor(userId:string){
     }
 }
 
-async getTeamsTeacherResponsibleForWithMembers(userId:string){
+async getTeamsTeacherResponsibleForWithMembers(userId:string,promotionId:string){
     try{
         const manager = getManager()
 
-        return await manager.getRepository(TeamEntity)
+
+        const query =  manager.getRepository(TeamEntity)
         .createQueryBuilder('team')
         .leftJoinAndSelect('team.responsibleTeachers','responsibleTeachers')
         .leftJoinAndSelect('responsibleTeachers.teacher','teacher')
         .where('teacher.userId = :userId',{userId})
         .leftJoinAndSelect('team.students','students')
-        .leftJoinAndSelect('team.teamLeader','leader')
-        .getMany()
+        .leftJoinAndSelect('team.teamLeader','leader');
+        if(promotionId!== 'all'){
+            
+          return   await query
+          .andWhere('team.promotionId = :promotionId',{promotionId})
+          .getMany()
+        }else {
+          
+            return await query.getMany();
+        }
+      
 
     }catch(err){
         Logger.error(err,'UserService/getTeamsTeacherResponsibleForWithMembers')

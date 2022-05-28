@@ -910,17 +910,24 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getTeamsTeacherResponsibleForWithMembers(userId) {
+    async getTeamsTeacherResponsibleForWithMembers(userId, promotionId) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            return await manager.getRepository(team_entity_1.TeamEntity)
+            const query = manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')
                 .leftJoinAndSelect('team.responsibleTeachers', 'responsibleTeachers')
                 .leftJoinAndSelect('responsibleTeachers.teacher', 'teacher')
                 .where('teacher.userId = :userId', { userId })
                 .leftJoinAndSelect('team.students', 'students')
-                .leftJoinAndSelect('team.teamLeader', 'leader')
-                .getMany();
+                .leftJoinAndSelect('team.teamLeader', 'leader');
+            if (promotionId !== 'all') {
+                return await query
+                    .andWhere('team.promotionId = :promotionId', { promotionId })
+                    .getMany();
+            }
+            else {
+                return await query.getMany();
+            }
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTeamsTeacherResponsibleForWithMembers');
