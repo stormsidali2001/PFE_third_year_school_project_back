@@ -1198,6 +1198,27 @@ async getTeamsTeacherResponsibleFor(userId:string){
 
     }
 }
+
+async getTeamsTeacherResponsibleForWithMembers(userId:string){
+    try{
+        const manager = getManager()
+
+        return await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .leftJoinAndSelect('team.responsibleTeachers','responsibleTeachers')
+        .leftJoinAndSelect('responsibleTeachers.teacher','teacher')
+        .where('teacher.userId = :userId',{userId})
+        .leftJoinAndSelect('team.students','students')
+        .leftJoinAndSelect('team.teamLeader','leader')
+        .getMany()
+
+    }catch(err){
+        Logger.error(err,'UserService/getTeamsTeacherResponsibleForWithMembers')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+}
+
 async getTeamCommits(userId:string,teamId:string){
     try{
         const manager = getManager()
@@ -1223,6 +1244,66 @@ async getTeamCommits(userId:string,teamId:string){
 
     }
 }
+async getAllCommitsDocs(userId:string,teamId:string){
+    try{
+        const manager = getManager()
+
+   
+
+        return   await manager.getRepository(CommitDocumentEntity)
+        .createQueryBuilder('document')
+        .leftJoinAndSelect('document.type','type')
+        .leftJoinAndSelect('document.commit','commit')
+        .where('commit.teamId = :teamId',{teamId})
+        .innerJoin('commit.team','team')
+        .innerJoin('team.responsibleTeachers','responsibleTeachers')
+        .innerJoin('responsibleTeachers.teacher','teacher')
+        .andWhere('teacher.userId = :userId',{userId})
+        .getMany()
+
+   
+    }catch(err){
+        Logger.error(err,'UserService/getTeamsTeacherResponsibleFor')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
+    }
+
+}
+async validatedDocument(userId:string,documentId:string){
+    try{
+        const manager = getManager();
+       const document =  await manager.getRepository(CommitDocumentEntity)
+        .createQueryBuilder('document')
+        .where('document.id = :documentId',{documentId})
+        .innerJoin('document.commit','commit')
+        .innerJoin('commit.team','team')
+        .innerJoin('team.responsibleTeachers','responsibleTeachers')
+        .innerJoin('responsibleTeachers.teacher','teacher')
+        .andWhere('teacher.userId = :userId',{userId})
+        .getOne()
+
+        if(!document){
+            Logger.error("Permission denied",'UserService/getTeamsTeacherResponsibleFor')
+            throw new HttpException("Permission denied",HttpStatus.BAD_REQUEST);
+        }
+
+        await manager.getRepository(CommitDocumentEntity)
+        .createQueryBuilder('document')
+        .update()
+        .set({validated:true})
+        .where('document.id = :documentId',{documentId})
+        .execute()
+
+
+ 
+
+    }catch(err){
+        Logger.log(err,'UserService/validateDocument')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST)
+    }
+}
+
+
 //crud operations student----------------------------------------
 async getStudents(){
     try{
@@ -2376,6 +2457,7 @@ async getPromotionDocumentTypes(userId:string){
     }
 
 }
+
 
 
 }

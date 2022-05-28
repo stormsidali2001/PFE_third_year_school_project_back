@@ -18,6 +18,12 @@ const theme_entity_1 = require("./theme.entity");
 let CommitDocumentEntity = class CommitDocumentEntity extends document_data_1.DoucmentData {
 };
 __decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], CommitDocumentEntity.prototype, "validated", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(type => commit_entity_1.CommitEntity, commit => commit.documents),
     __metadata("design:type", theme_entity_1.ThemeEntity)
 ], CommitDocumentEntity.prototype, "commit", void 0);

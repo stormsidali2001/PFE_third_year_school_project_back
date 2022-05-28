@@ -258,6 +258,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getTeamsTeacherResponsibleForWithMembers(userId) {
+        try {
+            return await this.userService.getTeamsTeacherResponsibleForWithMembers(userId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getTeamCommits(userId, teamId) {
         try {
             return await this.userService.getTeamCommits(userId, teamId);
@@ -721,6 +730,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeamsTeacherResponsibleFor", null);
+__decorate([
+    (0, common_1.Get)('getTeamsTeacherResponsibleForWithMembers'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeamsTeacherResponsibleForWithMembers", null);
 __decorate([
     (0, common_1.Get)('getTeamCommits/:teamId'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
