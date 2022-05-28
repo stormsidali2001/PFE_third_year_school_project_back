@@ -952,7 +952,7 @@ let UserService = class UserService {
             return await manager.getRepository(commit_document_entity_1.CommitDocumentEntity)
                 .createQueryBuilder('document')
                 .leftJoinAndSelect('document.type', 'type')
-                .leftJoinAndSelect('document.commit', 'commit')
+                .innerJoin('document.commit', 'commit')
                 .where('commit.teamId = :teamId', { teamId })
                 .innerJoin('commit.team', 'team')
                 .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
@@ -965,27 +965,27 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async validatedDocument(userId, documentId) {
+    async validatedDocument(userId, documentIds) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            const document = await manager.getRepository(commit_document_entity_1.CommitDocumentEntity)
+            const documents = await manager.getRepository(commit_document_entity_1.CommitDocumentEntity)
                 .createQueryBuilder('document')
-                .where('document.id = :documentId', { documentId })
+                .where('document.id  in  (:...documentIds)', { documentIds })
                 .innerJoin('document.commit', 'commit')
                 .innerJoin('commit.team', 'team')
                 .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
                 .innerJoin('responsibleTeachers.teacher', 'teacher')
                 .andWhere('teacher.userId = :userId', { userId })
-                .getOne();
-            if (!document) {
+                .getMany();
+            if (documents.length < documentIds.length || documents.some(doc => doc.validated)) {
                 common_1.Logger.error("Permission denied", 'UserService/getTeamsTeacherResponsibleFor');
                 throw new common_1.HttpException("Permission denied", common_1.HttpStatus.BAD_REQUEST);
             }
             await manager.getRepository(commit_document_entity_1.CommitDocumentEntity)
-                .createQueryBuilder('document')
+                .createQueryBuilder()
                 .update()
                 .set({ validated: true })
-                .where('document.id = :documentId', { documentId })
+                .where('commit_document.id  in  (:...documentIds)', { documentIds })
                 .execute();
         }
         catch (err) {

@@ -351,6 +351,30 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Get('getAllCommitsDocs/:teamId')
+    async getAllCommitsDocs(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
+        try{
+           
+            console.log('sssssssssssssssssssssss')
+            return await this.userService.getAllCommitsDocs(userId,teamId)
+        }catch(err){
+            Logger.error(err,'UserController/getAllCommitsDocs')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Post('validatedDocument')
+    async validatedDocument(@GetCurrentUserId() userId:string,@Body('documentIds') documentIds:string[]){
+        try{
+          
+            return await this.userService.validatedDocument(userId,documentIds)
+        }catch(err){
+            Logger.error(err,'UserController/validatedDocument')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
     //crud operations student
     @Public()
     @Get('getStudents')

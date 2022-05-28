@@ -1253,7 +1253,7 @@ async getAllCommitsDocs(userId:string,teamId:string){
         return   await manager.getRepository(CommitDocumentEntity)
         .createQueryBuilder('document')
         .leftJoinAndSelect('document.type','type')
-        .leftJoinAndSelect('document.commit','commit')
+        .innerJoin('document.commit','commit')
         .where('commit.teamId = :teamId',{teamId})
         .innerJoin('commit.team','team')
         .innerJoin('team.responsibleTeachers','responsibleTeachers')
@@ -1269,29 +1269,30 @@ async getAllCommitsDocs(userId:string,teamId:string){
     }
 
 }
-async validatedDocument(userId:string,documentId:string){
+async validatedDocument(userId:string,documentIds:string[]){
     try{
         const manager = getManager();
-       const document =  await manager.getRepository(CommitDocumentEntity)
+       const documents =  await manager.getRepository(CommitDocumentEntity)
         .createQueryBuilder('document')
-        .where('document.id = :documentId',{documentId})
+        .where('document.id  in  (:...documentIds)',{documentIds})
         .innerJoin('document.commit','commit')
         .innerJoin('commit.team','team')
         .innerJoin('team.responsibleTeachers','responsibleTeachers')
         .innerJoin('responsibleTeachers.teacher','teacher')
         .andWhere('teacher.userId = :userId',{userId})
-        .getOne()
+        .getMany()
+    
 
-        if(!document){
+        if(documents.length < documentIds.length || documents.some(doc=>doc.validated)){
             Logger.error("Permission denied",'UserService/getTeamsTeacherResponsibleFor')
             throw new HttpException("Permission denied",HttpStatus.BAD_REQUEST);
         }
 
         await manager.getRepository(CommitDocumentEntity)
-        .createQueryBuilder('document')
+        .createQueryBuilder() 
         .update()
         .set({validated:true})
-        .where('document.id = :documentId',{documentId})
+        .where('commit_document.id  in  (:...documentIds)',{documentIds})
         .execute()
 
 

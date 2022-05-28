@@ -276,6 +276,25 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getAllCommitsDocs(userId, teamId) {
+        try {
+            console.log('sssssssssssssssssssssss');
+            return await this.userService.getAllCommitsDocs(userId, teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getAllCommitsDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async validatedDocument(userId, documentIds) {
+        try {
+            return await this.userService.validatedDocument(userId, documentIds);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/validatedDocument');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             return await this.userService.getStudents();
@@ -745,6 +764,22 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeamCommits", null);
+__decorate([
+    (0, common_1.Get)('getAllCommitsDocs/:teamId'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllCommitsDocs", null);
+__decorate([
+    (0, common_1.Post)('validatedDocument'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('documentIds')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "validatedDocument", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getStudents'),
