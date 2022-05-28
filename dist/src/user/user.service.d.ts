@@ -137,6 +137,7 @@ export declare class UserService {
     getTeamCommits(userId: string, teamId: string): Promise<CommitEntity[]>;
     getAllCommitsDocs(userId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
+    getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;

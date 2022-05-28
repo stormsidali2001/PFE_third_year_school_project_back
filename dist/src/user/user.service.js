@@ -1000,6 +1000,40 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getAllDocsAdmin(userId, promotionId, teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id', { userId })
+                .andWhere('user.userType = :userType', { userType: user_entity_1.UserType.ADMIN })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("perssion denied", 'UserService/getAllDocsAdmin');
+                throw new common_1.HttpException("perssion denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            let query = manager.getRepository(commit_document_entity_1.CommitDocumentEntity)
+                .createQueryBuilder('document')
+                .where('document.validated = true')
+                .leftJoinAndSelect('document.type', 'type')
+                .innerJoin('document.commit', 'commit')
+                .innerJoinAndSelect('commit.team', 'team')
+                .innerJoinAndSelect('team.promotion', 'promotion');
+            if (promotionId !== 'all') {
+                query = query
+                    .andWhere('promotion.id = :promotionId', { promotionId });
+            }
+            if (teamId !== 'all') {
+                query = query
+                    .andWhere('team.id = :teamId', { teamId });
+            }
+            return await query.getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getAllDocsAdmin');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             const manager = (0, typeorm_1.getManager)();

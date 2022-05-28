@@ -1279,6 +1279,7 @@ async getAllCommitsDocs(userId:string,teamId:string){
     }
 
 }
+
 async validatedDocument(userId:string,documentIds:string[]){
     try{
         const manager = getManager();
@@ -1311,6 +1312,52 @@ async validatedDocument(userId:string,documentIds:string[]){
     }catch(err){
         Logger.log(err,'UserService/validateDocument')
         throw new HttpException(err,HttpStatus.BAD_REQUEST)
+    }
+}
+async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
+    try{
+        const manager = getManager()
+
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.id',{userId})
+        .andWhere('user.userType = :userType',{userType:UserType.ADMIN})
+        .getOne()
+
+        if(!user){
+            Logger.error("perssion denied",'UserService/getAllDocsAdmin')
+            throw new HttpException("perssion denied",HttpStatus.BAD_REQUEST);
+        }
+
+        let query  =  manager.getRepository(CommitDocumentEntity)
+        .createQueryBuilder('document')
+        .where('document.validated = true')
+        .leftJoinAndSelect('document.type','type')
+        .innerJoin('document.commit','commit')
+        .innerJoinAndSelect('commit.team','team')
+        .innerJoinAndSelect('team.promotion','promotion')
+       
+        
+        if(promotionId!== 'all'){
+            query= query
+            .andWhere('promotion.id = :promotionId',{promotionId})
+            
+            
+        }
+
+        if(teamId !== 'all'){
+            query= query
+            .andWhere('team.id = :teamId',{teamId})
+            
+        }
+
+        return await query.getMany();
+
+   
+    }catch(err){
+        Logger.error(err,'UserService/getAllDocsAdmin')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+
     }
 }
 
