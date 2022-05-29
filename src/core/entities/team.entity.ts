@@ -11,6 +11,7 @@ import { CommitEntity } from "./commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
 import { WishEntity } from "./wish.entity";
+import { SoutenanceEntity } from "./soutenance.entity";
 
 
 @Entity('team')
@@ -78,6 +79,10 @@ export class TeamEntity{
 
     @OneToMany(type=>ResponsibleEntity,res=>res.team)
     responsibleTeachers:ResponsibleEntity[];
+
+
+    @OneToOne(type=>SoutenanceEntity) 
+    soutenance:SoutenanceEntity;
     
   
     

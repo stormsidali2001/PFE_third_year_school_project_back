@@ -1362,6 +1362,28 @@ async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
 }
 
 
+//soutenance management
+
+async createSoutenance(userId:string,teamId:string,title:string,description:string,date:Date,jurysIds:string){
+    try{
+        const manager = getManager();
+
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.id = :userId and user.userType = :userType',{userId,userType:UserType.ADMIN})
+        .getOne()
+
+        if(!user){
+            Logger.error("permission denied",'UserService/createSoutenance')
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+        }
+    }catch(err){
+        Logger.error(err,'UserService/createSoutenance')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+
 //crud operations student----------------------------------------
 async getStudents(){
     try{

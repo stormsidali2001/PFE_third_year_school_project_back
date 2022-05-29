@@ -1034,6 +1034,23 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async createSoutenance(userId, teamId, title, description, date, jurysIds) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id = :userId and user.userType = :userType', { userId, userType: user_entity_1.UserType.ADMIN })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("permission denied", 'UserService/createSoutenance');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/createSoutenance');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             const manager = (0, typeorm_1.getManager)();

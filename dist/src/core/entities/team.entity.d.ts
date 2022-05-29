@@ -10,6 +10,7 @@ import { CommitEntity } from "./commit.entity";
 import { TeamDocumentEntity } from "./team.document.entity";
 import { ThemeEntity } from "./theme.entity";
 import { WishEntity } from "./wish.entity";
+import { SoutenanceEntity } from "./soutenance.entity";
 export declare class TeamEntity {
     id: string;
     nickName: string;
@@ -29,4 +30,5 @@ export declare class TeamEntity {
     promotion: PromotionEntity;
     wishes: WishEntity[];
     responsibleTeachers: ResponsibleEntity[];
+    soutenance: SoutenanceEntity;
 }

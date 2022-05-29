@@ -56,6 +56,7 @@ const responsible_entity_1 = require("./core/entities/responsible.entity");
 const document_types_entity_1 = require("./core/entities/document-types.entity");
 const commit_entity_1 = require("./core/entities/commit.entity");
 const commit_document_entity_1 = require("./core/entities/commit.document.entity");
+const soutenance_entity_1 = require("./core/entities/soutenance.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -106,7 +107,8 @@ AppModule = __decorate([
                     responsible_entity_1.ResponsibleEntity,
                     document_types_entity_1.DocumentTypeEntity,
                     commit_entity_1.CommitEntity,
-                    commit_document_entity_1.CommitDocumentEntity
+                    commit_document_entity_1.CommitDocumentEntity,
+                    soutenance_entity_1.SoutenanceEntity
                 ],
             }),
             auth_module_1.Auth,

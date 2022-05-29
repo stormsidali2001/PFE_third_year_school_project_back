@@ -44,13 +44,13 @@ import { SocketModule } from './socket/socket.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { SessionEntity } from './core/entities/session.entity';
 import { ConfigEntity } from './core/entities/config.entity';
-import { ConfigMigration } from 'migrations/config.migration';
 import { PromotionEntity } from './core/entities/promotion.entity';
 import { WishEntity } from './core/entities/wish.entity';
 import { ResponsibleEntity } from './core/entities/responsible.entity';
 import { DocumentTypeEntity } from './core/entities/document-types.entity';
 import { CommitEntity } from './core/entities/commit.entity';
 import { CommitDocumentEntity } from './core/entities/commit.document.entity';
+import { SoutenanceEntity } from './core/entities/soutenance.entity';
 
 
 @Module({
@@ -100,7 +100,8 @@ import { CommitDocumentEntity } from './core/entities/commit.document.entity';
               ResponsibleEntity,
               DocumentTypeEntity,
               CommitEntity,
-              CommitDocumentEntity
+              CommitDocumentEntity,
+              SoutenanceEntity
             
  
  

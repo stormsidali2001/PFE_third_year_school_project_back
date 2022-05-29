@@ -131,6 +131,12 @@ export declare class UserController {
             promotion: import("../core/entities/promotion.entity").PromotionEntity;
         } | {
             id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
+        } | {
+            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -146,12 +152,6 @@ export declare class UserController {
             firstName: String;
             lastName: String;
             user: UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
         };
         userType: UserType;
         email: string;

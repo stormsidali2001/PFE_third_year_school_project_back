@@ -23,6 +23,7 @@ const commit_entity_1 = require("./commit.entity");
 const team_document_entity_1 = require("./team.document.entity");
 const theme_entity_1 = require("./theme.entity");
 const wish_entity_1 = require("./wish.entity");
+const soutenance_entity_1 = require("./soutenance.entity");
 let TeamEntity = class TeamEntity {
 };
 __decorate([
@@ -103,6 +104,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => responsible_entity_1.ResponsibleEntity, res => res.team),
     __metadata("design:type", Array)
 ], TeamEntity.prototype, "responsibleTeachers", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(type => soutenance_entity_1.SoutenanceEntity),
+    __metadata("design:type", soutenance_entity_1.SoutenanceEntity)
+], TeamEntity.prototype, "soutenance", void 0);
 TeamEntity = __decorate([
     (0, typeorm_1.Entity)('team')
 ], TeamEntity);
