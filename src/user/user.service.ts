@@ -35,6 +35,9 @@ import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
 import { CommitEntity } from "src/core/entities/commit.entity";
+import { SalleEntity } from "src/core/entities/salle.entity";
+import { SoutenanceEntity } from "src/core/entities/soutenance.entity";
+import { Jury_of } from "src/core/entities/juryOf.entity";
 
 @Injectable()
 export class UserService{
@@ -1364,19 +1367,81 @@ async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
 
 //soutenance management
 
-async createSoutenance(userId:string,teamId:string,title:string,description:string,date:Date,jurysIds:string){
+async createSoutenance(userId:string,teamId:string,title:string,description:string,date:Date,jurysIds:string[],salleId:string,duration:number){
     try{
         const manager = getManager();
 
         const user = await manager.getRepository(UserEntity)
         .createQueryBuilder('user')
         .where('user.id = :userId and user.userType = :userType',{userId,userType:UserType.ADMIN})
-        .getOne()
+        .getOne();
 
         if(!user){
             Logger.error("permission denied",'UserService/createSoutenance')
             throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
         }
+        const salle = await manager.getRepository(SalleEntity)
+        .createQueryBuilder('salle')
+        .where('salle.id = :salleId',{salleId})
+        .getOne();
+        if(!salle){
+            Logger.error("salle not found",'UserService/createSoutenance')
+            throw new HttpException("salle not found",HttpStatus.BAD_REQUEST);
+        }
+        const jurys = await manager.getRepository(TeacherEntity)
+        .createQueryBuilder('teacher')
+        .where('teacher.id in (:...jurysIds)',{jurysIds})
+        .getMany()
+
+        if(jurys.length !== jurysIds.length){
+            Logger.error("jurys not found",'UserService/createSoutenance')
+            throw new HttpException("jurys not found",HttpStatus.BAD_REQUEST);
+        }
+        const team = await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .where('team.id = :teamId',{teamId})
+        .getOne()
+
+        if(!team){
+            Logger.error("team not found",'UserService/createSoutenance')
+            throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
+        }
+        const soutenance =  await manager.getRepository(SoutenanceEntity)
+        .createQueryBuilder('soutenance')
+        .where('soutenance.teamId = :teamId',{teamId})
+        .getOne()
+        if(soutenance){
+            Logger.error("soutenance already created for that team",'UserService/createSoutenance')
+            throw new HttpException("soutenance already created for that team",HttpStatus.BAD_REQUEST);
+        }
+     
+        
+
+
+
+        await manager.getRepository(SoutenanceEntity)
+        .createQueryBuilder('soutenance')
+        .insert()
+        .values({title,description,salle,duration,date,team})
+        .execute()
+
+        const insertedSoutenance = await manager.getRepository(SoutenanceEntity)
+        .createQueryBuilder('soutenance')
+        .where('soutenance.teamId = :teamId',{teamId})
+        .getOne()
+
+        await manager.getRepository(Jury_of)
+        .createQueryBuilder('jf')
+        .insert()
+        .values(jurys.map(jr=>{
+            return {
+                teacher:jr,
+                soutenance:insertedSoutenance
+            }
+        }))
+        .execute()
+
+
     }catch(err){
         Logger.error(err,'UserService/createSoutenance')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
