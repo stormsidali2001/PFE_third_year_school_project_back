@@ -77,6 +77,7 @@ export declare class UserController {
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
     getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
+    getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
     getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
     getAllCommitsDocs(userId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
@@ -94,7 +95,7 @@ export declare class UserController {
     getAllThemes(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
     getThemes(promotionId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
     getTheme(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
-    getTeams(): Promise<{
+    getTeams(promotionId: string): Promise<{
         id: string;
         pseudo: string;
         theme: import("../core/entities/theme.entity").ThemeEntity;

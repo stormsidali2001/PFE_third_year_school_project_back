@@ -267,6 +267,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getAllDocsAdmin(userId, promotionId, teamId) {
+        try {
+            return await this.userService.getAllDocsAdmin(userId, promotionId, teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getAllDocsAdmin');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getTeamCommits(userId, teamId) {
         try {
             return await this.userService.getTeamCommits(userId, teamId);
@@ -408,9 +417,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getTeams() {
+    async getTeams(promotionId) {
         try {
-            return await this.userService.getTeams();
+            return await this.userService.getTeams(promotionId);
         }
         catch (err) {
             common_1.Logger.error(err, "UserController/getTeams");
@@ -758,6 +767,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeamsTeacherResponsibleForWithMembers", null);
 __decorate([
+    (0, common_1.Get)('getAllDocsAdmin/:promotionId/:teamId'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('promotionId')),
+    __param(2, (0, common_1.Param)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllDocsAdmin", null);
+__decorate([
     (0, common_1.Get)('getTeamCommits/:teamId'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __param(1, (0, common_1.Param)('teamId')),
@@ -888,9 +906,10 @@ __decorate([
 ], UserController.prototype, "getTheme", null);
 __decorate([
     (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getTeams'),
+    (0, common_1.Get)('getAllTeams/:promotionId'),
+    __param(0, (0, common_1.Param)('promotionId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeams", null);
 __decorate([

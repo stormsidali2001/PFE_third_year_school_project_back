@@ -1320,7 +1320,7 @@ async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
 
         const user = await manager.getRepository(UserEntity)
         .createQueryBuilder('user')
-        .where('user.id',{userId})
+        .where('user.id = :userId',{userId})
         .andWhere('user.userType = :userType',{userType:UserType.ADMIN})
         .getOne()
 
@@ -1333,7 +1333,7 @@ async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
         .createQueryBuilder('document')
         .where('document.validated = true')
         .leftJoinAndSelect('document.type','type')
-        .innerJoin('document.commit','commit')
+        .innerJoinAndSelect('document.commit','commit')
         .innerJoinAndSelect('commit.team','team')
         .innerJoinAndSelect('team.promotion','promotion')
        
@@ -2331,15 +2331,20 @@ async applyThemesToTeamsAssignements(userId:string,data:ThemeToTeamDTO):Promise<
     }
 }
 //team crud operations
-async getTeams(){
+async getTeams(promotionId:string){
     try{
         const manager = getManager();
-        const teams = await manager.getRepository(TeamEntity)
+        let query =  manager.getRepository(TeamEntity)
         .createQueryBuilder('team')
         .leftJoinAndSelect('team.givenTheme','givenTheme')
         .loadRelationCountAndMap('team.membersCount','team.students')
         .leftJoinAndSelect('team.promotion','promotion')
-        .getMany();
+       
+        if(promotionId !=='all'){
+            query = query.where('promotion.id = :promotionId',{promotionId})
+        }
+
+        const teams = await query.getMany()
         
         //@ts-ignore
         return teams.map(({nickName,givenTheme,membersCount,id,promotion})=>{
@@ -2352,7 +2357,7 @@ async getTeams(){
                 promotion:promotion.name,
                 validated: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam
             }
-        }) ;
+        });
     }catch(err){
         Logger.error(err,'UserService/getTeams')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

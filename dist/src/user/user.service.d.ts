@@ -172,7 +172,7 @@ export declare class UserService {
         teams: any;
     }[]>;
     applyThemesToTeamsAssignements(userId: string, data: ThemeToTeamDTO): Promise<any>;
-    getTeams(): Promise<{
+    getTeams(promotionId: string): Promise<{
         id: string;
         pseudo: string;
         theme: ThemeEntity;

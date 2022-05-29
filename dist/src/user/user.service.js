@@ -1005,7 +1005,7 @@ let UserService = class UserService {
             const manager = (0, typeorm_1.getManager)();
             const user = await manager.getRepository(user_entity_1.UserEntity)
                 .createQueryBuilder('user')
-                .where('user.id', { userId })
+                .where('user.id = :userId', { userId })
                 .andWhere('user.userType = :userType', { userType: user_entity_1.UserType.ADMIN })
                 .getOne();
             if (!user) {
@@ -1016,7 +1016,7 @@ let UserService = class UserService {
                 .createQueryBuilder('document')
                 .where('document.validated = true')
                 .leftJoinAndSelect('document.type', 'type')
-                .innerJoin('document.commit', 'commit')
+                .innerJoinAndSelect('document.commit', 'commit')
                 .innerJoinAndSelect('commit.team', 'team')
                 .innerJoinAndSelect('team.promotion', 'promotion');
             if (promotionId !== 'all') {
@@ -1783,15 +1783,18 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getTeams() {
+    async getTeams(promotionId) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            const teams = await manager.getRepository(team_entity_1.TeamEntity)
+            let query = manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')
                 .leftJoinAndSelect('team.givenTheme', 'givenTheme')
                 .loadRelationCountAndMap('team.membersCount', 'team.students')
-                .leftJoinAndSelect('team.promotion', 'promotion')
-                .getMany();
+                .leftJoinAndSelect('team.promotion', 'promotion');
+            if (promotionId !== 'all') {
+                query = query.where('promotion.id = :promotionId', { promotionId });
+            }
+            const teams = await query.getMany();
             return teams.map(({ nickName, givenTheme, membersCount, id, promotion }) => {
                 common_1.Logger.error(nickName, promotion, "debug");
                 return {

@@ -343,6 +343,16 @@ export class UserController{
         }
     }
     
+    @Get('getAllDocsAdmin/:promotionId/:teamId')
+    async getAllDocsAdmin(@GetCurrentUserId() userId:string,@Param('promotionId')promotionId:string,@Param('teamId')teamId:string){
+        try{
+            return await this.userService.getAllDocsAdmin(userId,promotionId,teamId)
+        }catch(err){
+            Logger.error(err,'UserController/getAllDocsAdmin')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     @Get('getTeamCommits/:teamId')
     async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
@@ -526,10 +536,10 @@ export class UserController{
 
 
     @Public()
-    @Get('getTeams')
-    async getTeams(){
+    @Get('getAllTeams/:promotionId')
+    async getTeams(@Param('promotionId') promotionId:string){
         try{
-            return await this.userService.getTeams()
+            return await this.userService.getTeams(promotionId)
         }catch(err){
             Logger.error(err,"UserController/getTeams")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
