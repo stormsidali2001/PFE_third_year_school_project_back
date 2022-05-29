@@ -1,5 +1,6 @@
 import {  Check, Column, Entity, JoinColumn, Long, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { EncadrementEntity } from "./encadrement.entity";
+import { Jury_of } from "./juryOf.entity";
 import { ResponsibleEntity } from "./responsible.entity";
 import { TeamCommitReviewEntity } from "./team.commit.review.entity";
 import { TeamTeacherChatMessage } from "./team.teacher.message.entity";
@@ -49,6 +50,10 @@ export class TeacherEntity{
 
     @OneToMany(type=>ResponsibleEntity,res=>res.teacher)
     teamsInCharge:ResponsibleEntity[];
+
+    @OneToMany(type=>Jury_of,jf=>jf.teacher)
+    soutenances:Jury_of[]
+
     
 
 

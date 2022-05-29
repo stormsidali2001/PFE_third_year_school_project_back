@@ -51,6 +51,8 @@ import { DocumentTypeEntity } from './core/entities/document-types.entity';
 import { CommitEntity } from './core/entities/commit.entity';
 import { CommitDocumentEntity } from './core/entities/commit.document.entity';
 import { SoutenanceEntity } from './core/entities/soutenance.entity';
+import { Jury_of } from './core/entities/juryOf.entity';
+import { SalleEntity } from './core/entities/salle.entity';
 
 
 @Module({
@@ -101,7 +103,9 @@ import { SoutenanceEntity } from './core/entities/soutenance.entity';
               DocumentTypeEntity,
               CommitEntity,
               CommitDocumentEntity,
-              SoutenanceEntity
+              SoutenanceEntity,
+              Jury_of,
+              SalleEntity
             
  
  

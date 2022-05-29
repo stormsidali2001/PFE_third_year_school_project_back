@@ -1,4 +1,5 @@
 import { EncadrementEntity } from "./encadrement.entity";
+import { Jury_of } from "./juryOf.entity";
 import { ResponsibleEntity } from "./responsible.entity";
 import { TeamCommitReviewEntity } from "./team.commit.review.entity";
 import { TeamTeacherChatMessage } from "./team.teacher.message.entity";
@@ -16,4 +17,5 @@ export declare class TeacherEntity {
     commitReviews: TeamCommitReviewEntity[];
     suggestedThemes: ThemeEntity[];
     teamsInCharge: ResponsibleEntity[];
+    soutenances: Jury_of[];
 }

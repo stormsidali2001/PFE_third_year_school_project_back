@@ -20,6 +20,7 @@ import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
 import { CommitEntity } from "src/core/entities/commit.entity";
+import { Jury_of } from "src/core/entities/juryOf.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -43,12 +44,6 @@ export declare class UserService {
             promotion: PromotionEntity;
         } | {
             id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: ThemeEntity[];
-        } | {
-            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -59,11 +54,18 @@ export declare class UserService {
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: ThemeEntity[];
             teamsInCharge: ResponsibleEntity[];
+            soutenances: Jury_of[];
         } | {
             id: String;
             firstName: String;
             lastName: String;
             user: UserEntity;
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+            suggestedThemes: ThemeEntity[];
         };
         userType: UserType;
         email: string;
@@ -138,7 +140,7 @@ export declare class UserService {
     getAllCommitsDocs(userId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<CommitDocumentEntity[]>;
-    createSoutenance(userId: string, teamId: string, title: string, description: string, date: Date, jurysIds: string): Promise<void>;
+    createSoutenance(userId: string, teamId: string, title: string, description: string, date: Date, jurysIds: string[], salleId: string, duration: number): Promise<void>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;

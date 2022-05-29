@@ -43,6 +43,9 @@ const responsible_entity_1 = require("../core/entities/responsible.entity");
 const document_types_entity_1 = require("../core/entities/document-types.entity");
 const commit_document_entity_1 = require("../core/entities/commit.document.entity");
 const commit_entity_1 = require("../core/entities/commit.entity");
+const salle_entity_1 = require("../core/entities/salle.entity");
+const soutenance_entity_1 = require("../core/entities/soutenance.entity");
+const juryOf_entity_1 = require("../core/entities/juryOf.entity");
 let UserService = class UserService {
     constructor(schedulerRegistry, socketService) {
         this.schedulerRegistry = schedulerRegistry;
@@ -1034,7 +1037,7 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createSoutenance(userId, teamId, title, description, date, jurysIds) {
+    async createSoutenance(userId, teamId, title, description, date, jurysIds, salleId, duration) {
         try {
             const manager = (0, typeorm_1.getManager)();
             const user = await manager.getRepository(user_entity_1.UserEntity)
@@ -1045,6 +1048,57 @@ let UserService = class UserService {
                 common_1.Logger.error("permission denied", 'UserService/createSoutenance');
                 throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
             }
+            const salle = await manager.getRepository(salle_entity_1.SalleEntity)
+                .createQueryBuilder('salle')
+                .where('salle.id = :salleId', { salleId })
+                .getOne();
+            if (!salle) {
+                common_1.Logger.error("salle not found", 'UserService/createSoutenance');
+                throw new common_1.HttpException("salle not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const jurys = await manager.getRepository(teacher_entity_1.TeacherEntity)
+                .createQueryBuilder('teacher')
+                .where('teacher.id in (:...jurysIds)', { jurysIds })
+                .getMany();
+            if (jurys.length !== jurysIds.length) {
+                common_1.Logger.error("jurys not found", 'UserService/createSoutenance');
+                throw new common_1.HttpException("jurys not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.id = :teamId', { teamId })
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("team not found", 'UserService/createSoutenance');
+                throw new common_1.HttpException("team not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const soutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                .createQueryBuilder('soutenance')
+                .where('soutenance.teamId = :teamId', { teamId })
+                .getOne();
+            if (soutenance) {
+                common_1.Logger.error("soutenance already created for that team", 'UserService/createSoutenance');
+                throw new common_1.HttpException("soutenance already created for that team", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                .createQueryBuilder('soutenance')
+                .insert()
+                .values({ title, description, salle, duration, date, team })
+                .execute();
+            const insertedSoutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                .createQueryBuilder('soutenance')
+                .where('soutenance.teamId = :teamId', { teamId })
+                .getOne();
+            await manager.getRepository(juryOf_entity_1.Jury_of)
+                .createQueryBuilder('jf')
+                .insert()
+                .values(jurys.map(jr => {
+                return {
+                    teacher: jr,
+                    soutenance: insertedSoutenance
+                };
+            }))
+                .execute();
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createSoutenance');

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeacherEntity = void 0;
 const typeorm_1 = require("typeorm");
 const encadrement_entity_1 = require("./encadrement.entity");
+const juryOf_entity_1 = require("./juryOf.entity");
 const responsible_entity_1 = require("./responsible.entity");
 const team_commit_review_entity_1 = require("./team.commit.review.entity");
 const team_teacher_message_entity_1 = require("./team.teacher.message.entity");
@@ -64,6 +65,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(type => responsible_entity_1.ResponsibleEntity, res => res.teacher),
     __metadata("design:type", Array)
 ], TeacherEntity.prototype, "teamsInCharge", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(type => juryOf_entity_1.Jury_of, jf => jf.teacher),
+    __metadata("design:type", Array)
+], TeacherEntity.prototype, "soutenances", void 0);
 TeacherEntity = __decorate([
     (0, typeorm_1.Entity)('teacher')
 ], TeacherEntity);

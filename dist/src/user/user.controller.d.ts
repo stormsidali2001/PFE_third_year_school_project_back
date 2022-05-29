@@ -131,12 +131,6 @@ export declare class UserController {
             promotion: import("../core/entities/promotion.entity").PromotionEntity;
         } | {
             id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
-        } | {
-            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -147,11 +141,18 @@ export declare class UserController {
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
             teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
+            soutenances: import("../core/entities/juryOf.entity").Jury_of[];
         } | {
             id: String;
             firstName: String;
             lastName: String;
             user: UserEntity;
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
         };
         userType: UserType;
         email: string;

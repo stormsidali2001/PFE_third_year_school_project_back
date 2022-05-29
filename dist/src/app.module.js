@@ -57,6 +57,8 @@ const document_types_entity_1 = require("./core/entities/document-types.entity")
 const commit_entity_1 = require("./core/entities/commit.entity");
 const commit_document_entity_1 = require("./core/entities/commit.document.entity");
 const soutenance_entity_1 = require("./core/entities/soutenance.entity");
+const juryOf_entity_1 = require("./core/entities/juryOf.entity");
+const salle_entity_1 = require("./core/entities/salle.entity");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -108,7 +110,9 @@ AppModule = __decorate([
                     document_types_entity_1.DocumentTypeEntity,
                     commit_entity_1.CommitEntity,
                     commit_document_entity_1.CommitDocumentEntity,
-                    soutenance_entity_1.SoutenanceEntity
+                    soutenance_entity_1.SoutenanceEntity,
+                    juryOf_entity_1.Jury_of,
+                    salle_entity_1.SalleEntity
                 ],
             }),
             auth_module_1.Auth,
