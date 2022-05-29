@@ -4,7 +4,7 @@ import { diskStorage } from "multer";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { editFileName } from "src/common/utils/files-middalewares";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO, ThemeToTeamDTO} from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto , ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto} from "src/core/dtos/user.dto";
 import * as fs from 'fs';
 import * as path from "path";
 
@@ -353,6 +353,16 @@ export class UserController{
         }
     }
 
+
+    @Post('createSoutenance')
+    async createSoutenance(@GetCurrentUserId() userId:string,data:SoutenanceDto){
+        try{
+            return await this.userService.createSoutenance(userId,data)
+        }catch(err){
+            Logger.error(err,'UserController/createSoutenance')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @Get('getTeamCommits/:teamId')
     async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){

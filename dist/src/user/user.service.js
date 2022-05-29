@@ -1037,7 +1037,8 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createSoutenance(userId, teamId, title, description, date, jurysIds, salleId, duration) {
+    async createSoutenance(userId, data) {
+        const { title, description, date, duration, jurysIds, salleId, teamId } = data;
         try {
             const manager = (0, typeorm_1.getManager)();
             const user = await manager.getRepository(user_entity_1.UserEntity)
@@ -1080,25 +1081,27 @@ let UserService = class UserService {
                 common_1.Logger.error("soutenance already created for that team", 'UserService/createSoutenance');
                 throw new common_1.HttpException("soutenance already created for that team", common_1.HttpStatus.BAD_REQUEST);
             }
-            await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
-                .createQueryBuilder('soutenance')
-                .insert()
-                .values({ title, description, salle, duration, date, team })
-                .execute();
-            const insertedSoutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
-                .createQueryBuilder('soutenance')
-                .where('soutenance.teamId = :teamId', { teamId })
-                .getOne();
-            await manager.getRepository(juryOf_entity_1.Jury_of)
-                .createQueryBuilder('jf')
-                .insert()
-                .values(jurys.map(jr => {
-                return {
-                    teacher: jr,
-                    soutenance: insertedSoutenance
-                };
-            }))
-                .execute();
+            (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                    .createQueryBuilder('soutenance')
+                    .insert()
+                    .values({ title, description, salle, duration, date, team })
+                    .execute();
+                const insertedSoutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                    .createQueryBuilder('soutenance')
+                    .where('soutenance.teamId = :teamId', { teamId })
+                    .getOne();
+                await manager.getRepository(juryOf_entity_1.Jury_of)
+                    .createQueryBuilder('jf')
+                    .insert()
+                    .values(jurys.map(jr => {
+                    return {
+                        teacher: jr,
+                        soutenance: insertedSoutenance
+                    };
+                }))
+                    .execute();
+            });
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createSoutenance');

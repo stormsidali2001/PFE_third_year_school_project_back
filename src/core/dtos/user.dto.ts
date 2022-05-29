@@ -125,3 +125,13 @@ class ThemeToTeamEntry {
 export class ThemeToTeamDTO{
     themeToTeam:ThemeToTeamEntry[]
 }
+
+export class SoutenanceDto{
+    teamId:string;
+    title:string;
+    description:string;
+    date:Date;
+    jurysIds:string[];
+    salleId:string;
+    duration:number;
+}

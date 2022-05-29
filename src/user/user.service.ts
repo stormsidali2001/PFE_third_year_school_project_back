@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { NormalTeamMeetDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SoutenanceDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
@@ -1367,7 +1367,16 @@ async getAllDocsAdmin(userId:string,promotionId:string,teamId:string){
 
 //soutenance management
 
-async createSoutenance(userId:string,teamId:string,title:string,description:string,date:Date,jurysIds:string[],salleId:string,duration:number){
+async createSoutenance(userId:string,data:SoutenanceDto){
+    const {
+        title,
+        description,
+        date,
+        duration,
+        jurysIds,
+        salleId,
+        teamId
+    } = data;
     try{
         const manager = getManager();
 
@@ -1415,31 +1424,31 @@ async createSoutenance(userId:string,teamId:string,title:string,description:stri
             throw new HttpException("soutenance already created for that team",HttpStatus.BAD_REQUEST);
         }
      
-        
 
+        getConnection().transaction(async manager =>{
 
-
-        await manager.getRepository(SoutenanceEntity)
-        .createQueryBuilder('soutenance')
-        .insert()
-        .values({title,description,salle,duration,date,team})
-        .execute()
-
-        const insertedSoutenance = await manager.getRepository(SoutenanceEntity)
-        .createQueryBuilder('soutenance')
-        .where('soutenance.teamId = :teamId',{teamId})
-        .getOne()
-
-        await manager.getRepository(Jury_of)
-        .createQueryBuilder('jf')
-        .insert()
-        .values(jurys.map(jr=>{
-            return {
-                teacher:jr,
-                soutenance:insertedSoutenance
-            }
-        }))
-        .execute()
+            await manager.getRepository(SoutenanceEntity)
+            .createQueryBuilder('soutenance')
+            .insert()
+            .values({title,description,salle,duration,date,team})
+            .execute()
+    
+            const insertedSoutenance = await manager.getRepository(SoutenanceEntity)
+            .createQueryBuilder('soutenance')
+            .where('soutenance.teamId = :teamId',{teamId})
+            .getOne()
+    
+            await manager.getRepository(Jury_of)
+            .createQueryBuilder('jf')
+            .insert()
+            .values(jurys.map(jr=>{
+                return {
+                    teacher:jr,
+                    soutenance:insertedSoutenance
+                }
+            }))
+            .execute()
+        })
 
 
     }catch(err){

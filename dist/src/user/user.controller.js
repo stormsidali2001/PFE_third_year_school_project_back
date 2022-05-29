@@ -276,6 +276,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async createSoutenance(userId, data) {
+        try {
+            return await this.userService.createSoutenance(userId, data);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/createSoutenance');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getTeamCommits(userId, teamId) {
         try {
             return await this.userService.getTeamCommits(userId, teamId);
@@ -775,6 +784,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAllDocsAdmin", null);
+__decorate([
+    (0, common_1.Post)('createSoutenance'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.SoutenanceDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createSoutenance", null);
 __decorate([
     (0, common_1.Get)('getTeamCommits/:teamId'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),

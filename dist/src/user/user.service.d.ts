@@ -1,4 +1,4 @@
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SoutenanceDto, SurveyDto, TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
@@ -140,7 +140,7 @@ export declare class UserService {
     getAllCommitsDocs(userId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<CommitDocumentEntity[]>;
-    createSoutenance(userId: string, teamId: string, title: string, description: string, date: Date, jurysIds: string[], salleId: string, duration: number): Promise<void>;
+    createSoutenance(userId: string, data: SoutenanceDto): Promise<void>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;

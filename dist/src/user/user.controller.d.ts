@@ -1,6 +1,6 @@
 /// <reference types="multer" />
 import { StreamableFile } from "@nestjs/common";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
@@ -78,6 +78,7 @@ export declare class UserController {
     getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
+    createSoutenance(userId: string, data: SoutenanceDto): Promise<void>;
     getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
     getAllCommitsDocs(userId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;

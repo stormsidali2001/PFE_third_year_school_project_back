@@ -102,4 +102,13 @@ declare class ThemeToTeamEntry {
 export declare class ThemeToTeamDTO {
     themeToTeam: ThemeToTeamEntry[];
 }
+export declare class SoutenanceDto {
+    teamId: string;
+    title: string;
+    description: string;
+    date: Date;
+    jurysIds: string[];
+    salleId: string;
+    duration: number;
+}
 export {};
