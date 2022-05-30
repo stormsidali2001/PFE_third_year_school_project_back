@@ -1460,14 +1460,15 @@ async createSoutenance(userId:string,data:SoutenanceDto){
 async getSoutenance(soutenanceId:string){
 try{
     const manager = getManager();
+
     return await manager.getRepository(SoutenanceEntity)
     .createQueryBuilder('soutenance')
     .where('soutenance.id = :soutenanceId',{soutenanceId})
     .leftJoinAndSelect('soutenance.team','team')
     .leftJoinAndSelect('team.givenTheme','theme')
     .leftJoinAndSelect('soutenance.jurys','jurys')
-    .leftJoinAndSelect('soutenance.salle','salle')
     .leftJoinAndSelect('jurys.teacher','teacher')
+    .leftJoinAndSelect('soutenance.salle','salle')
     .getOne()
 
 }catch(err){
