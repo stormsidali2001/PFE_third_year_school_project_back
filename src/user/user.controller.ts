@@ -355,7 +355,7 @@ export class UserController{
 
 
     @Post('createSoutenance')
-    async createSoutenance(@GetCurrentUserId() userId:string,data:SoutenanceDto){
+    async createSoutenance(@GetCurrentUserId() userId:string,@Body() data:SoutenanceDto){
         try{
             return await this.userService.createSoutenance(userId,data)
         }catch(err){
@@ -557,6 +557,12 @@ export class UserController{
     }
 
     @Public()
+    @Get('getTeamsWithThemes/:promotionId')
+    async getTeamsithThemes(@Param('promotionId') promotionId:string){
+        return await this.userService.getTeamsithThemes(promotionId)
+    }
+
+    @Public()
     @Get('getTeams/:teamId')
     async getTeam(@Param('teamId') teamId:string){
         try{
@@ -648,6 +654,22 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Public()
+    @Get('getSalles')
+    async getSalles(){
+        return await this.userService.getSalles()
+    }
+
+    @Post('canSoutenir')
+    async canSoutenir(@GetCurrentUserId() userId:string,@Body('teamId') teamId:string){
+        try{
+            return await this.userService.canSoutenir(userId,teamId);
+        }catch(err){
+            Logger.error(err,'UserController/sendNotifications')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')
@@ -687,5 +709,16 @@ export class UserController{
         Logger.error(err,'UserController/createNewPromotion')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
+}
+
+@Public()
+@Post('test/createSalle')
+async createSalle(@Body('name') name:string) {
+try{
+    return await this.userService.careateSalle(name)
+}catch(err){
+    Logger.error(err,'UserController/createNewPromotion')
+    throw new HttpException(err,HttpStatus.BAD_REQUEST);
+}
 }
 }

@@ -47,6 +47,12 @@ __decorate([
     __metadata("design:type", String)
 ], TeamEntity.prototype, "rules", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], TeamEntity.prototype, "peutSoutenir", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(type => student_entity_1.StudentEntity, student => student.team),
     __metadata("design:type", Array)
 ], TeamEntity.prototype, "students", void 0);

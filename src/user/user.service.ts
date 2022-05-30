@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger, Post } from "@nestjs/common";
 import { NormalTeamMeetDto, SoutenanceDto, StudentDTO, SurveyDto , TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
 import { AnnouncementEntity } from "src/core/entities/announcement.entity";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
@@ -1374,7 +1374,8 @@ async createSoutenance(userId:string,data:SoutenanceDto){
         date,
         jurysIds,
         salleId,
-        teamId
+        teamId,
+        duration
     } = data;
     try{
         const manager = getManager();
@@ -1424,12 +1425,12 @@ async createSoutenance(userId:string,data:SoutenanceDto){
         }
      
 
-        getConnection().transaction(async manager =>{
+       await getConnection().transaction(async manager =>{
 
             await manager.getRepository(SoutenanceEntity)
             .createQueryBuilder('soutenance')
             .insert()
-            .values({title,description,salle,date,team})
+            .values({title,description,salle,date,team,duration})
             .execute()
     
             const insertedSoutenance = await manager.getRepository(SoutenanceEntity)
@@ -1449,6 +1450,7 @@ async createSoutenance(userId:string,data:SoutenanceDto){
             .execute()
         })
 
+        return "done"
 
     }catch(err){
         Logger.error(err,'UserService/createSoutenance')
@@ -2615,8 +2617,112 @@ async getPromotionDocumentTypes(userId:string){
     }
 
 }
+@Post('getSalles')
+async getSalles(){
+    try{
+        const manager = getManager()
+
+        const salles = await manager.getRepository(SalleEntity)
+        .createQueryBuilder('salles')
+        .getMany();
+
+        return salles;
+
+    }catch(err){
+        Logger.log(err,'UserService/getSalles')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+
+async careateSalle(name:string){
+    try{
+        const manager = getManager()
+
+       await manager.getRepository(SalleEntity)
+        .createQueryBuilder('salle')
+        .insert()
+        .values({name})
+        .execute()
+
+       
+
+    }catch(err){
+        Logger.log(err,'UserService/getSalles')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 
 
+async getTeamsithThemes(promotionId:string){
+    try{
+        const manager = getManager();
+        let query =  manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .where('team.peutSoutenir = true')
+        .innerJoinAndSelect('team.givenTheme','givenTheme')
+        .leftJoinAndSelect('team.promotion','promotion')
+       
+        if(promotionId !=='all'){
+            query = query.where('promotion.id = :promotionId',{promotionId})
+        }
 
+        const teams = await query.getMany()
+        
+        //@ts-ignore
+        return teams.map(({nickName,givenTheme,membersCount,id,promotion})=>{
+           Logger.error(nickName,promotion,"debug")
+            return {
+                id,
+                pseudo:nickName,
+                theme:givenTheme,
+                nombre:membersCount,
+                promotion:promotion.name,
+                validated: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam
+            }
+        });
+    }catch(err){
+        Logger.error(err,'UserService/getTeams')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+
+
+}
+async canSoutenir(userId:string,teamId:string){
+    try{
+
+        const manager = getManager();
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.id = :userId and user.userType = :userType',{userId,userType:UserType.TEACHER})
+        .getOne()
+
+        if(!user){
+            Logger.error("permission denied",'UserService/canSoutenir')
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+        }
+         const team = await manager.getRepository(TeamEntity)
+         .createQueryBuilder('team')
+         .where('team.id = :teamId and team.givenTheme IS NOT NULL',{teamId})
+         .innerJoin('team.responsibleTeachers','responsibleTeachers')
+         .innerJoin('responsibleTeachers.teacher','teacher')
+         .andWhere('teacher.userId = :userId',{userId})
+         .getOne();
+
+         if(!team){
+            Logger.error("team not found or theme",'UserService/canSoutenir')
+            throw new HttpException("team not found or theme",HttpStatus.BAD_REQUEST);
+         }
+
+         await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .update()
+        .where('team.id = :teamId',{teamId})
+        .set({peutSoutenir:true})
+        .execute()
+    }catch(err){
+        Logger.error(err,'UserService/canSoutenir')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 }
 

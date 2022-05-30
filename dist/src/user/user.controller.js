@@ -435,6 +435,9 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getTeamsithThemes(promotionId) {
+        return await this.userService.getTeamsithThemes(promotionId);
+    }
     async getTeam(teamId) {
         try {
             return await this.userService.getTeam(teamId);
@@ -513,6 +516,18 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSalles() {
+        return await this.userService.getSalles();
+    }
+    async canSoutenir(userId, teamId) {
+        try {
+            return await this.userService.canSoutenir(userId, teamId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/sendNotifications');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async sendNotification(userId, description) {
         try {
             return await this.userService._sendNotfication(userId, description);
@@ -535,6 +550,15 @@ let UserController = class UserController {
     async createNewPromotion(name, documentTypes) {
         try {
             return await this.userService.createNewPromotion(name, documentTypes);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/createNewPromotion');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async createSalle(name) {
+        try {
+            return await this.userService.careateSalle(name);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/createNewPromotion');
@@ -787,6 +811,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('createSoutenance'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, user_dto_1.SoutenanceDto]),
     __metadata("design:returntype", Promise)
@@ -930,6 +955,14 @@ __decorate([
 ], UserController.prototype, "getTeams", null);
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTeamsWithThemes/:promotionId'),
+    __param(0, (0, common_1.Param)('promotionId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeamsithThemes", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getTeams/:teamId'),
     __param(0, (0, common_1.Param)('teamId')),
     __metadata("design:type", Function),
@@ -1008,6 +1041,21 @@ __decorate([
 ], UserController.prototype, "getPromotionDocumentTypes", null);
 __decorate([
     (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getSalles'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getSalles", null);
+__decorate([
+    (0, common_1.Post)('canSoutenir'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('teamId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "canSoutenir", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),
     __param(0, (0, common_1.Body)('userId')),
     __param(1, (0, common_1.Body)('description')),
@@ -1033,6 +1081,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "createNewPromotion", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('test/createSalle'),
+    __param(0, (0, common_1.Body)('name')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "createSalle", null);
 UserController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [user_service_1.UserService])

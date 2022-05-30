@@ -1038,7 +1038,7 @@ let UserService = class UserService {
         }
     }
     async createSoutenance(userId, data) {
-        const { title, description, date, jurysIds, salleId, teamId } = data;
+        const { title, description, date, jurysIds, salleId, teamId, duration } = data;
         try {
             const manager = (0, typeorm_1.getManager)();
             const user = await manager.getRepository(user_entity_1.UserEntity)
@@ -1081,11 +1081,11 @@ let UserService = class UserService {
                 common_1.Logger.error("soutenance already created for that team", 'UserService/createSoutenance');
                 throw new common_1.HttpException("soutenance already created for that team", common_1.HttpStatus.BAD_REQUEST);
             }
-            (0, typeorm_1.getConnection)().transaction(async (manager) => {
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
                 await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                     .createQueryBuilder('soutenance')
                     .insert()
-                    .values({ title, description, salle, date, team })
+                    .values({ title, description, salle, date, team, duration })
                     .execute();
                 const insertedSoutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                     .createQueryBuilder('soutenance')
@@ -1102,6 +1102,7 @@ let UserService = class UserService {
                 }))
                     .execute();
             });
+            return "done";
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createSoutenance');
@@ -2009,7 +2010,103 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSalles() {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const salles = await manager.getRepository(salle_entity_1.SalleEntity)
+                .createQueryBuilder('salles')
+                .getMany();
+            return salles;
+        }
+        catch (err) {
+            common_1.Logger.log(err, 'UserService/getSalles');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async careateSalle(name) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            await manager.getRepository(salle_entity_1.SalleEntity)
+                .createQueryBuilder('salle')
+                .insert()
+                .values({ name })
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.log(err, 'UserService/getSalles');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeamsithThemes(promotionId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            let query = manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.peutSoutenir = true')
+                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
+                .leftJoinAndSelect('team.promotion', 'promotion');
+            if (promotionId !== 'all') {
+                query = query.where('promotion.id = :promotionId', { promotionId });
+            }
+            const teams = await query.getMany();
+            return teams.map(({ nickName, givenTheme, membersCount, id, promotion }) => {
+                common_1.Logger.error(nickName, promotion, "debug");
+                return {
+                    id,
+                    pseudo: nickName,
+                    theme: givenTheme,
+                    nombre: membersCount,
+                    promotion: promotion.name,
+                    validated: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam
+                };
+            });
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeams');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async canSoutenir(userId, teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id = :userId and user.userType = :userType', { userId, userType: user_entity_1.UserType.TEACHER })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("permission denied", 'UserService/canSoutenir');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.id = :teamId and team.givenTheme IS NOT NULL', { teamId })
+                .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
+                .innerJoin('responsibleTeachers.teacher', 'teacher')
+                .andWhere('teacher.userId = :userId', { userId })
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("team not found or theme", 'UserService/canSoutenir');
+                throw new common_1.HttpException("team not found or theme", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .update()
+                .where('team.id = :teamId', { teamId })
+                .set({ peutSoutenir: true })
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/canSoutenir');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
+__decorate([
+    (0, common_1.Post)('getSalles'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserService.prototype, "getSalles", null);
 UserService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [schedule_1.SchedulerRegistry,

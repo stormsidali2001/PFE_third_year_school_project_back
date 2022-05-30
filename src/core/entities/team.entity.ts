@@ -31,7 +31,12 @@ export class TeamEntity{
         default:''
     })
     rules:string;
-    //relations
+
+    @Column({
+        default:false
+    })
+    peutSoutenir:boolean;
+    //relations}
     //for invitation
     @OneToMany(type=>StudentEntity,student=>student.team)
     students:StudentEntity[];

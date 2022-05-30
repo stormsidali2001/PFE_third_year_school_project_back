@@ -78,7 +78,7 @@ export declare class UserController {
     getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
-    createSoutenance(userId: string, data: SoutenanceDto): Promise<void>;
+    createSoutenance(userId: string, data: SoutenanceDto): Promise<string>;
     getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
     getAllCommitsDocs(userId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
@@ -97,6 +97,14 @@ export declare class UserController {
     getThemes(promotionId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
     getTheme(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
     getTeams(promotionId: string): Promise<{
+        id: string;
+        pseudo: string;
+        theme: import("../core/entities/theme.entity").ThemeEntity;
+        nombre: any;
+        promotion: string;
+        validated: boolean;
+    }[]>;
+    getTeamsithThemes(promotionId: string): Promise<{
         id: string;
         pseudo: string;
         theme: import("../core/entities/theme.entity").ThemeEntity;
@@ -172,7 +180,10 @@ export declare class UserController {
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
     assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
     getPromotionDocumentTypes(userId: any): Promise<import("../core/entities/document-types.entity").DocumentTypeEntity[]>;
+    getSalles(): Promise<import("../core/entities/salle.entity").SalleEntity[]>;
+    canSoutenir(userId: string, teamId: string): Promise<void>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
+    createSalle(name: string): Promise<void>;
 }

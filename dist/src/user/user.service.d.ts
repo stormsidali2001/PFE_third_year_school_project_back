@@ -20,6 +20,7 @@ import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
 import { CommitEntity } from "src/core/entities/commit.entity";
+import { SalleEntity } from "src/core/entities/salle.entity";
 import { Jury_of } from "src/core/entities/juryOf.entity";
 export declare class UserService {
     private schedulerRegistry;
@@ -140,7 +141,7 @@ export declare class UserService {
     getAllCommitsDocs(userId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<CommitDocumentEntity[]>;
-    createSoutenance(userId: string, data: SoutenanceDto): Promise<void>;
+    createSoutenance(userId: string, data: SoutenanceDto): Promise<string>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
@@ -197,4 +198,15 @@ export declare class UserService {
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
     getAllPromotions(): Promise<PromotionEntity[]>;
     getPromotionDocumentTypes(userId: string): Promise<DocumentTypeEntity[]>;
+    getSalles(): Promise<SalleEntity[]>;
+    careateSalle(name: string): Promise<void>;
+    getTeamsithThemes(promotionId: string): Promise<{
+        id: string;
+        pseudo: string;
+        theme: ThemeEntity;
+        nombre: any;
+        promotion: string;
+        validated: boolean;
+    }[]>;
+    canSoutenir(userId: string, teamId: string): Promise<void>;
 }

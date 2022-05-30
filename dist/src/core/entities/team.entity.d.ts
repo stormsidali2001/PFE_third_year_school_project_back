@@ -16,6 +16,7 @@ export declare class TeamEntity {
     nickName: string;
     description: string;
     rules: string;
+    peutSoutenir: boolean;
     students: StudentEntity[];
     teamLeader: StudentEntity;
     qualityManager: StudentEntity;

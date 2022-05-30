@@ -313,3 +313,13 @@ Content-Type:application/json
     "method":"random"
 
 }
+
+
+###
+POST  http://localhost:8080/test/createSalle
+Content-Type:application/json
+
+{
+    "name":"F"
+
+}
