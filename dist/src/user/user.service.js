@@ -1038,7 +1038,7 @@ let UserService = class UserService {
         }
     }
     async createSoutenance(userId, data) {
-        const { title, description, date, duration, jurysIds, salleId, teamId } = data;
+        const { title, description, date, jurysIds, salleId, teamId } = data;
         try {
             const manager = (0, typeorm_1.getManager)();
             const user = await manager.getRepository(user_entity_1.UserEntity)
@@ -1085,7 +1085,7 @@ let UserService = class UserService {
                 await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                     .createQueryBuilder('soutenance')
                     .insert()
-                    .values({ title, description, salle, duration, date, team })
+                    .values({ title, description, salle, date, team })
                     .execute();
                 const insertedSoutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                     .createQueryBuilder('soutenance')

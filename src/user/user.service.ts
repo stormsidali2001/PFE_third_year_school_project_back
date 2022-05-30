@@ -1372,7 +1372,6 @@ async createSoutenance(userId:string,data:SoutenanceDto){
         title,
         description,
         date,
-        duration,
         jurysIds,
         salleId,
         teamId
@@ -1430,7 +1429,7 @@ async createSoutenance(userId:string,data:SoutenanceDto){
             await manager.getRepository(SoutenanceEntity)
             .createQueryBuilder('soutenance')
             .insert()
-            .values({title,description,salle,duration,date,team})
+            .values({title,description,salle,date,team})
             .execute()
     
             const insertedSoutenance = await manager.getRepository(SoutenanceEntity)

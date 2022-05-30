@@ -133,5 +133,5 @@ export class SoutenanceDto{
     date:Date;
     jurysIds:string[];
     salleId:string;
-    duration:number;
+ 
 }
