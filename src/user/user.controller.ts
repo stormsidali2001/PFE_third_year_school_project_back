@@ -369,7 +369,7 @@ export class UserController{
         try{
             return await this.userService.getSoutenances(promotionId)
         }catch(err){
-            Logger.error(err,'UserController/createSoutenances')
+            Logger.error(err,'UserController/getSoutenances')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }

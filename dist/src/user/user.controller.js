@@ -290,7 +290,7 @@ let UserController = class UserController {
             return await this.userService.getSoutenances(promotionId);
         }
         catch (err) {
-            common_1.Logger.error(err, 'UserController/createSoutenances');
+            common_1.Logger.error(err, 'UserController/getSoutenances');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
