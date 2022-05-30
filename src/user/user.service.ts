@@ -1457,7 +1457,41 @@ async createSoutenance(userId:string,data:SoutenanceDto){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
+async getSoutenance(soutenanceId:string){
+try{
+    const manager = getManager();
+    return await manager.getRepository(SoutenanceEntity)
+    .createQueryBuilder('soutenance')
+    .where('soutenance.id = :soutenanceId',{soutenanceId})
+    .leftJoinAndSelect('soutenance.team','team')
+    .leftJoinAndSelect('team.givenTheme','theme')
+    .leftJoinAndSelect('soutenance.jurys','jurys')
+    .leftJoinAndSelect('jurys.teacher','teacher')
+    .getOne()
 
+}catch(err){
+    Logger.error(err,'UserService/getSoutenance')
+    throw new HttpException(err,HttpStatus.BAD_REQUEST);
+}
+}
+async getSoutenances(promotionId:string){
+        try{
+            const manager = getManager();
+            let query =  manager.getRepository(SoutenanceEntity)
+            .createQueryBuilder('soutenance')
+            .leftJoinAndSelect('soutenance.team','team')
+            .leftJoinAndSelect('team.promotion','promotion')
+            
+            if(promotionId!=='all'){
+                query = query.where('promotion.id = :promotionId',{promotionId})
+            }
+        
+            return await query.getMany()
+        }catch(err){
+            Logger.error(err,'UserService/getSoutenances')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
 
 //crud operations student----------------------------------------
 async getStudents(){

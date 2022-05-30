@@ -1109,6 +1109,40 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getSoutenance(soutenanceId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            return await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                .createQueryBuilder('soutenance')
+                .where('soutenance.id = :soutenanceId', { soutenanceId })
+                .leftJoinAndSelect('soutenance.team', 'team')
+                .leftJoinAndSelect('team.givenTheme', 'theme')
+                .leftJoinAndSelect('soutenance.jurys', 'jurys')
+                .leftJoinAndSelect('jurys.teacher', 'teacher')
+                .getOne();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getSoutenance');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getSoutenances(promotionId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            let query = manager.getRepository(soutenance_entity_1.SoutenanceEntity)
+                .createQueryBuilder('soutenance')
+                .leftJoinAndSelect('soutenance.team', 'team')
+                .leftJoinAndSelect('team.promotion', 'promotion');
+            if (promotionId !== 'all') {
+                query = query.where('promotion.id = :promotionId', { promotionId });
+            }
+            return await query.getMany();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getSoutenances');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getStudents() {
         try {
             const manager = (0, typeorm_1.getManager)();

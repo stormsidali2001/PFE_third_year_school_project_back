@@ -21,6 +21,7 @@ import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
 import { CommitEntity } from "src/core/entities/commit.entity";
 import { SalleEntity } from "src/core/entities/salle.entity";
+import { SoutenanceEntity } from "src/core/entities/soutenance.entity";
 import { Jury_of } from "src/core/entities/juryOf.entity";
 export declare class UserService {
     private schedulerRegistry;
@@ -142,6 +143,8 @@ export declare class UserService {
     validatedDocument(userId: string, documentIds: string[]): Promise<void>;
     getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<CommitDocumentEntity[]>;
     createSoutenance(userId: string, data: SoutenanceDto): Promise<string>;
+    getSoutenance(soutenanceId: string): Promise<SoutenanceEntity>;
+    getSoutenances(promotionId: string): Promise<SoutenanceEntity[]>;
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
