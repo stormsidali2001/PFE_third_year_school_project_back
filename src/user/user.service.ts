@@ -1466,6 +1466,7 @@ try{
     .leftJoinAndSelect('soutenance.team','team')
     .leftJoinAndSelect('team.givenTheme','theme')
     .leftJoinAndSelect('soutenance.jurys','jurys')
+    .leftJoinAndSelect('soutenance.salle','salle')
     .leftJoinAndSelect('jurys.teacher','teacher')
     .getOne()
 
