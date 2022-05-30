@@ -364,6 +364,16 @@ export class UserController{
         }
     }
 
+    @Get('getSoutenances/:promotionId')
+    async getSoutenances(@GetCurrentUserId() userId:string,@Param('promotionId') promotionId:string){
+        try{
+            return await this.userService.getSoutenances(promotionId)
+        }catch(err){
+            Logger.error(err,'UserController/createSoutenances')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @Get('getTeamCommits/:teamId')
     async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
         try{
