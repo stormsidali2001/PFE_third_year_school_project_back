@@ -31,14 +31,14 @@ POST http://localhost:8080/signup/studentTest
 content-type:application/json
 
 {
-    "email":"s.assoul@esi-sba.dz",
+    "email":"h.debza2@esi-sba.dz",
     "password":"1@2@3@abC",
-    "firstName":"assoul",
-    "lastName":"sidali",
+    "firstName":"debza2",
+    "lastName":"houda2",
     "dob":"2001-04-20",
     "code":"191932004015",
     "moy":"17.20",
-    "promotionId":"d2228d4b-f491-4548-8a61-b1f6a7b8dede"
+    "promotionId":"199f831c-6cc3-449e-8594-26452a99a6a5"
 }
 
 ###
@@ -297,7 +297,7 @@ Content-Type:application/json
 
 {
     "ssn":"034565456465",
-    "email":"t.teacher1@esi-sba.dz",
+    "email":"t.teacher@esi-sba.dz",
     "password":"1@2@3@4@passwordP",
     "firstName":"teacher1",
     "lastName":"teacher1",
@@ -320,6 +320,6 @@ POST  http://localhost:8080/test/createSalle
 Content-Type:application/json
 
 {
-    "name":"F"
+    "name":"C"
 
 }
