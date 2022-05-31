@@ -11,6 +11,7 @@ export declare class AuthController {
     signupEntereprise(data: EnterpriseDTO): Promise<void>;
     forgotpassword(email: string): Promise<string>;
     resetPassword(password: string, token: string, userId: string): Promise<string>;
+    Pu: any;
     logout(request: any): Promise<string>;
     signupAdmin(admin: AdminDto): Promise<{
         user: import("../core/entities/user.entity").UserEntity;

@@ -1461,6 +1461,7 @@ async getSoutenance(soutenanceId:string){
 try{
     const manager = getManager();
 
+ 
     return await manager.getRepository(SoutenanceEntity)
     .createQueryBuilder('soutenance')
     .where('soutenance.id = :soutenanceId',{soutenanceId})
@@ -1482,6 +1483,7 @@ async getSoutenances(promotionId:string){
             let query =  manager.getRepository(SoutenanceEntity)
             .createQueryBuilder('soutenance')
             .leftJoinAndSelect('soutenance.team','team')
+            .leftJoinAndSelect('soutenance.jurys','jurys')
             .leftJoinAndSelect('team.promotion','promotion')
             
             if(promotionId!=='all'){

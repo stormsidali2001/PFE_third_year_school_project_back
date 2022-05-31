@@ -27,7 +27,7 @@ export class SoutenanceEntity{
     duration:number;
     //relations
 
-    @OneToOne(type=>TeamEntity,{primary:true})  @JoinColumn()
+    @OneToOne(type=>TeamEntity)  @JoinColumn()
     team:TeamEntity;
 
     @OneToMany(type=>Jury_of,jf=>jf.soutenance)

@@ -41,7 +41,7 @@ __decorate([
     __metadata("design:type", Number)
 ], SoutenanceEntity.prototype, "duration", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(type => team_entity_1.TeamEntity, { primary: true }),
+    (0, typeorm_1.OneToOne)(type => team_entity_1.TeamEntity),
     (0, typeorm_1.JoinColumn)(),
     __metadata("design:type", team_entity_1.TeamEntity)
 ], SoutenanceEntity.prototype, "team", void 0);

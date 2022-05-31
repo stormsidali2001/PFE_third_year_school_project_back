@@ -66,6 +66,9 @@ export class AuthController{
      }
     
 
+
+
+    Pu
     @Post('logout')
     async logout(@Request() request){
          request.logOut();

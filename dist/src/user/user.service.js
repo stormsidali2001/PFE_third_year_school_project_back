@@ -1133,6 +1133,7 @@ let UserService = class UserService {
             let query = manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                 .createQueryBuilder('soutenance')
                 .leftJoinAndSelect('soutenance.team', 'team')
+                .leftJoinAndSelect('soutenance.jurys', 'jurys')
                 .leftJoinAndSelect('team.promotion', 'promotion');
             if (promotionId !== 'all') {
                 query = query.where('promotion.id = :promotionId', { promotionId });
