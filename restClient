@@ -31,14 +31,14 @@ POST http://localhost:8080/signup/studentTest
 content-type:application/json
 
 {
-    "email":"h.debza2@esi-sba.dz",
+    "email":"h.debza10@esi-sba.dz",
     "password":"1@2@3@abC",
-    "firstName":"debza2",
-    "lastName":"houda2",
+    "firstName":"debza10",
+    "lastName":"houda10",
     "dob":"2001-04-20",
     "code":"191932004015",
     "moy":"17.20",
-    "promotionId":"199f831c-6cc3-449e-8594-26452a99a6a5"
+    "promotionId":"c5f082a4-8f5e-4b6c-9026-081b96bf8a4a"
 }
 
 ###
@@ -283,7 +283,7 @@ Content-Type:application/json
 
 {
 
-  "name":"3CS",
+  "name":"3CPI",
   "documentTypes":["cahier charge","cahier analyse","cahier conception'","cahier architecture","charte nomage code","charte nomage document"]
 }
 
@@ -297,10 +297,10 @@ Content-Type:application/json
 
 {
     "ssn":"034565456465",
-    "email":"t.teacher@esi-sba.dz",
+    "email":"t.teacher3@esi-sba.dz",
     "password":"1@2@3@4@passwordP",
-    "firstName":"teacher1",
-    "lastName":"teacher1",
+    "firstName":"teacher3",
+    "lastName":"teacher3",
     "speciality":"Web"
 }
 
