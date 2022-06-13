@@ -133,6 +133,7 @@ let UserService = class UserService {
             const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
             const invitation = invitationsRepository.create({ description, sender, reciever });
             await invitationsRepository.save(invitation);
+            this._sendNotficationStudent(reciever.id, `vous avez une nouvelle invitation de jointure de ${sender.firstName} ${reciever.lastName}`);
             return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName} of the promotion ${sender.promotion.name}`;
         }
         catch (err) {
@@ -144,31 +145,33 @@ let UserService = class UserService {
         try {
             let newTeamCreated = false;
             let invitation;
+            const manager = (0, typeorm_1.getManager)();
             let outputMessage = `invitation has been accepted`;
+            const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
+            invitation = await invitationsRepository
+                .createQueryBuilder('invitation')
+                .leftJoinAndSelect('invitation.sender', 'sender')
+                .leftJoinAndSelect('invitation.reciever', 'reciever')
+                .leftJoinAndSelect('sender.team', 'steam')
+                .leftJoinAndSelect('reciever.team', 'rteam')
+                .leftJoinAndSelect('reciever.user', 'ruser')
+                .leftJoinAndSelect('sender.promotion', 'spromotion')
+                .where('invitation.id = :invitationId', { invitationId })
+                .andWhere('reciever.userId = :userId', { userId })
+                .getOne();
+            if (!invitation) {
+                common_1.Logger.error("invitation not found", 'UserService/getAcceptRefuseTeamInvitation');
+                throw new common_1.HttpException("invitation not found", common_1.HttpStatus.FORBIDDEN);
+            }
+            if (!accepted) {
+                await invitationsRepository.delete({ id: invitation.id });
+                this._sendNotficationStudent(invitation.sender.id, `${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `);
+                return "the invitation has been refused";
+            }
             await (0, typeorm_1.getConnection)().transaction(async (manager) => {
-                const invitationsRepository = manager.getRepository(invitation_entity_1.InvitationEntity);
-                invitation = await invitationsRepository
-                    .createQueryBuilder('invitation')
-                    .leftJoinAndSelect('invitation.sender', 'sender')
-                    .leftJoinAndSelect('invitation.reciever', 'reciever')
-                    .leftJoinAndSelect('sender.team', 'steam')
-                    .leftJoinAndSelect('reciever.team', 'rteam')
-                    .leftJoinAndSelect('sender.promotion', 'spromotion')
-                    .where('invitation.id = :invitationId', { invitationId })
-                    .andWhere('reciever.userId = :userId', { userId })
-                    .getOne();
-                if (!invitation) {
-                    common_1.Logger.error("invitation not found", 'UserService/getAcceptRefuseTeamInvitation');
-                    throw new common_1.HttpException("invitation not found", common_1.HttpStatus.FORBIDDEN);
-                }
-                if (!accepted) {
-                    await invitationsRepository.delete({ id: invitation.id });
-                    this._sendNotficationStudent(invitation.sender.id, `${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `);
-                    return "the invitation has been refused";
-                }
-                const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
-                const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
                 if (!invitation.sender.team) {
+                    const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
+                    const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
                     const teamLength = await teamRepository
                         .createQueryBuilder('team')
                         .getCount();
@@ -182,7 +185,7 @@ let UserService = class UserService {
                 }
                 else {
                     invitation.reciever.team = invitation.sender.team;
-                    await studentRepository.save(invitation.reciever);
+                    await manager.getRepository(student_entity_1.StudentEntity).save(invitation.reciever);
                 }
                 await invitationsRepository.createQueryBuilder()
                     .delete()
@@ -192,6 +195,8 @@ let UserService = class UserService {
             if (newTeamCreated) {
                 outputMessage += `\n team: ${invitation.sender.team.nickName} was created.`;
                 await this._sendTeamNotfication(invitation.sender.team.id, `you are now in the new team: ${invitation.sender.team.nickName} .`);
+                const socket = this.socketService.socket;
+                await socket.to(invitation.reciever.user.id).emit("refresh");
             }
             else {
                 outputMessage += `\n ${invitation.reciever.firstName + ' ' + invitation.reciever.lastName} joined the ${invitation.reciever.team.nickName}.`;
@@ -300,8 +305,9 @@ let UserService = class UserService {
         }
         await notificationRepository.save(notifications);
         const socket = this.socketService.socket;
-        notifications.forEach(nf => {
-            socket.to(nf.user).emit("new_notification", nf);
+        notifications.forEach((nf, index) => {
+            common_1.Logger.error(`notification sent ${index}`, "Notification");
+            socket.to(nf.user.id).emit("new_notification", nf);
         });
         return `notification sent with success to team: ${team.nickName} members`;
     }
@@ -352,6 +358,7 @@ let UserService = class UserService {
                 .where('student.userId = :userId', { userId })
                 .innerJoinAndSelect('student.team', 'team')
                 .innerJoinAndSelect('team.teamLeader', 'teamLeader')
+                .andWhere('teamLeader.id = student.id')
                 .getOne();
             if (!student) {
                 common_1.Logger.error("student not found", 'UserService/createTeamAnnouncement');
@@ -375,6 +382,7 @@ let UserService = class UserService {
                 .insert()
                 .values(announcementDocs)
                 .execute();
+            this._sendTeamNotfication(student.team.id, `a new announcement with  title: ${announcement.title} is available`, student.team.teamLeader.id);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createTeamAnnouncement');
@@ -450,6 +458,7 @@ let UserService = class UserService {
                 .where('student.userId = :userId', { userId })
                 .innerJoinAndSelect('student.team', 'team')
                 .innerJoinAndSelect('team.teamLeader', 'teamLeader')
+                .andWhere('teamLeader.id = student.id')
                 .getOne();
             if (!student) {
                 common_1.Logger.error("student | team   not found | student is not the teamLeader", 'UserService/createSurvey');
@@ -770,6 +779,8 @@ let UserService = class UserService {
                 .insert()
                 .values(teamDocument)
                 .execute();
+            const socket = this.socketService.socket;
+            socket.to(team.id).emit("team-documents-alltered");
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/addTeamDocument');
@@ -829,9 +840,19 @@ let UserService = class UserService {
                 .delete()
                 .where('team_document.id IN (:...docsIds)', { docsIds })
                 .execute();
+            const socket = this.socketService.socket;
+            socket.to(team.id).emit("team-documents-alltered");
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/deleteTeamDocs');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async updateDocument(userId, documentId, description, name) {
+        try {
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/updateDocument');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

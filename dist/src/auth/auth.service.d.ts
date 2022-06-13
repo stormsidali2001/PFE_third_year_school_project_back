@@ -4,7 +4,6 @@ import { UserEntity } from "../core/entities/user.entity";
 import { StudentRepository } from "src/core/repositories/student.repository";
 import { RestPasswordTokenRepository } from "src/core/repositories/reset.password.token.repository";
 import { JwtService } from "@nestjs/jwt";
-import { Tokens } from "./types/tokens";
 import { SocketService } from "src/socket/socket.service";
 import { UserService } from "src/user/user.service";
 export declare class AuthService {
@@ -33,8 +32,4 @@ export declare class AuthService {
     resetPassword(password: string, token: string, userId: string): Promise<string>;
     signupStudentTest(data: StudentTestDTO): Promise<void>;
     signupTeacherTest(data: TeacherTestDTO): Promise<void>;
-    refrechToken(userId: string, refrechToken: string): Promise<Tokens>;
-    logout(userId: string): Promise<string>;
-    _getTokens(userId: string, email: string): Promise<Tokens>;
-    _updateRefrechTokenHash(userId: string, refrechToken: string): Promise<void>;
 }

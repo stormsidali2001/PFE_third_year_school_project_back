@@ -21,7 +21,6 @@ const crypto_1 = require("crypto");
 const nodemailer = require("nodemailer");
 const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("typeorm");
-const argon = require("argon2");
 const socket_service_1 = require("../socket/socket.service");
 const admin_entity_1 = require("../core/entities/admin.entity");
 const teacher_entity_1 = require("../core/entities/teacher.entity");
@@ -445,78 +444,6 @@ let AuthService = class AuthService {
         }
         catch (err) {
             common_1.Logger.error(err, "AuthService/signupStudent");
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async refrechToken(userId, refrechToken) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const userRepository = manager.getRepository(user_entity_1.UserEntity);
-            const user = await userRepository.findOne({ id: userId });
-            if (!user || !user.refrechTokenHash) {
-                common_1.Logger.error("acces denied:user not found or user does not have a refresh token", "AuthService/refrechToken");
-                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
-            }
-            const matches = await argon.verify(user.refrechTokenHash, refrechToken);
-            if (!matches) {
-                common_1.Logger.error("acces denied: wrong refrech token", "AuthService/refrechToken");
-                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
-            }
-            const tokens = await this._getTokens(user.id, user.email);
-            await this._updateRefrechTokenHash(user.id, tokens.refrechToken);
-            return tokens;
-        }
-        catch (err) {
-            common_1.Logger.error(err, "AuthService/refrechToken");
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async logout(userId) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const userRepository = manager.getRepository(user_entity_1.UserEntity);
-            const user = await userRepository.findOne({ id: userId });
-            if (!user) {
-                common_1.Logger.error("acces denied:user not found ", "AuthService/logout");
-                throw new common_1.HttpException("acces denied", common_1.HttpStatus.FORBIDDEN);
-            }
-            await userRepository.update({ id: userId }, { refrechTokenHash: null });
-            return "logout success";
-        }
-        catch (err) {
-            common_1.Logger.error(err, "AuthService/logout");
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async _getTokens(userId, email) {
-        const jwtPayload = {
-            uuid: userId,
-            email
-        };
-        const [accesToken, refrechToken] = await Promise.all([
-            this.jwtService.signAsync(jwtPayload, {
-                secret: process.env.ACCESS_TOKEN_SECRET,
-                expiresIn: '15m'
-            }),
-            this.jwtService.signAsync(jwtPayload, {
-                secret: process.env.REFRECH_TOKEN_SECRET,
-                expiresIn: '7d'
-            })
-        ]);
-        return {
-            accesToken,
-            refrechToken
-        };
-    }
-    async _updateRefrechTokenHash(userId, refrechToken) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const userRepository = manager.getRepository(user_entity_1.UserEntity);
-            const refrechTokenHash = await argon.hash(refrechToken);
-            await userRepository.update({ id: userId }, { refrechTokenHash });
-        }
-        catch (err) {
-            common_1.Logger.error(err, "AuthService/_updateRefrechTokenHash");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

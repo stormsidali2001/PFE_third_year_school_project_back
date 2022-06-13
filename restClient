@@ -31,10 +31,10 @@ POST http://localhost:8080/signup/studentTest
 content-type:application/json
 
 {
-    "email":"h.debza10@esi-sba.dz",
+    "email":"h.debza18@esi-sba.dz",
     "password":"1@2@3@abC",
-    "firstName":"debza10",
-    "lastName":"houda10",
+    "firstName":"debza18",
+    "lastName":"houda18",
     "dob":"2001-04-20",
     "code":"191932004015",
     "moy":"17.20",
@@ -227,7 +227,7 @@ POST http://localhost:8080/test/sendNotification
 content-type:application/json
 
 {
-    "userId":"6bd2d613-919b-482c-95bb-22e43a81b92b",
+    "userId":"a3b5ce38-509c-4596-a7ae-a78ac9f20a6c",
     "description":"working 1"
 }
 ###

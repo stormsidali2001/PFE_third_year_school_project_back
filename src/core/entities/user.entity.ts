@@ -35,11 +35,6 @@ export class UserEntity{
 
     userType:UserType
 
-    @Column({
-        default:null
-    })
-    refrechTokenHash:string;
-
     //relations
     @OneToMany(type=>RestPasswordTokenEntity,resetPasswordToken=>resetPasswordToken.token)
     tokens:RestPasswordTokenEntity[];

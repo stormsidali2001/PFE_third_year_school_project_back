@@ -156,6 +156,7 @@ export class UserService{
             const invitationsRepository = manager.getRepository(InvitationEntity);
             const invitation:InvitationEntity = invitationsRepository.create({description,sender,reciever});
             await invitationsRepository.save(invitation);
+            this._sendNotficationStudent(reciever.id,`vous avez une nouvelle invitation de jointure de ${sender.firstName} ${reciever.lastName}`)
             return `Invitation sent succesfully to ${reciever.firstName} ${reciever.lastName} of the promotion ${sender.promotion.name}`;
         }catch(err){
             Logger.error(err,'UserService/sendATeamInvitation')
@@ -176,65 +177,59 @@ export class UserService{
      
       
      
-     
-        
+             
         try{
+          
             let newTeamCreated = false;
             let invitation:InvitationEntity;
+            const manager = getManager();
 
             let outputMessage = `invitation has been accepted`;
-            await getConnection().transaction(async manager=>{
-                const invitationsRepository = manager.getRepository(InvitationEntity);
-              
-           
-             invitation = await invitationsRepository
+            const invitationsRepository = manager.getRepository(InvitationEntity);
+            
+            
+            invitation = await invitationsRepository
              .createQueryBuilder('invitation')
              .leftJoinAndSelect('invitation.sender','sender')
              .leftJoinAndSelect('invitation.reciever','reciever')
              .leftJoinAndSelect('sender.team','steam')
              .leftJoinAndSelect('reciever.team','rteam')
+             .leftJoinAndSelect('reciever.user','ruser')
              .leftJoinAndSelect('sender.promotion','spromotion')
              .where('invitation.id = :invitationId',{invitationId})
              .andWhere('reciever.userId = :userId',{userId})
              .getOne()
-            
-
-         
-         
-        if(!invitation){
-            Logger.error("invitation not found",'UserService/getAcceptRefuseTeamInvitation')
-            throw new HttpException("invitation not found",HttpStatus.FORBIDDEN);
-        }
-
-      
-      
-      if(!accepted){
-          /*
-            either a teamLeader or a student  refused the invitation
+             if(!invitation){
+                 Logger.error("invitation not found",'UserService/getAcceptRefuseTeamInvitation')
+                 throw new HttpException("invitation not found",HttpStatus.FORBIDDEN);
+                }
+                
+                
+                
+                if(!accepted){
+                    /*
+                    either a teamLeader or a student  refused the invitation
           */
           await invitationsRepository.delete({id:invitation.id})
           this._sendNotficationStudent(invitation.sender.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} refused your invitation `)
           return "the invitation has been refused";
           
-      }
+        }
+      
       
        
-        const teamRepository = manager.getRepository(TeamEntity);
+      
       
      
       
-        const studentRepository = manager.getRepository(StudentEntity);
      
-      
+        await getConnection().transaction(async manager=>{
         if(!invitation.sender.team){
-           
+            const teamRepository =  manager.getRepository(TeamEntity);
+            const studentRepository = manager.getRepository(StudentEntity);
             const teamLength:number = await teamRepository
             .createQueryBuilder('team')
             .getCount()
-
-
-           
-           
             newTeamCreated = true;
             const newTeam = teamRepository.create({nickName:'team'+teamLength,teamLeader:invitation.sender,promotion:invitation.sender.promotion});
             await teamRepository.save(newTeam);
@@ -243,12 +238,10 @@ export class UserService{
             await studentRepository.save(invitation.reciever);
             await studentRepository.save(invitation.sender);
 
-
-
         }else{
            
             invitation.reciever.team = invitation.sender.team;
-            await studentRepository.save(invitation.reciever)
+            await manager.getRepository(StudentEntity).save(invitation.reciever)
         }
 
         await invitationsRepository.createQueryBuilder()
@@ -262,11 +255,13 @@ export class UserService{
 
             outputMessage += `\n team: ${invitation.sender.team.nickName} was created.`
             await this._sendTeamNotfication(invitation.sender.team.id,`you are now in the new team: ${invitation.sender.team.nickName} .`)
+            const socket = this.socketService.socket as Server;
+            await socket.to(invitation.reciever.user.id).emit("refresh")
             
         }else{
             outputMessage += `\n ${invitation.reciever.firstName +' '+invitation.reciever.lastName} joined the ${invitation.reciever.team.nickName}.`
             await this._sendTeamNotfication(invitation.sender.team.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} joined your team`,invitation.reciever.id,`you joined the team: ${invitation.sender.team.nickName} successfully...`);
-            
+           
            
         }
        
@@ -411,8 +406,10 @@ export class UserService{
         }
         await notificationRepository.save(notifications)
         const socket = this.socketService.socket as Server;
-        notifications.forEach(nf=>{
-            socket.to(nf.user).emit("new_notification",nf)
+        
+        notifications.forEach((nf,index)=>{
+            Logger.error(`notification sent ${index}`,"Notification")
+            socket.to(nf.user.id).emit("new_notification",nf)
 
         })
        
@@ -482,6 +479,7 @@ async createTeamAnnouncement(userId:string,title:string,description:string,docum
         .where('student.userId = :userId',{userId})
         .innerJoinAndSelect('student.team','team')
         .innerJoinAndSelect('team.teamLeader','teamLeader')
+        .andWhere('teamLeader.id = student.id')
         .getOne();
 
         if(!student){
@@ -511,7 +509,7 @@ async createTeamAnnouncement(userId:string,title:string,description:string,docum
         .values(announcementDocs)
         .execute();
 
-      
+        this._sendTeamNotfication(student.team.id,`a new announcement with  title: ${announcement.title} is available`,student.team.teamLeader.id);
        
     }catch(err){
         Logger.error(err,'UserService/createTeamAnnouncement')
@@ -603,6 +601,7 @@ async createSurvey(userId:string ,survey:SurveyDto){
         .where('student.userId = :userId',{userId})
         .innerJoinAndSelect('student.team','team')
         .innerJoinAndSelect('team.teamLeader','teamLeader')
+        .andWhere('teamLeader.id = student.id')
         .getOne()
         
       
@@ -1007,7 +1006,8 @@ async addTeamDocument(userId:string,name:string,url:string,description:string,ty
         .values(teamDocument)
         .execute()
 
-      
+        const socket = this.socketService.socket as Server;
+        socket.to(team.id).emit("team-documents-alltered");
 
 
     }catch(err){
@@ -1083,6 +1083,9 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
         .delete()
         .where('team_document.id IN (:...docsIds)',{docsIds})
         .execute()
+
+        const socket = this.socketService.socket as Server;
+        socket.to(team.id).emit("team-documents-alltered");
         
 
     }catch(err){
@@ -1091,6 +1094,14 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
 
     }
 
+}
+async updateDocument(userId:string,documentId:string,description:string,name:string){
+    try{
+        
+    }catch(err){
+        Logger.error(err,'UserService/updateDocument')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
 }
 async commitDocs(userId:string,title:string,description:string,docsIds:string[]){
     try{

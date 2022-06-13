@@ -66,6 +66,7 @@ import { SalleEntity } from './core/entities/salle.entity';
     password:"root",
     synchronize:true,
     logging:true,
+    
     entities:[UserEntity,
               StudentEntity,
               TeamEntity,
