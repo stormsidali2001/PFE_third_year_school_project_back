@@ -1,13 +1,27 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Logger, Param, Post } from "@nestjs/common";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
+import { SurveyDto } from "src/core/dtos/user.dto";
 import { TeamSurveyService } from "../services/team.survey.service";
 
+/*
 
+    5 routes
+*/
 
 @Controller()
 export class TeamSurveyController{
     constructor(private readonly teamSurveyService:TeamSurveyService) {}
+    @Post('createSurvey')
+    async createSurvey(@GetCurrentUserId() userId:string,@Body('survey') survey:SurveyDto){
+       
+        try{
+            return await this.teamSurveyService.createSurvey(userId,survey);
+        }catch(err){
+            Logger.error(err,'UsrController/createSurvey')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
 
+    }
     @Get('surveys')
     async getSurveys(@GetCurrentUserId() userId:string){
             try{
@@ -53,7 +67,4 @@ export class TeamSurveyController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
-
-   
-
 }

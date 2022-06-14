@@ -6,7 +6,6 @@ import { StudentEntity } from "src/core/entities/student.entity";
 import { SurveyEntity } from "src/core/entities/survey.entity";
 import { SurveyOptionEntity } from "src/core/entities/survey.option.entity";
 import { SurveyParticipantEntity } from "src/core/entities/survey.participant.entity";
-import { SocketService } from "src/socket/socket.service";
 import { UserService } from "src/user/user.service";
 import { getManager } from "typeorm";
 
@@ -85,8 +84,6 @@ export class TeamSurveyService{
         } 
     }
     
-    
-   
     async getSurveys(userId:string){
         try{
             const manager =     getManager();

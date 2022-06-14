@@ -3,7 +3,9 @@ import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.deco
 import { TeamInvitationService } from "../services/team.invitation.service";
 
 
-
+/**
+ *    6 routes
+ */
 @Controller()
 export class TeamInvitationController{
     constructor(private readonly teamInvitationService:TeamInvitationService) {}

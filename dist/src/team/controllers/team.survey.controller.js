@@ -15,10 +15,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeamSurveyController = void 0;
 const common_1 = require("@nestjs/common");
 const get_current_user_id_decorator_1 = require("../../common/decorators/get-current-user-id.decorator");
+const user_dto_1 = require("../../core/dtos/user.dto");
 const team_survey_service_1 = require("../services/team.survey.service");
 let TeamSurveyController = class TeamSurveyController {
     constructor(teamSurveyService) {
         this.teamSurveyService = teamSurveyService;
+    }
+    async createSurvey(userId, survey) {
+        try {
+            return await this.teamSurveyService.createSurvey(userId, survey);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UsrController/createSurvey');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
     }
     async getSurveys(userId) {
         try {
@@ -57,6 +67,14 @@ let TeamSurveyController = class TeamSurveyController {
         }
     }
 };
+__decorate([
+    (0, common_1.Post)('createSurvey'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('survey')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
+    __metadata("design:returntype", Promise)
+], TeamSurveyController.prototype, "createSurvey", null);
 __decorate([
     (0, common_1.Get)('surveys'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),

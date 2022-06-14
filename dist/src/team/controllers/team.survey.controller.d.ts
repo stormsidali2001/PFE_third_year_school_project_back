@@ -1,7 +1,9 @@
+import { SurveyDto } from "src/core/dtos/user.dto";
 import { TeamSurveyService } from "../services/team.survey.service";
 export declare class TeamSurveyController {
     private readonly teamSurveyService;
     constructor(teamSurveyService: TeamSurveyService);
+    createSurvey(userId: string, survey: SurveyDto): Promise<string>;
     getSurveys(userId: string): Promise<import("../../core/entities/survey.entity").SurveyEntity[]>;
     getSurvey(userId: string, surveyId: string): Promise<{
         id: string;

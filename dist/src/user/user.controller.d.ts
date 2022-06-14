@@ -1,6 +1,6 @@
 /// <reference types="multer" />
 import { StreamableFile } from "@nestjs/common";
-import { SurveyDto, TeamAnnoncementDocDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
+import { TeamAnnoncementDocDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
@@ -12,27 +12,12 @@ export declare class UserController {
     getInvitations(studentId: string): Promise<import("../core/entities/invitation.entity").InvitationEntity[]>;
     createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
-    createSurvey(userId: string, survey: SurveyDto): Promise<string>;
-    getSurveyParticipantsArguments(userId: string, surveyId: string, optionId: string): Promise<import("../core/entities/survey.participant.entity").SurveyParticipantEntity[]>;
     getAnnouncement(userId: string): Promise<{
         id: string;
         title: string;
         description: string;
         documents: import("../core/entities/announcement.document.entity").AnnouncementDocumentEntity[];
     }[]>;
-    submitSurveyAnswer(userId: string, surveyId: string, optionId: string, argument: string): Promise<"survey answered succesfully" | "answer updated succesfully">;
-    getSurveys(userId: string): Promise<import("../core/entities/survey.entity").SurveyEntity[]>;
-    getSurvey(userId: string, surveyId: string): Promise<{
-        id: string;
-        title: string;
-        description: string;
-        createdAt: Date;
-        period: number;
-        close: boolean;
-        team: import("../core/entities/team.entity").TeamEntity;
-        options: import("../core/entities/survey.option.entity").SurveyOptionEntity[];
-        participants: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
-    }>;
     getLastNotifications(userId: string, number: number): Promise<{
         notifications: import("../core/entities/Notification.entity").NotificationEntity[];
         totalNotificationCount: number;

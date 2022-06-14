@@ -81,30 +81,8 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }          
-    @Post('createSurvey')
-    async createSurvey(@GetCurrentUserId() userId:string,@Body('survey') survey:SurveyDto){
-       
-        try{
-            return await this.userService.createSurvey(userId,survey);
-        }catch(err){
-            Logger.error(err,'UsrController/createSurvey')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
-    @Get('getSurveyParticipantsArguments/:surveyId/:optionId')
-    async getSurveyParticipantsArguments(
-        @GetCurrentUserId() userId:string,
-        @Param('surveyId') surveyId:string,
-        @Param('optionId') optionId:string
-    ){
-        try{
-            return await this.userService.getSurveyParticipantsArguments(userId,surveyId,optionId);
-        }catch(err){
-            Logger.error(err,'UsrController/createSurvey')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+    
+   
     @Get('getAnnouncement')
     async getAnnouncement(@GetCurrentUserId() userId:string){
         try{
@@ -114,38 +92,7 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
-    @Post('submitSurveyAnswer')
-    async submitSurveyAnswer( @GetCurrentUserId() userId:string,
-                                @Body('surveyId') surveyId:string,
-                                @Body('optionId') optionId:string,
-                                @Body('argument') argument:string
-                                ){
-        try{
-            return await this.userService.submitSurveyAnswer(userId,surveyId,optionId,argument);
-        }catch(err){
-            Logger.error(err,'UsrController/submitSurveyAnswer')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Get('surveys')
-    async getSurveys(@GetCurrentUserId() userId:string){
-            try{
-                return await this.userService.getSurveys(userId);
-            }catch(err){
-                Logger.error(err,"UserController/getSurveys");
-                throw new HttpException(err,HttpStatus.BAD_REQUEST)
-            }
-    }
-    @Get('surveys/:surveyId')
-    async getSurvey(@GetCurrentUserId() userId:string,@Param('surveyId') surveyId:string){
-            try{
-                return await this.userService.getSurvey(userId,surveyId);
-            }catch(err){
-                Logger.error(err,"UserController/getSurveys");
-                throw new HttpException(err,HttpStatus.BAD_REQUEST)
-            }
-    }
+   
    
     @Get('notifications/:number')
     async getLastNotifications(@GetCurrentUserId() userId:string,   @Param('number',ParseIntPipe) number:number){

@@ -67,57 +67,12 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createSurvey(userId, survey) {
-        try {
-            return await this.userService.createSurvey(userId, survey);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/createSurvey');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSurveyParticipantsArguments(userId, surveyId, optionId) {
-        try {
-            return await this.userService.getSurveyParticipantsArguments(userId, surveyId, optionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/createSurvey');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async getAnnouncement(userId) {
         try {
             return await this.userService.getAnnouncement(userId);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/createSurvey');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async submitSurveyAnswer(userId, surveyId, optionId, argument) {
-        try {
-            return await this.userService.submitSurveyAnswer(userId, surveyId, optionId, argument);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/submitSurveyAnswer');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSurveys(userId) {
-        try {
-            return await this.userService.getSurveys(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, "UserController/getSurveys");
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSurvey(userId, surveyId) {
-        try {
-            return await this.userService.getSurvey(userId, surveyId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, "UserController/getSurveys");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -620,54 +575,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sendTeamChatMessage", null);
 __decorate([
-    (0, common_1.Post)('createSurvey'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('survey')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, user_dto_1.SurveyDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "createSurvey", null);
-__decorate([
-    (0, common_1.Get)('getSurveyParticipantsArguments/:surveyId/:optionId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('surveyId')),
-    __param(2, (0, common_1.Param)('optionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getSurveyParticipantsArguments", null);
-__decorate([
     (0, common_1.Get)('getAnnouncement'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAnnouncement", null);
-__decorate([
-    (0, common_1.Post)('submitSurveyAnswer'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('surveyId')),
-    __param(2, (0, common_1.Body)('optionId')),
-    __param(3, (0, common_1.Body)('argument')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "submitSurveyAnswer", null);
-__decorate([
-    (0, common_1.Get)('surveys'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getSurveys", null);
-__decorate([
-    (0, common_1.Get)('surveys/:surveyId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('surveyId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getSurvey", null);
 __decorate([
     (0, common_1.Get)('notifications/:number'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
