@@ -51,7 +51,7 @@ export class TeamAnnouncementService{
             .values(announcementDocs)
             .execute();
     
-            this.userService._sendTeamNotfication(student.team.id,`a new announcement with  title: ${announcement.title} is available`,student.team.teamLeader.id);
+            this.userService._sendTeamNotfication(student.team.id,`a new announcement with  title: ${announcement.title} is available`,student.id);
            
         }catch(err){
             Logger.error(err,'UserService/createTeamAnnouncement')

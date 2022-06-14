@@ -52,7 +52,7 @@ let TeamAnnouncementService = class TeamAnnouncementService {
                 .insert()
                 .values(announcementDocs)
                 .execute();
-            this.userService._sendTeamNotfication(student.team.id, `a new announcement with  title: ${announcement.title} is available`, student.team.teamLeader.id);
+            this.userService._sendTeamNotfication(student.team.id, `a new announcement with  title: ${announcement.title} is available`, student.id);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createTeamAnnouncement');

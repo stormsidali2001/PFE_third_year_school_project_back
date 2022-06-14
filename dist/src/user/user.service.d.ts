@@ -69,10 +69,6 @@ export declare class UserService {
         userType: UserType;
         email: string;
     }>;
-    sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
-    acceptRefuseTeamInvitation(invitationId: string, userId: string, accepted: boolean): Promise<string>;
-    sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
-    getInvitations(studentId: string): Promise<InvitationEntity[]>;
     _sendNotficationStudent(studentId: string, description: string): Promise<string>;
     _sendTeamNotfication(teamId: string, description: string, expectStudentId?: string, expectMessage?: string): Promise<string>;
     _sendNotfication(userId: string, description: string): Promise<string>;
@@ -83,30 +79,6 @@ export declare class UserService {
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
-    getStudentsWithoutTeam(userId: string): Promise<StudentEntity[]>;
-    getInvitationList(userId: string): Promise<({
-        id: string;
-        description: string;
-        senderTeam: {
-            id: string;
-            nickname: string;
-            teamLeader: {
-                id: string;
-                firstname: string;
-                lastName: string;
-            };
-        };
-        student?: undefined;
-    } | {
-        id: string;
-        description: string;
-        student: {
-            id: string;
-            firstname: string;
-            lastName: string;
-        };
-        senderTeam?: undefined;
-    })[]>;
     addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;

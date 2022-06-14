@@ -29,25 +29,6 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async sendATeamInvitation(userId, recieverId, description) {
-        common_1.Logger.log({ recieverId, description }, 'UserController/sendATeamInvitation');
-        return await this.userService.sendATeamInvitation(userId, recieverId, description);
-    }
-    async acceptRefuseTeamInvitation(invitationId, accepted, userId) {
-        return this.userService.acceptRefuseTeamInvitation(invitationId, userId, accepted);
-    }
-    async sendTeamJoinRequest(senderId, teamId, description) {
-        return this.userService.sendTeamJoinRequest(senderId, teamId, description);
-    }
-    async getInvitations(studentId) {
-        try {
-            return await this.userService.getInvitations(studentId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getInvitations');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async sendTeamChatMessage(studentId, message) {
         try {
             return await this.userService.sendTeamChatMessage(studentId, message);
@@ -64,23 +45,6 @@ let UserController = class UserController {
         catch (err) {
             common_1.Logger.error(err, 'UserController/getNotifications');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getStudentsWithoutTeam(userId) {
-        try {
-            return await this.userService.getStudentsWithoutTeam(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getStudentsWithoutTeam');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getInvitationList(userId) {
-        try {
-            return await this.userService.getInvitationList(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getInvitationList');
         }
     }
     async uploadFile(file) {
@@ -504,40 +468,6 @@ let UserController = class UserController {
     }
 };
 __decorate([
-    (0, common_1.Post)('/sendATeamInvitation'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('recieverId')),
-    __param(2, (0, common_1.Body)('description')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "sendATeamInvitation", null);
-__decorate([
-    (0, common_1.Post)('/acceptRefuseTeamInvitation'),
-    __param(0, (0, common_1.Body)('invitationId')),
-    __param(1, (0, common_1.Body)('accepted', common_1.ParseBoolPipe)),
-    __param(2, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Boolean, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "acceptRefuseTeamInvitation", null);
-__decorate([
-    (0, common_1.Post)('/sendTeamJoinRequest'),
-    __param(0, (0, common_1.Body)('senderId')),
-    __param(1, (0, common_1.Body)('teamId')),
-    __param(2, (0, common_1.Body)('description')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "sendTeamJoinRequest", null);
-__decorate([
-    (0, common_1.Get)('/invitations/:studentId'),
-    __param(0, (0, common_1.Param)('studentId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getInvitations", null);
-__decorate([
     (0, common_1.Post)('sendTeamChatMessage'),
     __param(0, (0, common_1.Body)('studentId')),
     __param(1, (0, common_1.Body)('message')),
@@ -553,20 +483,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getLastNotifications", null);
-__decorate([
-    (0, common_1.Get)('getStudentsWithoutTeam'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getStudentsWithoutTeam", null);
-__decorate([
-    (0, common_1.Get)('getInvitationList'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getInvitationList", null);
 __decorate([
     (0, common_1.Post)('uploadFile'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {

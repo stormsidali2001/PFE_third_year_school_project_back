@@ -18,43 +18,7 @@ export class UserController{
     
   
 
-    @Post('/sendATeamInvitation')
-    async sendATeamInvitation(
-        @GetCurrentUserId() userId:string,
-        @Body('recieverId') recieverId:string,
-    @Body('description') description:string
-    ){
-        Logger.log({recieverId,description},'UserController/sendATeamInvitation')
-
-        return await this.userService.sendATeamInvitation(userId,recieverId,description);
-    }
-
-    @Post('/acceptRefuseTeamInvitation')
-    async acceptRefuseTeamInvitation(
-        @Body('invitationId') invitationId:string ,
-        @Body('accepted',ParseBoolPipe) accepted:boolean,
-       @GetCurrentUserId() userId:string 
-        
-    ){
-      
-        return this.userService.acceptRefuseTeamInvitation(invitationId,userId,accepted);
-    }
-
-    @Post('/sendTeamJoinRequest')
-    async sendTeamJoinRequest(@Body('senderId') senderId:string,@Body('teamId') teamId:string,@Body('description') description:string){
-         return this.userService.sendTeamJoinRequest(senderId,teamId,description)
-    }
-    @Get('/invitations/:studentId')
-    async getInvitations(@Param('studentId') studentId:string){
-        try{
-
-            return await this.userService.getInvitations(studentId);
-        }catch(err){
-            Logger.error(err,'UsrController/getInvitations')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
+ 
  
     @Post('sendTeamChatMessage')
     async sendTeamChatMessage(  @Body('studentId') studentId :string,
@@ -76,27 +40,6 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
-
-   
-    @Get('getStudentsWithoutTeam')
-    async getStudentsWithoutTeam(@GetCurrentUserId() userId:string){
-        try{
-            return await this.userService.getStudentsWithoutTeam(userId)
-        }catch(err){
-            Logger.error(err,'UserController/getStudentsWithoutTeam')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Get('getInvitationList')
-    async getInvitationList(@GetCurrentUserId() userId:string){
-        try{
-            return await  this.userService.getInvitationList(userId);
-        }catch(err){
-            Logger.error(err,'UserController/getInvitationList')
-        }
-    }
-
 
     @Post('uploadFile')
     @UseInterceptors(FileInterceptor('file',{

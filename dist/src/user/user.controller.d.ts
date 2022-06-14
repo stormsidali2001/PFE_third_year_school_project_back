@@ -6,39 +6,11 @@ import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    sendATeamInvitation(userId: string, recieverId: string, description: string): Promise<string>;
-    acceptRefuseTeamInvitation(invitationId: string, accepted: boolean, userId: string): Promise<string>;
-    sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
-    getInvitations(studentId: string): Promise<import("../core/entities/invitation.entity").InvitationEntity[]>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{
         notifications: import("../core/entities/Notification.entity").NotificationEntity[];
         totalNotificationCount: number;
     }>;
-    getStudentsWithoutTeam(userId: string): Promise<import("../core/entities/student.entity").StudentEntity[]>;
-    getInvitationList(userId: string): Promise<({
-        id: string;
-        description: string;
-        senderTeam: {
-            id: string;
-            nickname: string;
-            teamLeader: {
-                id: string;
-                firstname: string;
-                lastName: string;
-            };
-        };
-        student?: undefined;
-    } | {
-        id: string;
-        description: string;
-        student: {
-            id: string;
-            firstname: string;
-            lastName: string;
-        };
-        senderTeam?: undefined;
-    })[]>;
     uploadFile(file: Express.Multer.File): Promise<{
         originalname: string;
         filename: string;
