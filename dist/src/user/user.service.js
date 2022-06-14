@@ -355,17 +355,17 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async updateDocument(userId, documentId, description, name, documentTypeId) {
+    async updateTeamDocument(userId, documentId, description, name, documentTypeId) {
         try {
             const manager = (0, typeorm_1.getManager)();
             const document = await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
-                .createQueryBuilder('doc')
-                .where('doc.id = :documentId', { documentId })
-                .leftJoinAndSelect('doc.owner', 'owner')
-                .innerJoinAndSelect('doc.team', 'team')
+                .createQueryBuilder('document')
+                .where('document.id = :documentId', { documentId })
+                .leftJoinAndSelect('document.owner', 'owner')
+                .innerJoinAndSelect('document.team', 'team')
                 .innerJoinAndSelect('team.students', 'students')
-                .leftJoinAndSelect('team.teamLeader', 'teamLeader')
                 .andWhere('students.userId = :userId', { userId })
+                .leftJoinAndSelect('team.teamLeader', 'teamLeader')
                 .getOne();
             if (!document) {
                 common_1.Logger.error("document not found", 'UserService/updateDocument');
@@ -386,11 +386,13 @@ let UserService = class UserService {
                 throw new common_1.HttpException("document type not found", common_1.HttpStatus.BAD_REQUEST);
             }
             await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
-                .createQueryBuilder('doc')
-                .where('doc.id = :documentId', { documentId })
+                .createQueryBuilder('document')
                 .update()
                 .set({ description, name, type: documentType })
+                .where('team_document.id = :documentId', { documentId })
                 .execute();
+            const socket = this.socketService.socket;
+            socket.to(document.team.id).emit("team-documents-alltered");
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/updateDocument');

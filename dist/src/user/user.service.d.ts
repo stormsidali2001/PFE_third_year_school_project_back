@@ -43,12 +43,6 @@ export declare class UserService {
             promotion: PromotionEntity;
         } | {
             id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: ThemeEntity[];
-        } | {
-            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -65,6 +59,12 @@ export declare class UserService {
             firstName: String;
             lastName: String;
             user: UserEntity;
+        } | {
+            id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+            suggestedThemes: ThemeEntity[];
         };
         userType: UserType;
         email: string;
@@ -81,7 +81,7 @@ export declare class UserService {
     addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
-    updateDocument(userId: string, documentId: string, description: string, name: string, documentTypeId: string): Promise<void>;
+    updateTeamDocument(userId: string, documentId: string, description: string, name: string, documentTypeId: string): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
     getTeamsTeacherResponsibleFor(userId: string): Promise<TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<TeamEntity[]>;

@@ -450,17 +450,18 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
     }
 
 }
-async updateDocument(userId:string,documentId:string,description:string,name:string,documentTypeId:string){
+async updateTeamDocument(userId:string,documentId:string,description:string,name:string,documentTypeId:string){
     try{
+      
         const manager = getManager();
         const document = await manager.getRepository(TeamDocumentEntity)
-        .createQueryBuilder('doc')
-        .where('doc.id = :documentId',{documentId})
-        .leftJoinAndSelect('doc.owner','owner')
-        .innerJoinAndSelect('doc.team','team')
+        .createQueryBuilder('document')
+        .where('document.id = :documentId',{documentId})
+        .leftJoinAndSelect('document.owner','owner')
+        .innerJoinAndSelect('document.team','team')
         .innerJoinAndSelect('team.students','students')
-        .leftJoinAndSelect('team.teamLeader','teamLeader')
         .andWhere('students.userId = :userId',{userId})
+        .leftJoinAndSelect('team.teamLeader','teamLeader')
         .getOne();
         if(!document){
             Logger.error("document not found",'UserService/updateDocument')
@@ -485,11 +486,14 @@ async updateDocument(userId:string,documentId:string,description:string,name:str
 
 
         await manager.getRepository(TeamDocumentEntity)
-        .createQueryBuilder('doc')
-        .where('doc.id = :documentId',{documentId})
+        .createQueryBuilder('document')
         .update()
         .set({description,name,type:documentType})
+        .where('team_document.id = :documentId',{documentId})
         .execute();
+
+        const socket = this.socketService.socket as Server;
+        socket.to(document.team.id).emit("team-documents-alltered");
 
         
     }catch(err){

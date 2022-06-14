@@ -138,7 +138,7 @@ export class UserController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
-    @Post('updateDocument')
+    @Post('deleteTeamDocs')
     async deleteTeamDocs(
         @GetCurrentUserId() userId:string,
         @Body('docsIds') docsIds:string[]
@@ -150,7 +150,8 @@ export class UserController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
         }
-        async updateDocument(
+    @Post('updateTeamDocument')
+    async updateTeamDocument(
            @GetCurrentUserId() userId:string,
            @Body("documentId") documentId:string,
            @Body("description") description:string,
@@ -158,14 +159,14 @@ export class UserController{
            @Body("documentTypeId") documentTypeId:string
             ){
                 try{    
-                    return await this.userService.updateDocument(userId,documentId,description,name,documentTypeId);
+                    return await this.userService.updateTeamDocument(userId,documentId,description,name,documentTypeId);
 
                 }catch(err){
                     Logger.error(err,'UserController/updateDocument');
                     throw new HttpException(err,HttpStatus.BAD_REQUEST);
                 }
 
-        }
+     }
     @Post('commitDocs')
     async commitDocs(@GetCurrentUserId() userId:string,@Body('title') title:string,@Body('description') description:string,@Body('docsIds')docsIds:string[]){
         try{
