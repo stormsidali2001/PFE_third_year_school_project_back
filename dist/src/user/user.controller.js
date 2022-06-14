@@ -29,15 +29,6 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async sendTeamChatMessage(studentId, message) {
-        try {
-            return await this.userService.sendTeamChatMessage(studentId, message);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/sendTeamChatMessage');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async getLastNotifications(userId, number) {
         try {
             return await this.userService.getLastNotifications(userId, number);
@@ -351,9 +342,6 @@ let UserController = class UserController {
     async getUser(userId) {
         return await this.userService.getUserInfo(userId);
     }
-    async getTeamMessages(userId) {
-        return await this.userService.getTeamMessages(userId);
-    }
     async submitWishList(userId, data) {
         try {
             return await this.userService.submitWishList(userId, data);
@@ -467,14 +455,6 @@ let UserController = class UserController {
         }
     }
 };
-__decorate([
-    (0, common_1.Post)('sendTeamChatMessage'),
-    __param(0, (0, common_1.Body)('studentId')),
-    __param(1, (0, common_1.Body)('message')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "sendTeamChatMessage", null);
 __decorate([
     (0, common_1.Get)('notifications/:number'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
@@ -770,13 +750,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUser", null);
-__decorate([
-    (0, common_1.Get)('getTeamMessages'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTeamMessages", null);
 __decorate([
     (0, common_1.Post)('submitWishList'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),

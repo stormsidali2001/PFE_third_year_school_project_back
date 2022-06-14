@@ -20,16 +20,7 @@ export class UserController{
 
  
  
-    @Post('sendTeamChatMessage')
-    async sendTeamChatMessage(  @Body('studentId') studentId :string,
-                                @Body('message') message:string) {
-        try{
-            return await this.userService.sendTeamChatMessage(studentId,message);
-        }catch(err){
-            Logger.error(err,'UsrController/sendTeamChatMessage')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }          
+     
     
     @Get('notifications/:number')
     async getLastNotifications(@GetCurrentUserId() userId:string,   @Param('number',ParseIntPipe) number:number){
@@ -443,10 +434,7 @@ export class UserController{
         return await this.userService.getUserInfo(userId)
     }
 
-    @Get('getTeamMessages')
-    async getTeamMessages(@GetCurrentUserId() userId:string){
-        return await this.userService.getTeamMessages(userId)
-    }
+   
 
     @Post('submitWishList')
     async submitWishList(@GetCurrentUserId() userId:string,@Body() data:WishListDTO){

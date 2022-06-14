@@ -6,7 +6,6 @@ import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{
         notifications: import("../core/entities/Notification.entity").NotificationEntity[];
         totalNotificationCount: number;
@@ -116,7 +115,6 @@ export declare class UserController {
         userType: UserType;
         email: string;
     }>;
-    getTeamMessages(userId: string): Promise<import("../core/entities/team.chat.message.entity").TeamChatMessageEntity[]>;
     submitWishList(userId: string, data: WishListDTO): Promise<void>;
     getAllPromotions(): Promise<import("../core/entities/promotion.entity").PromotionEntity[]>;
     asignThemesToTeams(userId: string, promotionId: string, method: string): Promise<{

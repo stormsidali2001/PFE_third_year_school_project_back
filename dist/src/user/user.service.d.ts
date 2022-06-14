@@ -76,7 +76,6 @@ export declare class UserService {
         notifications: NotificationEntity[];
         totalNotificationCount: number;
     }>;
-    sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
     addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
@@ -144,7 +143,6 @@ export declare class UserService {
         validated: boolean;
         teamLeader: StudentEntity;
     }>;
-    getTeamMessages(userId: any): Promise<TeamChatMessageEntity[]>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
     getAllPromotions(): Promise<PromotionEntity[]>;
