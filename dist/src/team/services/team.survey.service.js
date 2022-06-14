@@ -157,7 +157,7 @@ let TeamSurveyService = class TeamSurveyService {
                 throw new common_1.HttpException("you've already answered to the survey using that option", common_1.HttpStatus.BAD_REQUEST);
             }
             await surveyParticipantRepository.update({ id: existingSurveyParticipant.id }, surveyParticipant);
-            this.userService._sendTeamNotfication(student.team.id, `${student.firstName} ${student.lastName} a repondu au sondage : ${student.team.surveys[0].title}`);
+            this.userService._sendTeamNotfication(student.team.id, `${student.firstName} ${student.lastName} a repondu au sondage : ${student.team.surveys[0].title}`, student.id);
             return "answer updated succesfully";
         }
         catch (err) {

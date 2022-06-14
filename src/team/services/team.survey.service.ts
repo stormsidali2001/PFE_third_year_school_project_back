@@ -184,7 +184,7 @@ export class TeamSurveyService{
        
            await surveyParticipantRepository.update({id:existingSurveyParticipant.id},surveyParticipant);
             
-          this.userService._sendTeamNotfication(student.team.id,`${student.firstName} ${student.lastName} a repondu au sondage : ${student.team.surveys[0].title}`)
+          this.userService._sendTeamNotfication(student.team.id,`${student.firstName} ${student.lastName} a repondu au sondage : ${student.team.surveys[0].title}`,student.id)
           return "answer updated succesfully"
        
             

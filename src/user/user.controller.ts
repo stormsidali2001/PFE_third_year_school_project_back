@@ -67,10 +67,6 @@ export class UserController{
         }
     }          
     
-   
-   
-   
-   
     @Get('notifications/:number')
     async getLastNotifications(@GetCurrentUserId() userId:string,   @Param('number',ParseIntPipe) number:number){
         try{
