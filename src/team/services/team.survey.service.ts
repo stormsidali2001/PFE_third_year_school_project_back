@@ -176,14 +176,15 @@ export class TeamSurveyService{
                 await surveyParticipantRepository.save(surveyParticipant);
                 return "survey answered succesfully"
             }
-        
-           if(surveyParticipant.answer.id === existingSurveyParticipant.answer.id && surveyParticipant.argument === argument){
+        console.log( surveyParticipant.argument,"------------------",argument)
+           if(surveyParticipant.answer.id === existingSurveyParticipant.answer.id && existingSurveyParticipant.argument === argument){
             Logger.error("you've already answered to the survey using that option or by providing the same argument",'UserService/submitSurvey')
             throw new HttpException("you've already answered to the survey using that option",HttpStatus.BAD_REQUEST);
            }
        
            await surveyParticipantRepository.update({id:existingSurveyParticipant.id},surveyParticipant);
             
+          this.userService._sendTeamNotfication(student.team.id,`${student.firstName} ${student.lastName} a repondu au sondage : ${student.team.surveys[0].title}`)
           return "answer updated succesfully"
        
             
