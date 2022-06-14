@@ -10,8 +10,10 @@ exports.TeamModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_service_1 = require("../user/user.service");
+const team_announcement_controller_1 = require("./controllers/team.announcement.controller");
 const team_invitation_controller_1 = require("./controllers/team.invitation.controller");
 const team_survey_controller_1 = require("./controllers/team.survey.controller");
+const team_announcement_service_1 = require("./services/team.announcement.service");
 const team_invitation_service_1 = require("./services/team.invitation.service");
 const team_survey_service_1 = require("./services/team.survey.service");
 let TeamModule = class TeamModule {
@@ -19,8 +21,8 @@ let TeamModule = class TeamModule {
 TeamModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([])],
-        providers: [team_invitation_service_1.TeamInvitationService, team_survey_service_1.TeamSurveyService, user_service_1.UserService],
-        controllers: [team_invitation_controller_1.TeamInvitationController, team_survey_controller_1.TeamSurveyController]
+        providers: [team_invitation_service_1.TeamInvitationService, team_survey_service_1.TeamSurveyService, team_announcement_service_1.TeamAnnouncementService, user_service_1.UserService],
+        controllers: [team_invitation_controller_1.TeamInvitationController, team_survey_controller_1.TeamSurveyController, team_announcement_controller_1.TeamAnnouncementController]
     })
 ], TeamModule);
 exports.TeamModule = TeamModule;

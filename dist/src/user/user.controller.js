@@ -48,31 +48,12 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async createTeamAnnouncement(userId, title, description, documents) {
-        common_1.Logger.error(documents, "*****555****");
-        try {
-            return await this.userService.createTeamAnnouncement(userId, title, description, documents);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/createTeamAnnouncement');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async sendTeamChatMessage(studentId, message) {
         try {
             return await this.userService.sendTeamChatMessage(studentId, message);
         }
         catch (err) {
             common_1.Logger.error(err, 'UsrController/sendTeamChatMessage');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAnnouncement(userId) {
-        try {
-            return await this.userService.getAnnouncement(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/createSurvey');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -557,16 +538,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getInvitations", null);
 __decorate([
-    (0, common_1.Post)('/createTeamAnnouncement'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('title')),
-    __param(2, (0, common_1.Body)('description')),
-    __param(3, (0, common_1.Body)('documents')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Array]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "createTeamAnnouncement", null);
-__decorate([
     (0, common_1.Post)('sendTeamChatMessage'),
     __param(0, (0, common_1.Body)('studentId')),
     __param(1, (0, common_1.Body)('message')),
@@ -574,13 +545,6 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sendTeamChatMessage", null);
-__decorate([
-    (0, common_1.Get)('getAnnouncement'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getAnnouncement", null);
 __decorate([
     (0, common_1.Get)('notifications/:number'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),

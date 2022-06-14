@@ -1,6 +1,6 @@
 /// <reference types="multer" />
 import { StreamableFile } from "@nestjs/common";
-import { TeamAnnoncementDocDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
+import { ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
@@ -10,14 +10,7 @@ export declare class UserController {
     acceptRefuseTeamInvitation(invitationId: string, accepted: boolean, userId: string): Promise<string>;
     sendTeamJoinRequest(senderId: string, teamId: string, description: string): Promise<string>;
     getInvitations(studentId: string): Promise<import("../core/entities/invitation.entity").InvitationEntity[]>;
-    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
-    getAnnouncement(userId: string): Promise<{
-        id: string;
-        title: string;
-        description: string;
-        documents: import("../core/entities/announcement.document.entity").AnnouncementDocumentEntity[];
-    }[]>;
     getLastNotifications(userId: string, number: number): Promise<{
         notifications: import("../core/entities/Notification.entity").NotificationEntity[];
         totalNotificationCount: number;

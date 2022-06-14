@@ -1,4 +1,4 @@
-import { NormalTeamMeetDto, SoutenanceDto, TeamAnnoncementDocDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
+import { NormalTeamMeetDto, SoutenanceDto, ThemeDocDto, ThemeToTeamDTO, UrgentTeamMeetDto, WishListDTO } from "src/core/dtos/user.dto";
 import { InvitationEntity } from "src/core/entities/invitation.entity";
 import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
@@ -8,7 +8,6 @@ import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
-import { AnnouncementDocumentEntity } from "src/core/entities/announcement.document.entity";
 import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
@@ -81,13 +80,6 @@ export declare class UserService {
         notifications: NotificationEntity[];
         totalNotificationCount: number;
     }>;
-    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
-    getAnnouncement(userId: string): Promise<{
-        id: string;
-        title: string;
-        description: string;
-        documents: AnnouncementDocumentEntity[];
-    }[]>;
     sendTeamChatMessage(studentId: string, message: string): Promise<string>;
     createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;

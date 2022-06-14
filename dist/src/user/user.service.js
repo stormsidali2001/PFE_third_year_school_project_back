@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
-const announcement_entity_1 = require("../core/entities/announcement.entity");
 const invitation_entity_1 = require("../core/entities/invitation.entity");
 const Notification_entity_1 = require("../core/entities/Notification.entity");
 const student_entity_1 = require("../core/entities/student.entity");
@@ -23,7 +22,6 @@ const schedule_1 = require("@nestjs/schedule");
 const cron_1 = require("cron");
 const meet_entity_1 = require("../core/entities/meet.entity");
 const socket_service_1 = require("../socket/socket.service");
-const announcement_document_entity_1 = require("../core/entities/announcement.document.entity");
 const team_document_entity_1 = require("../core/entities/team.document.entity");
 const fs = require("fs");
 const path = require("path");
@@ -344,71 +342,6 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getNotifications');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async createTeamAnnouncement(userId, title, description, documents) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const student = await manager.getRepository(student_entity_1.StudentEntity)
-                .createQueryBuilder('student')
-                .where('student.userId = :userId', { userId })
-                .innerJoinAndSelect('student.team', 'team')
-                .innerJoinAndSelect('team.teamLeader', 'teamLeader')
-                .andWhere('teamLeader.id = student.id')
-                .getOne();
-            if (!student) {
-                common_1.Logger.error("student not found", 'UserService/createTeamAnnouncement');
-                throw new common_1.HttpException("student not found", common_1.HttpStatus.BAD_REQUEST);
-            }
-            common_1.Logger.error(title, "*********");
-            const announcementRepository = manager.getRepository(announcement_entity_1.AnnouncementEntity);
-            const announcement = announcementRepository.create({ title, description, team: student.team });
-            await announcementRepository
-                .createQueryBuilder('announcement')
-                .insert()
-                .values(announcement)
-                .execute();
-            const announcementDocumentRepository = manager.getRepository(announcement_document_entity_1.AnnouncementDocumentEntity);
-            const announcementDocs = [];
-            documents.forEach(doc => {
-                const announcementDoc = announcementDocumentRepository.create({ name: doc.name, url: doc.url, announcement });
-                announcementDocs.push(announcementDoc);
-            });
-            await manager.getRepository(announcement_document_entity_1.AnnouncementDocumentEntity).createQueryBuilder('docs')
-                .insert()
-                .values(announcementDocs)
-                .execute();
-            this._sendTeamNotfication(student.team.id, `a new announcement with  title: ${announcement.title} is available`, student.team.teamLeader.id);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserService/createTeamAnnouncement');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAnnouncement(userId) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const Announcements = await manager.getRepository(announcement_entity_1.AnnouncementEntity)
-                .createQueryBuilder('announcement')
-                .innerJoinAndSelect('announcement.team', 'team')
-                .innerJoinAndSelect('team.students', 'student')
-                .where('student.userId = :userId', { userId })
-                .leftJoinAndSelect('announcement.documents', 'documents')
-                .orderBy('createdAt', 'DESC')
-                .getMany();
-            const response = Announcements.map(({ id, title, description, documents }) => {
-                return {
-                    id,
-                    title,
-                    description,
-                    documents
-                };
-            });
-            return response;
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserService/getAnnouncement');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

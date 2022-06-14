@@ -55,22 +55,7 @@ export class UserController{
         }
 
     }
-    @Post('/createTeamAnnouncement')
-    async createTeamAnnouncement(@GetCurrentUserId() userId:string,
-                                @Body('title') title:string,
-                                @Body('description') description:string,
-                                @Body('documents') documents:TeamAnnoncementDocDto[]
-                              
-                                
-                                ){        
-                                    Logger.error(documents,"*****555****")
-        try{
-            return await this.userService.createTeamAnnouncement(userId,title,description,documents);
-        }catch(err){
-            Logger.error(err,'UsrController/createTeamAnnouncement')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+ 
     @Post('sendTeamChatMessage')
     async sendTeamChatMessage(  @Body('studentId') studentId :string,
                                 @Body('message') message:string) {
@@ -83,15 +68,7 @@ export class UserController{
     }          
     
    
-    @Get('getAnnouncement')
-    async getAnnouncement(@GetCurrentUserId() userId:string){
-        try{
-            return await this.userService.getAnnouncement(userId)
-        }catch(err){
-            Logger.error(err,'UsrController/createSurvey')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+   
    
    
     @Get('notifications/:number')
