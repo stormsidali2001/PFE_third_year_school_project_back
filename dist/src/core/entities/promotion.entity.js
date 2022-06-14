@@ -41,7 +41,7 @@ __decorate([
 ], PromotionEntity.prototype, "maxMembersInTeam", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        default: 2
+        default: 4
     }),
     __metadata("design:type", Number)
 ], PromotionEntity.prototype, "maxTeamForTheme", void 0);

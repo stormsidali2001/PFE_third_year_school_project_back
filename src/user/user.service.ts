@@ -550,10 +550,11 @@ async commitDocs(userId:string,title:string,description:string,docsIds:string[])
             const docsToCommit:CommitDocumentEntity[] = [];
             teamDocs.forEach(
                 teamDoc=>{
-                    const  splited = teamDoc.name.split('.')
-                    const extension = splited[splited.length-1]
-                    const name = splited.slice(0,splited.length-1)
-                    const url = './files/'+name+Date.now()+'.'+extension;
+                   
+                
+                   
+                    const extension =  teamDoc.url.slice(teamDoc.url.lastIndexOf("."),teamDoc.url.length);
+                    const url = './files/'+teamDoc.name+Date.now()+'.'+extension;
                     fs.copyFile(
                         path.resolve(teamDoc.url),
                         path.resolve(url),
@@ -646,6 +647,7 @@ async getTeamCommits(userId:string,teamId:string){
         return   await manager.getRepository(CommitEntity)
         .createQueryBuilder('commit')
         .where('commit.teamId = :teamId',{teamId})
+        .orderBy("commit.createdAt","DESC")
         .leftJoinAndSelect('commit.documents','documents')
         .leftJoinAndSelect('documents.type','type')
         .innerJoin('commit.team','team')

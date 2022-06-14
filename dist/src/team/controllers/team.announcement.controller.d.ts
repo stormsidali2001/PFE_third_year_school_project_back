@@ -9,5 +9,5 @@ export declare class TeamAnnouncementController {
         description: string;
         documents: import("../../core/entities/announcement.document.entity").AnnouncementDocumentEntity[];
     }[]>;
-    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<void>;
+    createTeamAnnouncement(userId: string, title: string, description: string, documents: TeamAnnoncementDocDto[]): Promise<import("../../core/entities/student.entity").StudentEntity>;
 }

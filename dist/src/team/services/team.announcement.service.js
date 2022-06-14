@@ -53,6 +53,7 @@ let TeamAnnouncementService = class TeamAnnouncementService {
                 .values(announcementDocs)
                 .execute();
             this.userService._sendTeamNotfication(student.team.id, `a new announcement with  title: ${announcement.title} is available`, student.id);
+            return student;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/createTeamAnnouncement');

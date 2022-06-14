@@ -43,6 +43,12 @@ export declare class UserService {
             promotion: PromotionEntity;
         } | {
             id: string;
+            code: string;
+            name: string;
+            user: UserEntity;
+            suggestedThemes: ThemeEntity[];
+        } | {
+            id: string;
             ssn: string;
             firstName: string;
             speciality: string;
@@ -59,12 +65,6 @@ export declare class UserService {
             firstName: String;
             lastName: String;
             user: UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: ThemeEntity[];
         };
         userType: UserType;
         email: string;

@@ -439,10 +439,8 @@ let UserService = class UserService {
                 await manager.getRepository(commit_entity_1.CommitEntity).save(commit);
                 const docsToCommit = [];
                 teamDocs.forEach(teamDoc => {
-                    const splited = teamDoc.name.split('.');
-                    const extension = splited[splited.length - 1];
-                    const name = splited.slice(0, splited.length - 1);
-                    const url = './files/' + name + Date.now() + '.' + extension;
+                    const extension = teamDoc.url.slice(teamDoc.url.lastIndexOf("."), teamDoc.url.length);
+                    const url = './files/' + teamDoc.name + Date.now() + '.' + extension;
                     fs.copyFile(path.resolve(teamDoc.url), path.resolve(url), (err) => {
                         if (err) {
                             common_1.Logger.error(`failed to copy the document with id: ${teamDoc.id} and url: ${teamDoc.url}`, 'UserService/commitDocs ');
@@ -505,6 +503,7 @@ let UserService = class UserService {
             return await manager.getRepository(commit_entity_1.CommitEntity)
                 .createQueryBuilder('commit')
                 .where('commit.teamId = :teamId', { teamId })
+                .orderBy("commit.createdAt", "DESC")
                 .leftJoinAndSelect('commit.documents', 'documents')
                 .leftJoinAndSelect('documents.type', 'type')
                 .innerJoin('commit.team', 'team')
