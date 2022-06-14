@@ -87,133 +87,6 @@ let UserController = class UserController {
         common_1.Logger.warn("files uploaded", response);
         return response;
     }
-    async addTeamDocument(userId, name, url, description, typeDocId) {
-        try {
-            return await this.userService.addTeamDocument(userId, name, url, description, typeDocId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/addTeamDocument');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getDocuments(userId) {
-        try {
-            return await this.userService.getTeamDocuments(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getTeamDocuments');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async deleteTeamDocs(userId, docsIds) {
-        try {
-            return await this.userService.deleteTeamDocs(userId, docsIds);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/deleteTeamDocs');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async updateTeamDocument(userId, documentId, description, name, documentTypeId) {
-        try {
-            return await this.userService.updateTeamDocument(userId, documentId, description, name, documentTypeId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/updateDocument');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async commitDocs(userId, title, description, docsIds) {
-        try {
-            return await this.userService.commitDocs(userId, title, description, docsIds);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/commitDocs');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getTeamsTeacherResponsibleFor(userId) {
-        try {
-            return await this.userService.getTeamsTeacherResponsibleFor(userId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getTeamsTeacherResponsibleForWithMembers(userId, promotionId) {
-        try {
-            return await this.userService.getTeamsTeacherResponsibleForWithMembers(userId, promotionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAllDocsAdmin(userId, promotionId, teamId) {
-        try {
-            return await this.userService.getAllDocsAdmin(userId, promotionId, teamId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getAllDocsAdmin');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async createSoutenance(userId, data) {
-        try {
-            return await this.userService.createSoutenance(userId, data);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/createSoutenance');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSoutenances(userId, promotionId) {
-        try {
-            return await this.userService.getSoutenances(promotionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getSoutenances');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getSoutenance(userId, soutenanceId) {
-        try {
-            return await this.userService.getSoutenance(soutenanceId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getSoutenances');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getTeamCommits(userId, teamId) {
-        try {
-            return await this.userService.getTeamCommits(userId, teamId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAllCommitsDocs(userId, teamId) {
-        try {
-            console.log('sssssssssssssssssssssss');
-            return await this.userService.getAllCommitsDocs(userId, teamId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/getAllCommitsDocs');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async validatedDocument(userId, documentIds) {
-        try {
-            return await this.userService.validatedDocument(userId, documentIds);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/validatedDocument');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async getStudents() {
         try {
             return await this.userService.getStudents();
@@ -254,79 +127,6 @@ let UserController = class UserController {
     }
     async editTeacher() {
     }
-    async createThemeSuggestion(userId, title, description, documents, promotionId) {
-        common_1.Logger.error(documents, "*****555****");
-        try {
-            return await this.userService.createThemeSuggestion(userId, title, description, documents, promotionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/createThemeSuggestion');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getThemeSuggestions(promotionId) {
-        try {
-            return await this.userService.getThemeSuggestions(promotionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getThemeSuggestions');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAllThemeSuggestions() {
-        try {
-            return await this.userService.getAllThemeSuggestions();
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getAllThemeSuggestions');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getThemeSuggestion(themeId) {
-        try {
-            return await this.userService.getThemeSuggestion(themeId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getThemeSuggestion');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async validateThemeSuggestion(userId, themeId) {
-        try {
-            return await this.userService.validateThemeSuggestion(userId, themeId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/validateThemeSuggestion');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getAllThemes() {
-        try {
-            return await this.userService.getAllThemes();
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getAllThemes');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getThemes(promotionId) {
-        try {
-            return await this.userService.getThemes(promotionId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getThemes');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async getTheme(themeId) {
-        try {
-            return await this.userService.getTheme(themeId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UsrController/getTheme');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
     async getTeams(promotionId) {
         try {
             return await this.userService.getTeams(promotionId);
@@ -335,9 +135,6 @@ let UserController = class UserController {
             common_1.Logger.error(err, "UserController/getTeams");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
-    }
-    async getTeamsithThemes(promotionId) {
-        return await this.userService.getTeamsithThemes(promotionId);
     }
     async getTeam(teamId) {
         try {
@@ -366,42 +163,6 @@ let UserController = class UserController {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/getAllPromotions');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async asignThemesToTeams(userId, promotionId, method) {
-        try {
-            return await this.userService.asignThemesToTeams(userId, promotionId, method);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/asignThemesToTeams');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async applyThemesToTeamsAssignements(userId, data) {
-        try {
-            return await this.userService.applyThemesToTeamsAssignements(userId, data);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/applyThemesToTeamsAssignements');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async encadrerTheme(userId, themeId, teacherId) {
-        try {
-            return await this.userService.encadrerTheme(userId, themeId, teacherId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/encadrerTheme');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async assignTeamsToTeacher(userId, teamIds, teacherId) {
-        try {
-            return await this.userService.assignTeamsToTeacher(userId, teamIds, teacherId);
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserController/assignTeamsToTeacher');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -516,125 +277,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "uploadFiles", null);
 __decorate([
-    (0, common_1.Post)('addTeamDocument'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('name')),
-    __param(2, (0, common_1.Body)('url')),
-    __param(3, (0, common_1.Body)('description')),
-    __param(4, (0, common_1.Body)('typeDocId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "addTeamDocument", null);
-__decorate([
-    (0, common_1.Get)('getTeamDocuments'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getDocuments", null);
-__decorate([
-    (0, common_1.Post)('deleteTeamDocs'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('docsIds')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "deleteTeamDocs", null);
-__decorate([
-    (0, common_1.Post)('updateTeamDocument'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)("documentId")),
-    __param(2, (0, common_1.Body)("description")),
-    __param(3, (0, common_1.Body)("name")),
-    __param(4, (0, common_1.Body)("documentTypeId")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "updateTeamDocument", null);
-__decorate([
-    (0, common_1.Post)('commitDocs'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('title')),
-    __param(2, (0, common_1.Body)('description')),
-    __param(3, (0, common_1.Body)('docsIds')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Array]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "commitDocs", null);
-__decorate([
-    (0, common_1.Get)('getTeamsTeacherResponsibleFor'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTeamsTeacherResponsibleFor", null);
-__decorate([
-    (0, common_1.Get)('getTeamsTeacherResponsibleForWithMembers/:promotionId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTeamsTeacherResponsibleForWithMembers", null);
-__decorate([
-    (0, common_1.Get)('getAllDocsAdmin/:promotionId/:teamId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('promotionId')),
-    __param(2, (0, common_1.Param)('teamId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getAllDocsAdmin", null);
-__decorate([
-    (0, common_1.Post)('createSoutenance'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, user_dto_1.SoutenanceDto]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "createSoutenance", null);
-__decorate([
-    (0, common_1.Get)('getSoutenances/:promotionId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getSoutenances", null);
-__decorate([
-    (0, common_1.Get)('getSoutenance/:soutenanceId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('soutenanceId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getSoutenance", null);
-__decorate([
-    (0, common_1.Get)('getTeamCommits/:teamId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('teamId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTeamCommits", null);
-__decorate([
-    (0, common_1.Get)('getAllCommitsDocs/:teamId'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Param)('teamId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getAllCommitsDocs", null);
-__decorate([
-    (0, common_1.Post)('validatedDocument'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('documentIds')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "validatedDocument", null);
-__decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getStudents'),
     __metadata("design:type", Function),
@@ -675,71 +317,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "editTeacher", null);
 __decorate([
-    (0, common_1.Post)('/createThemeSuggestion'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('title')),
-    __param(2, (0, common_1.Body)('description')),
-    __param(3, (0, common_1.Body)('documents')),
-    __param(4, (0, common_1.Body)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Array, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "createThemeSuggestion", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemeSuggestions/:promotionId'),
-    __param(0, (0, common_1.Param)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getThemeSuggestions", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemeSuggestions'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getAllThemeSuggestions", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemeSuggestion/:themeId'),
-    __param(0, (0, common_1.Param)('themeId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getThemeSuggestion", null);
-__decorate([
-    (0, common_1.Post)('validateThemeSuggestion'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('themeId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "validateThemeSuggestion", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemes'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getAllThemes", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getThemes/:promotionId'),
-    __param(0, (0, common_1.Param)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getThemes", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getTheme/:themeId'),
-    __param(0, (0, common_1.Param)('themeId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTheme", null);
-__decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getAllTeams/:promotionId'),
     __param(0, (0, common_1.Param)('promotionId')),
@@ -747,14 +324,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeams", null);
-__decorate([
-    (0, public_decorator_1.Public)(),
-    (0, common_1.Get)('getTeamsWithThemes/:promotionId'),
-    __param(0, (0, common_1.Param)('promotionId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getTeamsithThemes", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getTeams/:teamId'),
@@ -785,40 +354,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAllPromotions", null);
-__decorate([
-    (0, common_1.Post)('asignThemesToTeams'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('promotionId')),
-    __param(2, (0, common_1.Body)('method')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "asignThemesToTeams", null);
-__decorate([
-    (0, common_1.Post)('applyThemesToTeamsAssignements'),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, user_dto_1.ThemeToTeamDTO]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "applyThemesToTeamsAssignements", null);
-__decorate([
-    (0, common_1.Post)('encadrerTheme'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('themeId')),
-    __param(2, (0, common_1.Body)('teacherId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "encadrerTheme", null);
-__decorate([
-    (0, common_1.Post)('assignTeamsToTeacher'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)('teamIds')),
-    __param(2, (0, common_1.Body)('teacherId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Array, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "assignTeamsToTeacher", null);
 __decorate([
     (0, common_1.Get)('getPromotionDocumentTypes'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),

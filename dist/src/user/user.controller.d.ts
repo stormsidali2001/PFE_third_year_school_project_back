@@ -1,6 +1,6 @@
 /// <reference types="multer" />
 import { StreamableFile } from "@nestjs/common";
-import { ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
+import { WishListDTO } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
@@ -18,43 +18,13 @@ export declare class UserController {
     downlaodFile(url: string, userId: string): Promise<StreamableFile | "file not found">;
     seeUploadedFile(path: any, res: any): any;
     uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
-    addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
-    getDocuments(userId: string): Promise<import("../core/entities/team.document.entity").TeamDocumentEntity[]>;
-    deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
-    updateTeamDocument(userId: string, documentId: string, description: string, name: string, documentTypeId: string): Promise<void>;
-    commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
-    getTeamsTeacherResponsibleFor(userId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
-    getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../core/entities/team.entity").TeamEntity[]>;
-    getAllDocsAdmin(userId: string, promotionId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
-    createSoutenance(userId: string, data: SoutenanceDto): Promise<string>;
-    getSoutenances(userId: string, promotionId: string): Promise<import("../core/entities/soutenance.entity").SoutenanceEntity[]>;
-    getSoutenance(userId: string, soutenanceId: string): Promise<import("../core/entities/soutenance.entity").SoutenanceEntity>;
-    getTeamCommits(userId: string, teamId: string): Promise<import("../core/entities/commit.entity").CommitEntity[]>;
-    getAllCommitsDocs(userId: string, teamId: string): Promise<import("../core/entities/commit.document.entity").CommitDocumentEntity[]>;
-    validatedDocument(userId: string, documentIds: string[]): Promise<void>;
     getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(): Promise<void>;
     getTeachers(): Promise<import("../core/entities/teacher.entity").TeacherEntity[]>;
     deleteTeacher(teacherId: string): Promise<string>;
     editTeacher(): Promise<void>;
-    createThemeSuggestion(userId: string, title: string, description: string, documents: ThemeDocDto[], promotionId: string): Promise<void>;
-    getThemeSuggestions(promotionId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
-    getAllThemeSuggestions(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
-    getThemeSuggestion(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
-    validateThemeSuggestion(userId: string, themeId: string): Promise<void>;
-    getAllThemes(): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
-    getThemes(promotionId: string): Promise<import("../core/entities/theme.entity").ThemeEntity[]>;
-    getTheme(themeId: string): Promise<import("../core/entities/theme.entity").ThemeEntity>;
     getTeams(promotionId: string): Promise<{
-        id: string;
-        pseudo: string;
-        theme: import("../core/entities/theme.entity").ThemeEntity;
-        nombre: any;
-        promotion: string;
-        validated: boolean;
-    }[]>;
-    getTeamsithThemes(promotionId: string): Promise<{
         id: string;
         pseudo: string;
         theme: import("../core/entities/theme.entity").ThemeEntity;
@@ -118,16 +88,6 @@ export declare class UserController {
     }>;
     submitWishList(userId: string, data: WishListDTO): Promise<void>;
     getAllPromotions(): Promise<import("../core/entities/promotion.entity").PromotionEntity[]>;
-    asignThemesToTeams(userId: string, promotionId: string, method: string): Promise<{
-        theme: {
-            id: string;
-            title: string;
-        };
-        teams: any;
-    }[]>;
-    applyThemesToTeamsAssignements(userId: string, data: ThemeToTeamDTO): Promise<any>;
-    encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
-    assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
     getPromotionDocumentTypes(userId: any): Promise<import("../core/entities/document-types.entity").DocumentTypeEntity[]>;
     getSalles(): Promise<import("../core/entities/salle.entity").SalleEntity[]>;
     canSoutenir(userId: string, teamId: string): Promise<void>;

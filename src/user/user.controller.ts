@@ -87,9 +87,6 @@ export class UserController{
   
         return res.sendFile(path, { root: './files' });
     }
-
-
-  
     @Post('uploadFiles')
     @UseInterceptors(FilesInterceptor('files',10,{
         storage: diskStorage({
@@ -112,164 +109,12 @@ export class UserController{
         Logger.warn("files uploaded",response);
         return response;
     }
-
-    @Post('addTeamDocument')
-    async addTeamDocument(
-        @GetCurrentUserId() userId:string,
-        @Body('name') name:string,
-        @Body('url') url:string,
-        @Body('description') description:string,
-        @Body('typeDocId') typeDocId:string
-    ){
-        try{
-            return await this.userService.addTeamDocument(userId,name,url,description,typeDocId);
-        }catch(err){
-            Logger.error(err,'UserController/addTeamDocument')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-        
-    }
-    @Get('getTeamDocuments')
-    async getDocuments(@GetCurrentUserId() userId:string){
-        try{
-            return await this.userService.getTeamDocuments(userId);
-        }catch(err){
-            Logger.error(err,'UserController/getTeamDocuments')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    @Post('deleteTeamDocs')
-    async deleteTeamDocs(
-        @GetCurrentUserId() userId:string,
-        @Body('docsIds') docsIds:string[]
-        ){
-            try{
-                return await this.userService.deleteTeamDocs(userId,docsIds);
-            }catch(err){
-                Logger.error(err,'UserController/deleteTeamDocs')
-                throw new HttpException(err,HttpStatus.BAD_REQUEST);
-            }
-        }
-    @Post('updateTeamDocument')
-    async updateTeamDocument(
-           @GetCurrentUserId() userId:string,
-           @Body("documentId") documentId:string,
-           @Body("description") description:string,
-           @Body("name")  name:string,
-           @Body("documentTypeId") documentTypeId:string
-            ){
-                try{    
-                    return await this.userService.updateTeamDocument(userId,documentId,description,name,documentTypeId);
-
-                }catch(err){
-                    Logger.error(err,'UserController/updateDocument');
-                    throw new HttpException(err,HttpStatus.BAD_REQUEST);
-                }
-
-     }
-    @Post('commitDocs')
-    async commitDocs(@GetCurrentUserId() userId:string,@Body('title') title:string,@Body('description') description:string,@Body('docsIds')docsIds:string[]){
-        try{
-            return await this.userService.commitDocs(userId,title,description,docsIds);
-        }catch(err){
-            Logger.error(err,'UserController/commitDocs')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
-
-    @Get('getTeamsTeacherResponsibleFor')
-    async getTeamsTeacherResponsibleFor(@GetCurrentUserId() userId:string){
-        try{
-            return await this.userService.getTeamsTeacherResponsibleFor(userId)
-        }catch(err){
-            Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    @Get('getTeamsTeacherResponsibleForWithMembers/:promotionId')
-    async getTeamsTeacherResponsibleForWithMembers(@GetCurrentUserId() userId:string,@Param('promotionId') promotionId:string){
-        try{
-          
-            return await this.userService.getTeamsTeacherResponsibleForWithMembers(userId,promotionId)
-        }catch(err){
-            Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    
-    @Get('getAllDocsAdmin/:promotionId/:teamId')
-    async getAllDocsAdmin(@GetCurrentUserId() userId:string,@Param('promotionId')promotionId:string,@Param('teamId')teamId:string){
-        try{
-            return await this.userService.getAllDocsAdmin(userId,promotionId,teamId)
-        }catch(err){
-            Logger.error(err,'UserController/getAllDocsAdmin')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+   
 
 
-    @Post('createSoutenance')
-    async createSoutenance(@GetCurrentUserId() userId:string,@Body() data:SoutenanceDto){
-        try{
-            return await this.userService.createSoutenance(userId,data)
-        }catch(err){
-            Logger.error(err,'UserController/createSoutenance')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+  
 
-    @Get('getSoutenances/:promotionId')
-    async getSoutenances(@GetCurrentUserId() userId:string,@Param('promotionId') promotionId:string){
-        try{
-            return await this.userService.getSoutenances(promotionId)
-        }catch(err){
-            Logger.error(err,'UserController/getSoutenances')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    @Get('getSoutenance/:soutenanceId')
-    async getSoutenance(@GetCurrentUserId() userId:string,@Param('soutenanceId') soutenanceId:string){
-        try{
-            return await this.userService.getSoutenance(soutenanceId)
-        }catch(err){
-            Logger.error(err,'UserController/getSoutenances')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Get('getTeamCommits/:teamId')
-    async getTeamCommits(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
-        try{
-            return await this.userService.getTeamCommits(userId,teamId)
-        }catch(err){
-            Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Get('getAllCommitsDocs/:teamId')
-    async getAllCommitsDocs(@GetCurrentUserId() userId:string,@Param('teamId') teamId:string){
-        try{
-           
-            console.log('sssssssssssssssssssssss')
-            return await this.userService.getAllCommitsDocs(userId,teamId)
-        }catch(err){
-            Logger.error(err,'UserController/getAllCommitsDocs')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Post('validatedDocument')
-    async validatedDocument(@GetCurrentUserId() userId:string,@Body('documentIds') documentIds:string[]){
-        try{
-          
-            return await this.userService.validatedDocument(userId,documentIds)
-        }catch(err){
-            Logger.error(err,'UserController/validatedDocument')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+  
 
     //crud operations student
     @Public()
@@ -323,101 +168,7 @@ export class UserController{
  
      }
 
-    //theme suggestions crud operations
-    @Post('/createThemeSuggestion')
-    async createThemeSuggestion(@GetCurrentUserId() userId:string,
-                                @Body('title') title:string,
-                                @Body('description') description:string,
-                                @Body('documents') documents:ThemeDocDto[],
-                                @Body('promotionId') promotionId:string
-                                ){        
-                                    Logger.error(documents,"*****555****")
-        try{
-            return await this.userService.createThemeSuggestion(userId,title,description,documents,promotionId);
-        }catch(err){
-            Logger.error(err,'UsrController/createThemeSuggestion')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Public()
-    @Get('getThemeSuggestions/:promotionId')
-    async getThemeSuggestions(@Param('promotionId') promotionId:string){
-        try{
-            return await this.userService.getThemeSuggestions(promotionId)
-        }catch(err){
-            Logger.error(err,'UsrController/getThemeSuggestions')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Public()
-    @Get('getThemeSuggestions')
-    async getAllThemeSuggestions(){
-        try{
-            return await this.userService.getAllThemeSuggestions()
-        }catch(err){
-            Logger.error(err,'UsrController/getAllThemeSuggestions')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Public()
-    @Get('getThemeSuggestion/:themeId')
-    async getThemeSuggestion(@Param('themeId') themeId:string){
-        try{
-            return await this.userService.getThemeSuggestion(themeId)
-        }catch(err){
-            Logger.error(err,'UsrController/getThemeSuggestion')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Post('validateThemeSuggestion')
-    async validateThemeSuggestion(@GetCurrentUserId() userId:string,@Body('themeId') themeId:string){
-        try{
-            return await this.userService.validateThemeSuggestion(userId,themeId)
-        }catch(err){
-            Logger.error(err,'UsrController/validateThemeSuggestion')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
-    //themes
-    @Public()
-    @Get('getThemes')
-    async getAllThemes(){
-        try{
-            return await this.userService.getAllThemes()
-        }catch(err){
-            Logger.error(err,'UsrController/getAllThemes')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Public()
-    @Get('getThemes/:promotionId')
-    async getThemes(@Param('promotionId') promotionId:string){
-        try{
-            return await this.userService.getThemes(promotionId)
-        }catch(err){
-            Logger.error(err,'UsrController/getThemes')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    @Public()
-    @Get('getTheme/:themeId')
-    async getTheme(@Param('themeId') themeId:string){
-        try{
-            return await this.userService.getTheme(themeId)
-        }catch(err){
-            Logger.error(err,'UsrController/getTheme')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
    
-
 
     @Public()
     @Get('getAllTeams/:promotionId')
@@ -428,12 +179,6 @@ export class UserController{
             Logger.error(err,"UserController/getTeams")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
-    }
-
-    @Public()
-    @Get('getTeamsWithThemes/:promotionId')
-    async getTeamsithThemes(@Param('promotionId') promotionId:string){
-        return await this.userService.getTeamsithThemes(promotionId)
     }
 
     @Public()
@@ -475,47 +220,7 @@ export class UserController{
        
     }
    
-    @Post('asignThemesToTeams')
-    async asignThemesToTeams(@GetCurrentUserId() userId:string,@Body('promotionId') promotionId:string,@Body('method') method:string){
-        try{
-            return await this.userService.asignThemesToTeams(userId,promotionId,method)
-        }catch(err){
-            Logger.error(err,'UserController/asignThemesToTeams')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    
-    @Post('applyThemesToTeamsAssignements')
-    async applyThemesToTeamsAssignements(userId:string,@Body()data:ThemeToTeamDTO){
-        try{
-            return await this.userService.applyThemesToTeamsAssignements(userId,data)
-        }catch(err){
-            Logger.error(err,'UserController/applyThemesToTeamsAssignements')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
-
-    @Post('encadrerTheme')
-    async encadrerTheme(@GetCurrentUserId() userId:string,@Body('themeId') themeId:string,@Body('teacherId')teacherId:string){
-        try{
-            return await this.userService.encadrerTheme(userId,themeId,teacherId)
-        }catch(err){
-            Logger.error(err,'UserController/encadrerTheme')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-
-    }
-
-    @Post('assignTeamsToTeacher')
-    async assignTeamsToTeacher(@GetCurrentUserId() userId:string,@Body('teamIds') teamIds:string[],@Body('teacherId') teacherId:string){
-            try{
-                return await this.userService.assignTeamsToTeacher(userId,teamIds,teacherId)
-            }catch(err){
-                Logger.error(err,'UserController/assignTeamsToTeacher')
-                throw new HttpException(err,HttpStatus.BAD_REQUEST);
-            }
-    }
+   
     @Get('getPromotionDocumentTypes')
     async getPromotionDocumentTypes(@GetCurrentUserId() userId){
         try{
