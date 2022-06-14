@@ -1,6 +1,6 @@
 /// <reference types="multer" />
 import { StreamableFile } from "@nestjs/common";
-import { NormalTeamMeetDto, SurveyDto, TeamAnnoncementDocDto, UrgentTeamMeetDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
+import { SurveyDto, TeamAnnoncementDocDto, ThemeDocDto, WishListDTO, ThemeToTeamDTO, SoutenanceDto } from "src/core/dtos/user.dto";
 import { UserService } from "./user.service";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 export declare class UserController {
@@ -33,8 +33,6 @@ export declare class UserController {
         options: import("../core/entities/survey.option.entity").SurveyOptionEntity[];
         participants: import("../core/entities/survey.participant.entity").SurveyParticipantEntity[];
     }>;
-    createUrgentTeamMeet(studentId: string, meet: UrgentTeamMeetDto): Promise<string>;
-    createNormalTeamMeet(studentId: string, meet: NormalTeamMeetDto): Promise<string>;
     getLastNotifications(userId: string, number: number): Promise<{
         notifications: import("../core/entities/Notification.entity").NotificationEntity[];
         totalNotificationCount: number;

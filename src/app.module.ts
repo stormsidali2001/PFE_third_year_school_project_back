@@ -53,6 +53,7 @@ import { CommitDocumentEntity } from './core/entities/commit.document.entity';
 import { SoutenanceEntity } from './core/entities/soutenance.entity';
 import { Jury_of } from './core/entities/juryOf.entity';
 import { SalleEntity } from './core/entities/salle.entity';
+import { TeamModule } from './team/team.module';
 
 
 @Module({
@@ -124,7 +125,8 @@ import { SalleEntity } from './core/entities/salle.entity';
   Auth,
   UserModule,
   MessageModule,
-  SocketModule
+  SocketModule,
+  TeamModule
   ,
   ConfigModule.forRoot({isGlobal:true}), 
   ScheduleModule.forRoot(),

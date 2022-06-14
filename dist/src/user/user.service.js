@@ -848,8 +848,42 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async updateDocument(userId, documentId, description, name) {
+    async updateDocument(userId, documentId, description, name, documentTypeId) {
         try {
+            const manager = (0, typeorm_1.getManager)();
+            const document = await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
+                .createQueryBuilder('doc')
+                .where('doc.id = :documentId', { documentId })
+                .leftJoinAndSelect('doc.owner', 'owner')
+                .innerJoinAndSelect('doc.team', 'team')
+                .innerJoinAndSelect('team.students', 'students')
+                .leftJoinAndSelect('team.teamLeader', 'teamLeader')
+                .andWhere('students.userId = :userId', { userId })
+                .getOne();
+            if (!document) {
+                common_1.Logger.error("document not found", 'UserService/updateDocument');
+                throw new common_1.HttpException("document not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const isTeamLeader = document.team.teamLeader.id === document.team.students[0].id;
+            const isOwner = document.team.students[0].id === document.owner.id;
+            if (!isTeamLeader && !isOwner) {
+                common_1.Logger.error("permission denied", 'UserService/updateDocument');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const documentType = await manager.getRepository(document_types_entity_1.DocumentTypeEntity)
+                .createQueryBuilder("docType")
+                .where("docType.id = :documentTypeId", { documentTypeId })
+                .getOne();
+            if (!documentType) {
+                common_1.Logger.error("document type not found", 'UserService/updateDocument');
+                throw new common_1.HttpException("document type not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(team_document_entity_1.TeamDocumentEntity)
+                .createQueryBuilder('doc')
+                .where('doc.id = :documentId', { documentId })
+                .update()
+                .set({ description, name, type: documentType })
+                .execute();
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/updateDocument');

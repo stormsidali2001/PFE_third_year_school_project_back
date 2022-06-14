@@ -146,25 +146,7 @@ export class UserController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST)
             }
     }
-    @Post('createUrgentTeamMeet')
-    async createUrgentTeamMeet(@Body('studentId')studentId:string,@Body('meet')meet:UrgentTeamMeetDto){
-        try{
-            return await this.userService.createUrgentTeamMeet(studentId,meet);
-        }catch(err){
-            Logger.error(err,'UserController/createUrgentTeamMeet')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-    @Post('createNormalTeamMeet')
-    async createNormalTeamMeet(@Body('studentId')studentId:string,@Body('meet')meet:NormalTeamMeetDto){
-        try{
-            return await this.userService.createNormalTeamMeet(studentId,meet);
-        }catch(err){
-            Logger.error(err,'UserController/createNormalTeamMeet')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
-
+   
     @Get('notifications/:number')
     async getLastNotifications(@GetCurrentUserId() userId:string,   @Param('number',ParseIntPipe) number:number){
         try{
@@ -243,10 +225,12 @@ export class UserController{
     
     @Get('getFile/:path')
     seeUploadedFile(@Param('path') path, @Res() res) {
+        Logger.error("getting file"+path,"debug")
         res.set({
            
             'Content-Disposition': 'attachment; filename="package.json"',
           });
+  
         return res.sendFile(path, { root: './files' });
     }
 

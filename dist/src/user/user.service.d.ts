@@ -135,7 +135,7 @@ export declare class UserService {
     addTeamDocument(userId: string, name: string, url: string, description: string, typeDocId: string): Promise<void>;
     getTeamDocuments(userId: string): Promise<TeamDocumentEntity[]>;
     deleteTeamDocs(userId: string, docsIds: string[]): Promise<void>;
-    updateDocument(userId: string, documentId: string, description: string, name: string): Promise<void>;
+    updateDocument(userId: string, documentId: string, description: string, name: string, documentTypeId: string): Promise<void>;
     commitDocs(userId: string, title: string, description: string, docsIds: string[]): Promise<void>;
     getTeamsTeacherResponsibleFor(userId: string): Promise<TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<TeamEntity[]>;

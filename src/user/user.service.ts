@@ -1095,8 +1095,47 @@ async deleteTeamDocs(userId:string,docsIds:string[]){
     }
 
 }
-async updateDocument(userId:string,documentId:string,description:string,name:string){
+async updateDocument(userId:string,documentId:string,description:string,name:string,documentTypeId:string){
     try{
+        const manager = getManager();
+        const document = await manager.getRepository(TeamDocumentEntity)
+        .createQueryBuilder('doc')
+        .where('doc.id = :documentId',{documentId})
+        .leftJoinAndSelect('doc.owner','owner')
+        .innerJoinAndSelect('doc.team','team')
+        .innerJoinAndSelect('team.students','students')
+        .leftJoinAndSelect('team.teamLeader','teamLeader')
+        .andWhere('students.userId = :userId',{userId})
+        .getOne();
+        if(!document){
+            Logger.error("document not found",'UserService/updateDocument')
+              throw new HttpException("document not found",HttpStatus.BAD_REQUEST);
+        }
+       
+        const isTeamLeader = document.team.teamLeader.id === document.team.students[0].id;
+        const isOwner = document.team.students[0].id === document.owner.id;
+        if(!isTeamLeader && !isOwner){
+            Logger.error("permission denied",'UserService/updateDocument')
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+        }
+        const documentType = await manager.getRepository(DocumentTypeEntity)
+        .createQueryBuilder("docType")
+        .where("docType.id = :documentTypeId",{documentTypeId})
+        .getOne();
+        if(!documentType){
+            Logger.error("document type not found",'UserService/updateDocument')
+              throw new HttpException("document type not found",HttpStatus.BAD_REQUEST);
+        }
+
+
+
+        await manager.getRepository(TeamDocumentEntity)
+        .createQueryBuilder('doc')
+        .where('doc.id = :documentId',{documentId})
+        .update()
+        .set({description,name,type:documentType})
+        .execute();
+
         
     }catch(err){
         Logger.error(err,'UserService/updateDocument')

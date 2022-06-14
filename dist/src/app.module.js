@@ -59,6 +59,7 @@ const commit_document_entity_1 = require("./core/entities/commit.document.entity
 const soutenance_entity_1 = require("./core/entities/soutenance.entity");
 const juryOf_entity_1 = require("./core/entities/juryOf.entity");
 const salle_entity_1 = require("./core/entities/salle.entity");
+const team_module_1 = require("./team/team.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -119,6 +120,7 @@ AppModule = __decorate([
             user_module_1.UserModule,
             message_module_1.MessageModule,
             socket_module_1.SocketModule,
+            team_module_1.TeamModule,
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             schedule_1.ScheduleModule.forRoot(),
             platform_express_1.MulterModule.register({
