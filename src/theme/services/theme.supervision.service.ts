@@ -203,4 +203,41 @@ async getTeamsithThemes(promotionId:string){
 
 
 }
+async canSoutenir(userId:string,teamId:string){
+    try{
+
+        const manager = getManager();
+        const user = await manager.getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .where('user.id = :userId and user.userType = :userType',{userId,userType:UserType.TEACHER})
+        .getOne()
+
+        if(!user){
+            Logger.error("permission denied",'UserService/canSoutenir')
+            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
+        }
+         const team = await manager.getRepository(TeamEntity)
+         .createQueryBuilder('team')
+         .where('team.id = :teamId and team.givenTheme IS NOT NULL',{teamId})
+         .innerJoin('team.responsibleTeachers','responsibleTeachers')
+         .innerJoin('responsibleTeachers.teacher','teacher')
+         .andWhere('teacher.userId = :userId',{userId})
+         .getOne();
+
+         if(!team){
+            Logger.error("team not found or theme",'UserService/canSoutenir')
+            throw new HttpException("team not found or theme",HttpStatus.BAD_REQUEST);
+         }
+
+         await manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .update()
+        .where('team.id = :teamId',{teamId})
+        .set({peutSoutenir:true})
+        .execute()
+    }catch(err){
+        Logger.error(err,'UserService/canSoutenir')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 }
