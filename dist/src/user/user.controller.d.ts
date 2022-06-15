@@ -38,7 +38,8 @@ export declare class UserController {
         theme: import("../core/entities/theme.entity").ThemeEntity;
         nombre: any;
         promotion: string;
-        validated: boolean;
+        validée: boolean;
+        peut_soutenir: boolean;
     }[]>;
     getTeam(teamId: string): Promise<{
         id: string;
@@ -48,6 +49,7 @@ export declare class UserController {
         promotion: import("../core/entities/promotion.entity").PromotionEntity;
         validated: boolean;
         teamLeader: import("../core/entities/student.entity").StudentEntity;
+        peut_soutenir: boolean;
     }>;
     getUser(userId: string): Promise<{
         [x: string]: string | {
@@ -80,16 +82,16 @@ export declare class UserController {
             teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
             soutenances: import("../core/entities/juryOf.entity").Jury_of[];
         } | {
+            id: String;
+            firstName: String;
+            lastName: String;
+            user: UserEntity;
+        } | {
             id: string;
             code: string;
             name: string;
             user: UserEntity;
             suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
-        } | {
-            id: String;
-            firstName: String;
-            lastName: String;
-            user: UserEntity;
         };
         userType: UserType;
         email: string;
@@ -98,7 +100,6 @@ export declare class UserController {
     getAllPromotions(): Promise<import("../core/entities/promotion.entity").PromotionEntity[]>;
     getPromotionDocumentTypes(userId: any): Promise<import("../core/entities/document-types.entity").DocumentTypeEntity[]>;
     getSalles(): Promise<import("../core/entities/salle.entity").SalleEntity[]>;
-    canSoutenir(userId: string, teamId: string): Promise<void>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;

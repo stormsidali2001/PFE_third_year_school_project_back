@@ -14,4 +14,5 @@ export declare class ThemeSupervisionController {
         promotion: string;
         validated: boolean;
     }[]>;
+    canSoutenir(userId: string, teamId: string): Promise<void>;
 }

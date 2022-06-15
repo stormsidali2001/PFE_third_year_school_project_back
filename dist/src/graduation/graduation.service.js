@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GraduationService = void 0;
 const common_1 = require("@nestjs/common");
@@ -14,8 +17,12 @@ const soutenance_entity_1 = require("../core/entities/soutenance.entity");
 const teacher_entity_1 = require("../core/entities/teacher.entity");
 const team_entity_1 = require("../core/entities/team.entity");
 const user_entity_1 = require("../core/entities/user.entity");
+const user_service_1 = require("../user/user.service");
 const typeorm_1 = require("typeorm");
 let GraduationService = class GraduationService {
+    constructor(userService) {
+        this.userService = userService;
+    }
     async createSoutenance(userId, data) {
         const { title, description, date, jurysIds, salleId, teamId, duration } = data;
         try {
@@ -52,6 +59,10 @@ let GraduationService = class GraduationService {
                 common_1.Logger.error("team not found", 'UserService/createSoutenance');
                 throw new common_1.HttpException("team not found", common_1.HttpStatus.BAD_REQUEST);
             }
+            if (!team.peutSoutenir) {
+                common_1.Logger.error("l'equipe n'est pas encore autoriser a soutenir contactez les ensiegnant responsable.", 'UserService/createSoutenance');
+                throw new common_1.HttpException("l'equipe n'est pas prete a soutenir", common_1.HttpStatus.BAD_REQUEST);
+            }
             const soutenance = await manager.getRepository(soutenance_entity_1.SoutenanceEntity)
                 .createQueryBuilder('soutenance')
                 .where('soutenance.teamId = :teamId', { teamId })
@@ -81,6 +92,7 @@ let GraduationService = class GraduationService {
                 }))
                     .execute();
             });
+            this.userService._sendTeamNotfication(teamId, `les details de soutenance sont definit pour votre equipe.`);
             return "done";
         }
         catch (err) {
@@ -126,7 +138,8 @@ let GraduationService = class GraduationService {
     }
 };
 GraduationService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [user_service_1.UserService])
 ], GraduationService);
 exports.GraduationService = GraduationService;
 //# sourceMappingURL=graduation.service.js.map

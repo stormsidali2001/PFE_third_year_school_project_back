@@ -17,4 +17,4 @@ import { ThemeSupervisionService } from "./services/theme.supervision.service";
     controllers:[ThemeController,ThemeSupervisionController,ThemeAssignementController,ThemeCommitsController]
 
 })
-export class ThemeMModule{}
+export class ThemeModule{}

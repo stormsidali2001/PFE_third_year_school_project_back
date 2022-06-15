@@ -176,6 +176,40 @@ let ThemeSupervisionService = class ThemeSupervisionService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async canSoutenir(userId, teamId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where('user.id = :userId and user.userType = :userType', { userId, userType: user_entity_1.UserType.TEACHER })
+                .getOne();
+            if (!user) {
+                common_1.Logger.error("permission denied", 'UserService/canSoutenir');
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const team = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.id = :teamId and team.givenTheme IS NOT NULL', { teamId })
+                .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
+                .innerJoin('responsibleTeachers.teacher', 'teacher')
+                .andWhere('teacher.userId = :userId', { userId })
+                .getOne();
+            if (!team) {
+                common_1.Logger.error("team not found or theme", 'UserService/canSoutenir');
+                throw new common_1.HttpException("team not found or theme", common_1.HttpStatus.BAD_REQUEST);
+            }
+            await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .update()
+                .where('team.id = :teamId', { teamId })
+                .set({ peutSoutenir: true })
+                .execute();
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/canSoutenir');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
 };
 ThemeSupervisionService = __decorate([
     (0, common_1.Injectable)()

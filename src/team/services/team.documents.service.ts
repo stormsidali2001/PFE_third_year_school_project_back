@@ -221,6 +221,8 @@ export class TeamDocumentsService{
             .innerJoinAndSelect('team.givenTheme','givenTheme')
             .innerJoinAndSelect('givenTheme.encadrement','encadrement')
             .andWhere('encadrement.teacherId = res.teacherId')
+            .leftJoinAndSelect('encadrement.teacher','teacher')
+            .leftJoinAndSelect('teacher.user','user')
             .getMany();
           
             if(responsibles.length === 0){
@@ -277,6 +279,15 @@ export class TeamDocumentsService{
                 )
     
                 await manager.getRepository(CommitDocumentEntity).save(docsToCommit)
+              
+                for(let k in responsibles){
+                    const res= responsibles[k];
+                    const userId = res.teacher.user.id;
+                    this.userService._sendNotfication(userId,`l'equipe : ${res.team.nickName} a commiter des nouveaux documents`)
+
+                  
+                  
+                }
     
         })
          

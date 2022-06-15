@@ -472,7 +472,7 @@ let UserService = class UserService {
                 query = query.where('promotion.id = :promotionId', { promotionId });
             }
             const teams = await query.getMany();
-            return teams.map(({ nickName, givenTheme, membersCount, id, promotion }) => {
+            return teams.map(({ nickName, givenTheme, membersCount, id, promotion, peutSoutenir }) => {
                 common_1.Logger.error(nickName, promotion, "debug");
                 return {
                     id,
@@ -480,7 +480,8 @@ let UserService = class UserService {
                     theme: givenTheme,
                     nombre: membersCount,
                     promotion: promotion.name,
-                    validated: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam
+                    validée: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam,
+                    peut_soutenir: peutSoutenir
                 };
             });
         }
@@ -500,7 +501,7 @@ let UserService = class UserService {
                 .leftJoinAndSelect('team.promotion', 'promotion')
                 .leftJoinAndSelect('team.teamLeader', 'leader')
                 .getOne();
-            const { id, nickName, givenTheme, students, promotion, teamLeader } = team;
+            const { id, nickName, givenTheme, students, promotion, teamLeader, peutSoutenir } = team;
             return {
                 id,
                 pseudo: nickName,
@@ -508,7 +509,8 @@ let UserService = class UserService {
                 members: students,
                 promotion: promotion,
                 validated: students.length >= promotion.minMembersInTeam && students.length <= promotion.maxMembersInTeam,
-                teamLeader
+                teamLeader,
+                peut_soutenir: peutSoutenir,
             };
         }
         catch (err) {
@@ -647,40 +649,6 @@ let UserService = class UserService {
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTeams');
-            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
-        }
-    }
-    async canSoutenir(userId, teamId) {
-        try {
-            const manager = (0, typeorm_1.getManager)();
-            const user = await manager.getRepository(user_entity_1.UserEntity)
-                .createQueryBuilder('user')
-                .where('user.id = :userId and user.userType = :userType', { userId, userType: user_entity_1.UserType.TEACHER })
-                .getOne();
-            if (!user) {
-                common_1.Logger.error("permission denied", 'UserService/canSoutenir');
-                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
-            }
-            const team = await manager.getRepository(team_entity_1.TeamEntity)
-                .createQueryBuilder('team')
-                .where('team.id = :teamId and team.givenTheme IS NOT NULL', { teamId })
-                .innerJoin('team.responsibleTeachers', 'responsibleTeachers')
-                .innerJoin('responsibleTeachers.teacher', 'teacher')
-                .andWhere('teacher.userId = :userId', { userId })
-                .getOne();
-            if (!team) {
-                common_1.Logger.error("team not found or theme", 'UserService/canSoutenir');
-                throw new common_1.HttpException("team not found or theme", common_1.HttpStatus.BAD_REQUEST);
-            }
-            await manager.getRepository(team_entity_1.TeamEntity)
-                .createQueryBuilder('team')
-                .update()
-                .where('team.id = :teamId', { teamId })
-                .set({ peutSoutenir: true })
-                .execute();
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'UserService/canSoutenir');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,2 +1,2 @@
-export declare class ThemeMModule {
+export declare class ThemeModule {
 }

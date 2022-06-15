@@ -54,6 +54,8 @@ import { SoutenanceEntity } from './core/entities/soutenance.entity';
 import { Jury_of } from './core/entities/juryOf.entity';
 import { SalleEntity } from './core/entities/salle.entity';
 import { TeamModule } from './team/team.module';
+import { ThemeModule } from './theme/theme.module';
+import { Graduation } from './graduation/graduation.module';
 
 
 @Module({
@@ -126,7 +128,9 @@ import { TeamModule } from './team/team.module';
   UserModule,
   MessageModule,
   SocketModule,
-  TeamModule
+  TeamModule,
+  ThemeModule,
+  Graduation
   ,
   ConfigModule.forRoot({isGlobal:true}), 
   ScheduleModule.forRoot(),

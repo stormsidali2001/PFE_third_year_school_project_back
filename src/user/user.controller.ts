@@ -244,15 +244,7 @@ export class UserController{
         return await this.userService.getSalles()
     }
 
-    @Post('canSoutenir')
-    async canSoutenir(@GetCurrentUserId() userId:string,@Body('teamId') teamId:string){
-        try{
-            return await this.userService.canSoutenir(userId,teamId);
-        }catch(err){
-            Logger.error(err,'UserController/sendNotifications')
-            throw new HttpException(err,HttpStatus.BAD_REQUEST);
-        }
-    }
+   
     //test routes---------------------------
     @Public()
     @Post('test/sendNotification')

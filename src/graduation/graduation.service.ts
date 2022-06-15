@@ -6,6 +6,7 @@ import { SoutenanceEntity } from "src/core/entities/soutenance.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
+import { UserService } from "src/user/user.service";
 import { getConnection, getManager } from "typeorm";
 
 
@@ -13,6 +14,9 @@ import { getConnection, getManager } from "typeorm";
 
 @Injectable()
 export class GraduationService{
+    constructor(
+        private readonly userService:UserService
+    ){}
     async createSoutenance(userId:string,data:SoutenanceDto){
         const {
             title,
@@ -61,6 +65,10 @@ export class GraduationService{
                 Logger.error("team not found",'UserService/createSoutenance')
                 throw new HttpException("team not found",HttpStatus.BAD_REQUEST);
             }
+            if(!team.peutSoutenir){
+                Logger.error("l'equipe n'est pas encore autoriser a soutenir contactez les ensiegnant responsable.",'UserService/createSoutenance')
+                throw new HttpException("l'equipe n'est pas prete a soutenir",HttpStatus.BAD_REQUEST);
+            }
             const soutenance =  await manager.getRepository(SoutenanceEntity)
             .createQueryBuilder('soutenance')
             .where('soutenance.teamId = :teamId',{teamId})
@@ -96,6 +104,7 @@ export class GraduationService{
                 .execute()
             })
     
+            this.userService._sendTeamNotfication(teamId,`les details de soutenance sont definit pour votre equipe.`)
             return "done"
     
         }catch(err){

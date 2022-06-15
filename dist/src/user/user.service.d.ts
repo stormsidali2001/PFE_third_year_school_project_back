@@ -12,11 +12,8 @@ import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
-import { EncadrementEntity } from "src/core/entities/encadrement.entity";
-import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
 import { SalleEntity } from "src/core/entities/salle.entity";
-import { Jury_of } from "src/core/entities/juryOf.entity";
 export declare class UserService {
     private schedulerRegistry;
     private socketService;
@@ -46,22 +43,22 @@ export declare class UserService {
             lastName: string;
             user: UserEntity;
             teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
-            encadrements: EncadrementEntity[];
+            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
             commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: ThemeEntity[];
-            teamsInCharge: ResponsibleEntity[];
-            soutenances: Jury_of[];
+            teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
+            soutenances: import("../core/entities/juryOf.entity").Jury_of[];
+        } | {
+            id: String;
+            firstName: String;
+            lastName: String;
+            user: UserEntity;
         } | {
             id: string;
             code: string;
             name: string;
             user: UserEntity;
             suggestedThemes: ThemeEntity[];
-        } | {
-            id: String;
-            firstName: String;
-            lastName: String;
-            user: UserEntity;
         };
         userType: UserType;
         email: string;
@@ -95,7 +92,8 @@ export declare class UserService {
         theme: ThemeEntity;
         nombre: any;
         promotion: string;
-        validated: boolean;
+        validée: boolean;
+        peut_soutenir: boolean;
     }[]>;
     getTeam(teamId: any): Promise<{
         id: string;
@@ -105,6 +103,7 @@ export declare class UserService {
         promotion: PromotionEntity;
         validated: boolean;
         teamLeader: StudentEntity;
+        peut_soutenir: boolean;
     }>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;
@@ -120,5 +119,4 @@ export declare class UserService {
         promotion: string;
         validated: boolean;
     }[]>;
-    canSoutenir(userId: string, teamId: string): Promise<void>;
 }

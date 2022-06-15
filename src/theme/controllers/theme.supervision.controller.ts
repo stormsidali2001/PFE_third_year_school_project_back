@@ -59,5 +59,14 @@ export class ThemeSupervisionController{
     async getTeamsithThemes(@Param('promotionId') promotionId:string){
         return await this.themeSupervisionService.getTeamsithThemes(promotionId)
     }
+    @Post('canSoutenir')
+    async canSoutenir(@GetCurrentUserId() userId:string,@Body('teamId') teamId:string){
+        try{
+            return await this.themeSupervisionService.canSoutenir(userId,teamId);
+        }catch(err){
+            Logger.error(err,'UserController/sendNotifications')
+            throw new HttpException(err,HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

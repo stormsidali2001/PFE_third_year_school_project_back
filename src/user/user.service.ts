@@ -26,18 +26,10 @@ import { AdminEntity } from "src/core/entities/admin.entity";
 import { EntrepriseEntity } from "src/core/entities/entreprise.entity";
 import { ConfigEntity } from "src/core/entities/config.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
-import { ThemeDocumentEntity } from "src/core/entities/theme.document.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
-import {QueryBuilder} from  'typeorm'
 import { WishEntity } from "src/core/entities/wish.entity";
-import { EncadrementEntity } from "src/core/entities/encadrement.entity";
-import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
-import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
-import { CommitEntity } from "src/core/entities/commit.entity";
 import { SalleEntity } from "src/core/entities/salle.entity";
-import { SoutenanceEntity } from "src/core/entities/soutenance.entity";
-import { Jury_of } from "src/core/entities/juryOf.entity";
 
 @Injectable()
 export class UserService{
@@ -100,9 +92,6 @@ export class UserService{
      * team leader/student sends an invitation  to a student without a team
      * 
      */
-  
-
-  
    async _sendNotficationStudent(studentId:string,description:string){          
        // get the notification repository
          const manager = getManager();
@@ -222,10 +211,6 @@ async  getLastNotifications(userId:string,number:number = undefined){
     }
 }
 
-
-
-
-
 //crud operations student----------------------------------------
 async getStudents(){
     try{
@@ -271,7 +256,6 @@ async editStudent(studentId:string,data:Partial<StudentEntity>){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
-
 //crud operations Teacher----------------------------------------
 async getTeachers(){
     try{
@@ -318,7 +302,6 @@ async editTeacher(teacherId:string,data:Partial<TeacherEntity>){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
-
 //wish list 
 async sendWishList(userId:string,promotionId:string){
     try{
@@ -465,7 +448,6 @@ try{
     throw new HttpException(err,HttpStatus.BAD_REQUEST);
 }
 }
-
 // completer les equipes
 async completeTeams(userId:string,promotionId:string){
     try{
@@ -572,12 +554,6 @@ async completeTeams(userId:string,promotionId:string){
                 if(studentsNotYetInserted.length >0){
                     studentsToBeInsertedInNewTeam = [...studentsNotYetInserted];
                 }
-                
-                
-                
-
-          
-           
           
         }else{
           
@@ -600,12 +576,6 @@ async completeTeams(userId:string,promotionId:string){
 
             }
         }
-
-            
-            
-      
-       
-       
         return {
             studentsAddToTeamLater,
             studentsModifiedTeams,
@@ -637,7 +607,7 @@ async getTeams(promotionId:string){
         const teams = await query.getMany()
         
         //@ts-ignore
-        return teams.map(({nickName,givenTheme,membersCount,id,promotion})=>{
+        return teams.map(({nickName,givenTheme,membersCount,id,promotion,peutSoutenir})=>{
            Logger.error(nickName,promotion,"debug")
             return {
                 id,
@@ -645,7 +615,8 @@ async getTeams(promotionId:string){
                 theme:givenTheme,
                 nombre:membersCount,
                 promotion:promotion.name,
-                validated: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam
+                validée: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam,
+                peut_soutenir:peutSoutenir
             }
         });
     }catch(err){
@@ -669,7 +640,7 @@ async getTeam(teamId){
         .getOne();
         
         //@ts-ignore
-            const {id,nickName,givenTheme,students,promotion,teamLeader} = team;
+            const {id,nickName,givenTheme,students,promotion,teamLeader,peutSoutenir} = team;
             return {
                 id,
                 pseudo:nickName,
@@ -677,7 +648,8 @@ async getTeam(teamId){
                 members:students,
                 promotion:promotion,
                 validated: students.length >= promotion.minMembersInTeam &&  students.length <=  promotion.maxMembersInTeam,
-                teamLeader
+                teamLeader,
+                peut_soutenir:peutSoutenir,
             }
      
     }catch(err){
@@ -825,8 +797,6 @@ async careateSalle(name:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
-
-
 async getTeamsithThemes(promotionId:string){
     try{
         const manager = getManager();
@@ -858,45 +828,7 @@ async getTeamsithThemes(promotionId:string){
         Logger.error(err,'UserService/getTeams')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
-
-
 }
-async canSoutenir(userId:string,teamId:string){
-    try{
 
-        const manager = getManager();
-        const user = await manager.getRepository(UserEntity)
-        .createQueryBuilder('user')
-        .where('user.id = :userId and user.userType = :userType',{userId,userType:UserType.TEACHER})
-        .getOne()
-
-        if(!user){
-            Logger.error("permission denied",'UserService/canSoutenir')
-            throw new HttpException("permission denied",HttpStatus.BAD_REQUEST);
-        }
-         const team = await manager.getRepository(TeamEntity)
-         .createQueryBuilder('team')
-         .where('team.id = :teamId and team.givenTheme IS NOT NULL',{teamId})
-         .innerJoin('team.responsibleTeachers','responsibleTeachers')
-         .innerJoin('responsibleTeachers.teacher','teacher')
-         .andWhere('teacher.userId = :userId',{userId})
-         .getOne();
-
-         if(!team){
-            Logger.error("team not found or theme",'UserService/canSoutenir')
-            throw new HttpException("team not found or theme",HttpStatus.BAD_REQUEST);
-         }
-
-         await manager.getRepository(TeamEntity)
-        .createQueryBuilder('team')
-        .update()
-        .where('team.id = :teamId',{teamId})
-        .set({peutSoutenir:true})
-        .execute()
-    }catch(err){
-        Logger.error(err,'UserService/canSoutenir')
-        throw new HttpException(err,HttpStatus.BAD_REQUEST);
-    }
-}
 }
 

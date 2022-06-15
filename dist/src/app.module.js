@@ -60,6 +60,8 @@ const soutenance_entity_1 = require("./core/entities/soutenance.entity");
 const juryOf_entity_1 = require("./core/entities/juryOf.entity");
 const salle_entity_1 = require("./core/entities/salle.entity");
 const team_module_1 = require("./team/team.module");
+const theme_module_1 = require("./theme/theme.module");
+const graduation_module_1 = require("./graduation/graduation.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -121,6 +123,8 @@ AppModule = __decorate([
             message_module_1.MessageModule,
             socket_module_1.SocketModule,
             team_module_1.TeamModule,
+            theme_module_1.ThemeModule,
+            graduation_module_1.Graduation,
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             schedule_1.ScheduleModule.forRoot(),
             platform_express_1.MulterModule.register({

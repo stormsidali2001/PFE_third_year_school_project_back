@@ -9,13 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Graduation = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const user_service_1 = require("../user/user.service");
+const graduation_controller_1 = require("./graduation.controller");
+const graduation_service_1 = require("./graduation.service");
 let Graduation = class Graduation {
 };
 Graduation = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([])],
-        controllers: [],
-        providers: []
+        controllers: [graduation_controller_1.GraduationController],
+        providers: [graduation_service_1.GraduationService, user_service_1.UserService]
     })
 ], Graduation);
 exports.Graduation = Graduation;

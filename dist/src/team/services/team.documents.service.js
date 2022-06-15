@@ -189,6 +189,8 @@ let TeamDocumentsService = class TeamDocumentsService {
                 .innerJoinAndSelect('team.givenTheme', 'givenTheme')
                 .innerJoinAndSelect('givenTheme.encadrement', 'encadrement')
                 .andWhere('encadrement.teacherId = res.teacherId')
+                .leftJoinAndSelect('encadrement.teacher', 'teacher')
+                .leftJoinAndSelect('teacher.user', 'user')
                 .getMany();
             if (responsibles.length === 0) {
                 common_1.Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ", 'UserService/commitDocs');
@@ -222,6 +224,11 @@ let TeamDocumentsService = class TeamDocumentsService {
                     docsToCommit.push(doc);
                 });
                 await manager.getRepository(commit_document_entity_1.CommitDocumentEntity).save(docsToCommit);
+                for (let k in responsibles) {
+                    const res = responsibles[k];
+                    const userId = res.teacher.user.id;
+                    this.userService._sendNotfication(userId, `l'equipe : ${res.team.nickName} a commiter des nouveaux documents`);
+                }
             });
         }
         catch (err) {
