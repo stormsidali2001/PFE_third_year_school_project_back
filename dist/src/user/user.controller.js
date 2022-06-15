@@ -87,9 +87,6 @@ let UserController = class UserController {
         common_1.Logger.warn("files uploaded", response);
         return response;
     }
-    async equilibrer(userId, promotionId) {
-        return await this.userService.completeTeams(userId, promotionId);
-    }
     async getStudents() {
         try {
             return await this.userService.getStudents();
@@ -270,14 +267,6 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "uploadFiles", null);
-__decorate([
-    (0, common_1.Post)('equilibrer'),
-    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
-    __param(1, (0, common_1.Body)("promotionId")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "equilibrer", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getStudents'),

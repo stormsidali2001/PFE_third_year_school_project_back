@@ -332,3 +332,5 @@ Content-Type:application/json
 
 
 }
+###
+GET  http://localhost:8080/getTeamsStats/c5f082a4-8f5e-4b6c-9026-081b96bf8a4a

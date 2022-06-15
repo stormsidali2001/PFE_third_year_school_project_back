@@ -18,14 +18,6 @@ export declare class UserController {
     downlaodFile(url: string, userId: string): Promise<StreamableFile | "file not found">;
     seeUploadedFile(path: any, res: any): any;
     uploadFiles(files: Express.Multer.File[]): Promise<any[]>;
-    equilibrer(userId: any, promotionId: string): Promise<{
-        studentsAddToTeamLater: {
-            team: import("../core/entities/team.entity").TeamEntity;
-            student: import("../core/entities/student.entity").StudentEntity;
-        }[];
-        studentsModifiedTeams: any[];
-        studentsToBeInsertedInNewTeam: import("../core/entities/student.entity").StudentEntity[];
-    }>;
     getStudents(): Promise<import("../core/entities/student.entity").StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(): Promise<void>;

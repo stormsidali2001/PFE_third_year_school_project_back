@@ -78,14 +78,6 @@ export declare class UserService {
     editTeacher(teacherId: string, data: Partial<TeacherEntity>): Promise<string>;
     sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
     submitWishList(userId: string, wishList: WishListDTO): Promise<void>;
-    completeTeams(userId: string, promotionId: string): Promise<{
-        studentsAddToTeamLater: {
-            team: TeamEntity;
-            student: StudentEntity;
-        }[];
-        studentsModifiedTeams: any[];
-        studentsToBeInsertedInNewTeam: StudentEntity[];
-    }>;
     getTeams(promotionId: string): Promise<{
         id: string;
         pseudo: string;
