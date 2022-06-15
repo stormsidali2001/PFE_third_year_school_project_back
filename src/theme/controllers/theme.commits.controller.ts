@@ -42,6 +42,8 @@ export class ThemeCommitsController{
             throw new HttpException(err,HttpStatus.BAD_REQUEST);
         }
     }
+
+    
     @Get('getAllDocsAdmin/:promotionId/:teamId')
     async getAllDocsAdmin(@GetCurrentUserId() userId:string,@Param('promotionId')promotionId:string,@Param('teamId')teamId:string){
         try{

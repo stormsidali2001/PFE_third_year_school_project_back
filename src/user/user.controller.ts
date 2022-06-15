@@ -109,6 +109,13 @@ export class UserController{
         Logger.warn("files uploaded",response);
         return response;
     }
+
+    
+    @Post('equilibrer')
+    async equilibrer(@GetCurrentUserId() userId,@Body("promotionId") promotionId:string){
+        
+        return await this.userService.completeTeams(userId,promotionId);
+    }
    
 
 

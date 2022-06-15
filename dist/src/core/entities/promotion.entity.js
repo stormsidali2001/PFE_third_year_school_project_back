@@ -29,13 +29,13 @@ __decorate([
 ], PromotionEntity.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        default: 4
+        default: 1
     }),
     __metadata("design:type", Number)
 ], PromotionEntity.prototype, "minMembersInTeam", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        default: 6
+        default: 1
     }),
     __metadata("design:type", Number)
 ], PromotionEntity.prototype, "maxMembersInTeam", void 0);

@@ -52,16 +52,16 @@ export declare class UserService {
             teamsInCharge: ResponsibleEntity[];
             soutenances: Jury_of[];
         } | {
-            id: String;
-            firstName: String;
-            lastName: String;
-            user: UserEntity;
-        } | {
             id: string;
             code: string;
             name: string;
             user: UserEntity;
             suggestedThemes: ThemeEntity[];
+        } | {
+            id: String;
+            firstName: String;
+            lastName: String;
+            user: UserEntity;
         };
         userType: UserType;
         email: string;
