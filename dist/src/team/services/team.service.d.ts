@@ -1,3 +1,4 @@
+import { ApplyTeamsCompletionDTO } from "src/core/dtos/user.dto";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
@@ -14,6 +15,6 @@ export declare class TeamService {
             team: TeamEntity;
         }[];
         newTeams: TeamEntity[];
-        extraStudents: StudentEntity[];
     }>;
+    applyTeamsCompletion(userId: string, promotionId: string, applyTeamsCompletionPayload: ApplyTeamsCompletionDTO): Promise<ApplyTeamsCompletionDTO>;
 }

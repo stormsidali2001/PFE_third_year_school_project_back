@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { ApplyTeamsCompletionDTO } from "src/core/dtos/user.dto";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
@@ -35,18 +36,14 @@ export class TeamService{
                 .from(PromotionEntity,'p')
                 .where('p.id = :promotionId',{promotionId})
                 .getQuery();
-                const promotionQuery2 =  qb.subQuery()
-                .select('maxMembersInTeam')
-                .from(PromotionEntity,'p')
-                .where('p.id = :promotionId',{promotionId})
-                .getQuery();
+             
 
                 const subQuery = qb.subQuery()
                 .select('COUNT(st.id)')
                 .from(StudentEntity,'st')
                 .where('st.teamId = teams.id ')
                 .getQuery();
-                return qb.where(`${promotionQuery1} <= (${subQuery}) and ${promotionQuery2} >= (${subQuery})`)
+                return qb.where(`${promotionQuery1} > (${subQuery})`)
             }
             
          
@@ -186,7 +183,7 @@ export class TeamService{
                 studentAdded,
                 studentDeleted,
                 newTeams,
-                extraStudents
+              
             }
           
     
@@ -195,5 +192,38 @@ export class TeamService{
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
             
         }
+    }
+    async applyTeamsCompletion(userId:string,promotionId:string,applyTeamsCompletionPayload:ApplyTeamsCompletionDTO){
+        try{
+            const manager = getManager();
+            const user = await manager.getRepository(UserEntity)
+            .createQueryBuilder('user')
+            .where("user.id = :userId",{userId})
+            .andWhere("user.userType = :userType",{userType:UserType.ADMIN})
+            .getOne();
+    
+            const promotion = await manager.getRepository(PromotionEntity)
+            .createQueryBuilder('promotion')
+            .where('promotion.id = :promotionId',{promotionId})
+            .getOne();
+            if(!user){
+                Logger.log("permission denied","UserService/submitWishList")
+                throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
+            } 
+            if(!promotion){
+                Logger.log("promotion not found","UserService/submitWishList")
+                throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
+            }  
+
+            return applyTeamsCompletionPayload
+
+
+
+
+        }catch(err){
+            Logger.log(err,"UserService/applyTeamsCompletion")
+            throw new HttpException(err,HttpStatus.BAD_REQUEST)
+        }
+
     }
 }

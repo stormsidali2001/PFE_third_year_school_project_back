@@ -1,6 +1,7 @@
 import { Transform } from "class-transformer";
 import { isInt, isNumber, IsNumberString } from "class-validator";
 import { MeetType } from "../entities/meet.entity";
+import { StudentEntity } from "../entities/student.entity";
 
 export class UserDTO{
     email:string;
@@ -135,4 +136,9 @@ export class SoutenanceDto{
     salleId:string;
     duration:number;
  
+}
+export class ApplyTeamsCompletionDTO{
+    addedStudents:{studentId:string,teamId:string}[];
+    deletedStudents:{studentId:string,teamId:string}[];
+    newTeams:{students:{studentId:string}}[];
 }

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SoutenanceDto = exports.ThemeToTeamDTO = exports.WishListDTO = exports.Wish = exports.ThemeDocDto = exports.TeamAnnoncementDocDto = exports.UrgentTeamMeetDto = exports.NormalTeamMeetDto = exports.OptionsDto = exports.SurveyDto = exports.AdminDto = exports.EnterpriseTestDTO = exports.EnterpriseDTO = exports.StudentTestDTO = exports.StudentDTO = exports.TeacherTestDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
+exports.ApplyTeamsCompletionDTO = exports.SoutenanceDto = exports.ThemeToTeamDTO = exports.WishListDTO = exports.Wish = exports.ThemeDocDto = exports.TeamAnnoncementDocDto = exports.UrgentTeamMeetDto = exports.NormalTeamMeetDto = exports.OptionsDto = exports.SurveyDto = exports.AdminDto = exports.EnterpriseTestDTO = exports.EnterpriseDTO = exports.StudentTestDTO = exports.StudentDTO = exports.TeacherTestDTO = exports.TeacherDTO = exports.UserRO = exports.UserDTO = void 0;
 const class_transformer_1 = require("class-transformer");
 class UserDTO {
 }
@@ -90,4 +90,7 @@ exports.ThemeToTeamDTO = ThemeToTeamDTO;
 class SoutenanceDto {
 }
 exports.SoutenanceDto = SoutenanceDto;
+class ApplyTeamsCompletionDTO {
+}
+exports.ApplyTeamsCompletionDTO = ApplyTeamsCompletionDTO;
 //# sourceMappingURL=user.dto.js.map

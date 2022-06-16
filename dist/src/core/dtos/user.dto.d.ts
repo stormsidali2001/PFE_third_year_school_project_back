@@ -111,4 +111,19 @@ export declare class SoutenanceDto {
     salleId: string;
     duration: number;
 }
+export declare class ApplyTeamsCompletionDTO {
+    addedStudents: {
+        studentId: string;
+        teamId: string;
+    }[];
+    deletedStudents: {
+        studentId: string;
+        teamId: string;
+    }[];
+    newTeams: {
+        students: {
+            studentId: string;
+        };
+    }[];
+}
 export {};

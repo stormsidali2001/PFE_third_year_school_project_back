@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeamController = void 0;
 const common_1 = require("@nestjs/common");
 const get_current_user_id_decorator_1 = require("../../common/decorators/get-current-user-id.decorator");
+const user_dto_1 = require("../../core/dtos/user.dto");
 const team_service_1 = require("../services/team.service");
 let TeamController = class TeamController {
     constructor(teamService) {
@@ -23,8 +24,11 @@ let TeamController = class TeamController {
     async getTeamsStats(userId, promotionId) {
         return await this.teamService.getTeamsStats(userId, promotionId);
     }
-    async equilibrer(userId, promotionId) {
+    async completeTeams(userId, promotionId) {
         return await this.teamService.completeTeams(userId, promotionId);
+    }
+    async applyTeamsCompletion(userId, promotionId, applyTeamsCompletionPayload) {
+        return await this.teamService.applyTeamsCompletion(userId, promotionId, applyTeamsCompletionPayload);
     }
 };
 __decorate([
@@ -42,7 +46,16 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
-], TeamController.prototype, "equilibrer", null);
+], TeamController.prototype, "completeTeams", null);
+__decorate([
+    (0, common_1.Post)('applyTeamsCompletion'),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)("promotionId")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, user_dto_1.ApplyTeamsCompletionDTO]),
+    __metadata("design:returntype", Promise)
+], TeamController.prototype, "applyTeamsCompletion", null);
 TeamController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [team_service_1.TeamService])

@@ -36,17 +36,12 @@ let TeamService = class TeamService {
                     .from(promotion_entity_1.PromotionEntity, 'p')
                     .where('p.id = :promotionId', { promotionId })
                     .getQuery();
-                const promotionQuery2 = qb.subQuery()
-                    .select('maxMembersInTeam')
-                    .from(promotion_entity_1.PromotionEntity, 'p')
-                    .where('p.id = :promotionId', { promotionId })
-                    .getQuery();
                 const subQuery = qb.subQuery()
                     .select('COUNT(st.id)')
                     .from(student_entity_1.StudentEntity, 'st')
                     .where('st.teamId = teams.id ')
                     .getQuery();
-                return qb.where(`${promotionQuery1} <= (${subQuery}) and ${promotionQuery2} >= (${subQuery})`);
+                return qb.where(`${promotionQuery1} > (${subQuery})`);
             })
                 .getOne();
             if (!promotion) {
@@ -154,11 +149,37 @@ let TeamService = class TeamService {
                 studentAdded,
                 studentDeleted,
                 newTeams,
-                extraStudents
             };
         }
         catch (err) {
             common_1.Logger.log(err, "UserService/completeTeams");
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async applyTeamsCompletion(userId, promotionId, applyTeamsCompletionPayload) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const user = await manager.getRepository(user_entity_1.UserEntity)
+                .createQueryBuilder('user')
+                .where("user.id = :userId", { userId })
+                .andWhere("user.userType = :userType", { userType: user_entity_1.UserType.ADMIN })
+                .getOne();
+            const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
+                .createQueryBuilder('promotion')
+                .where('promotion.id = :promotionId', { promotionId })
+                .getOne();
+            if (!user) {
+                common_1.Logger.log("permission denied", "UserService/submitWishList");
+                throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (!promotion) {
+                common_1.Logger.log("promotion not found", "UserService/submitWishList");
+                throw new common_1.HttpException("promotion not found", common_1.HttpStatus.BAD_REQUEST);
+            }
+            return applyTeamsCompletionPayload;
+        }
+        catch (err) {
+            common_1.Logger.log(err, "UserService/applyTeamsCompletion");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

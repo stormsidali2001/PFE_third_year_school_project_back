@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { GetCurrentUserId } from "src/common/decorators/get-current-user-id.decorator";
+import { ApplyTeamsCompletionDTO } from "src/core/dtos/user.dto";
 import { TeamService } from "../services/team.service";
 
 
@@ -15,8 +16,13 @@ export class TeamController{
 
     }
     @Post('completeTeams')
-    async equilibrer(@GetCurrentUserId() userId,@Body("promotionId") promotionId:string){
+    async completeTeams(@GetCurrentUserId() userId,@Body("promotionId") promotionId:string){
         
         return await this.teamService.completeTeams(userId,promotionId);
+    }
+    @Post('applyTeamsCompletion')
+    async applyTeamsCompletion(@GetCurrentUserId() userId:string,
+    @Body("promotionId") promotionId:string,@Body() applyTeamsCompletionPayload:ApplyTeamsCompletionDTO){
+        return await this.teamService.applyTeamsCompletion(userId,promotionId,applyTeamsCompletionPayload);
     }
 }

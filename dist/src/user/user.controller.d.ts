@@ -46,6 +46,19 @@ export declare class UserController {
     getUser(userId: string): Promise<{
         [x: string]: string | {
             id: string;
+            ssn: string;
+            firstName: string;
+            speciality: string;
+            lastName: string;
+            user: UserEntity;
+            teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
+            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
+            commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
+            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
+            teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
+            soutenances: import("../core/entities/juryOf.entity").Jury_of[];
+        } | {
+            id: string;
             code: string;
             firstName: string;
             lastName: string;
@@ -62,28 +75,15 @@ export declare class UserController {
             promotion: import("../core/entities/promotion.entity").PromotionEntity;
         } | {
             id: string;
-            ssn: string;
-            firstName: string;
-            speciality: string;
-            lastName: string;
+            code: string;
+            name: string;
             user: UserEntity;
-            teamTeacherChatMessages: import("../core/entities/team.teacher.message.entity").TeamTeacherChatMessage[];
-            encadrements: import("../core/entities/encadrement.entity").EncadrementEntity[];
-            commitReviews: import("../core/entities/team.commit.review.entity").TeamCommitReviewEntity[];
             suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
-            teamsInCharge: import("../core/entities/responsible.entity").ResponsibleEntity[];
-            soutenances: import("../core/entities/juryOf.entity").Jury_of[];
         } | {
             id: String;
             firstName: String;
             lastName: String;
             user: UserEntity;
-        } | {
-            id: string;
-            code: string;
-            name: string;
-            user: UserEntity;
-            suggestedThemes: import("../core/entities/theme.entity").ThemeEntity[];
         };
         userType: UserType;
         email: string;

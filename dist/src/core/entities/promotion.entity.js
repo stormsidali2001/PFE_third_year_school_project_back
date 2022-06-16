@@ -52,6 +52,12 @@ __decorate([
     __metadata("design:type", Boolean)
 ], PromotionEntity.prototype, "wishListSent", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], PromotionEntity.prototype, "allTeamsValidated", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(type => team_entity_1.TeamEntity, team => team.promotion),
     __metadata("design:type", Array)
 ], PromotionEntity.prototype, "teams", void 0);

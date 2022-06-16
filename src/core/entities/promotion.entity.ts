@@ -37,6 +37,11 @@ export class PromotionEntity{
     
     wishListSent:boolean;
 
+    @Column({
+        default:false
+    })
+    allTeamsValidated:boolean
+
     //relations
 
     @OneToMany(type=>TeamEntity,team=>team.promotion)
