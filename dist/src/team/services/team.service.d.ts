@@ -16,5 +16,5 @@ export declare class TeamService {
         }[];
         newTeams: TeamEntity[];
     }>;
-    applyTeamsCompletion(userId: string, promotionId: string, applyTeamsCompletionPayload: ApplyTeamsCompletionDTO): Promise<ApplyTeamsCompletionDTO>;
+    applyTeamsCompletion(userId: string, promotionId: string, applyTeamsCompletionPayload: ApplyTeamsCompletionDTO): Promise<string>;
 }

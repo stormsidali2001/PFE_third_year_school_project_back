@@ -24,8 +24,16 @@ let ThemeAssignementService = class ThemeAssignementService {
                 .andWhere("user.userType = :userType", { userType: user_entity_1.UserType.ADMIN })
                 .getOne();
             if (!user) {
-                common_1.Logger.log("permission denied", "UserService/asignThemeToTeams");
+                common_1.Logger.log("permission denied", "ThemeAssignementService/asignThemeToTeams");
                 throw new common_1.HttpException("permission denied", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
+                .createQueryBuilder("promotion")
+                .where("promotion.id = :promotionId", { promotionId })
+                .getOne();
+            if (!promotion) {
+                common_1.Logger.log("promotion not found", "ThemeAssignementService/asignThemeToTeams");
+                throw new common_1.HttpException("promotion not found", common_1.HttpStatus.BAD_REQUEST);
             }
             const Themes = await manager.getRepository(theme_entity_1.ThemeEntity)
                 .createQueryBuilder('theme')
@@ -37,6 +45,18 @@ let ThemeAssignementService = class ThemeAssignementService {
                 .orderBy('wish.order', 'ASC')
                 .leftJoinAndSelect('team.students', 'student')
                 .getMany();
+            if (Themes.length === 0) {
+                common_1.Logger.log("there are no themes in the promotion yet", "ThemeAssignementService/asignThemeToTeams");
+                throw new common_1.HttpException("there are no themes in the promotion yet", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (Themes.length < promotion.minThemesToAssignThemesToTeams) {
+                common_1.Logger.log(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`, "ThemeAssignementService/asignThemeToTeams");
+                throw new common_1.HttpException(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`, common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (!promotion.allTeamsValidated) {
+                common_1.Logger.log("teams are not completed and validated by the admin", "ThemeAssignementService/asignThemeToTeams");
+                throw new common_1.HttpException("teams are not completed and validated by the admin", common_1.HttpStatus.BAD_REQUEST);
+            }
             const teams = await manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')
                 .where(qb => `team.id not in ${qb.subQuery()

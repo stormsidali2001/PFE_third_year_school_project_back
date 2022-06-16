@@ -176,10 +176,84 @@ let TeamService = class TeamService {
                 common_1.Logger.log("promotion not found", "UserService/submitWishList");
                 throw new common_1.HttpException("promotion not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            return applyTeamsCompletionPayload;
+            const teamsAddSt = {};
+            applyTeamsCompletionPayload.addedStudents.forEach(({ teamId, studentId }) => {
+                if (!teamsAddSt[teamId]) {
+                    teamsAddSt[teamId] = [];
+                }
+                teamsAddSt[teamId].push(studentId);
+            });
+            const teamsDeleteSt = {};
+            applyTeamsCompletionPayload.deletedStudents.forEach(({ teamId, studentId }) => {
+                if (!teamsDeleteSt[teamId]) {
+                    teamsDeleteSt[teamId] = [];
+                }
+                teamsDeleteSt[teamId].push(studentId);
+            });
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
+                const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+                applyTeamsCompletionPayload.newTeams.forEach(async ({ students }) => {
+                    const teamLength = await teamRepository
+                        .createQueryBuilder('team')
+                        .getCount();
+                    const newTeam = teamRepository.create({ nickName: `team${teamLength}`, promotion });
+                    const newTeamDb = await teamRepository.save(newTeam);
+                    students.forEach(async ({ studentId }) => {
+                        await studentRepository
+                            .createQueryBuilder('student')
+                            .where('student.id = :studentId', { studentId })
+                            .update()
+                            .set({ team: newTeamDb })
+                            .execute();
+                    });
+                    const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random() * (students.length - 1))].studentId;
+                    const choosenStudent = await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id = :studentId', { studentId: randomlyChoosenTeamLeaderId })
+                        .getOne();
+                    await teamRepository
+                        .createQueryBuilder('team')
+                        .where('team.id = :teamId', { teamId: newTeamDb })
+                        .update()
+                        .set({ teamLeader: choosenStudent })
+                        .execute();
+                });
+                Object.keys(teamsDeleteSt).forEach(async (teamId) => {
+                    const studentsIds = teamsDeleteSt[teamId];
+                    await studentRepository
+                        .createQueryBuilder("student")
+                        .where('student.id in (:...studentsIds)', { studentsIds })
+                        .update({ team: null })
+                        .execute();
+                });
+                Object.keys(teamsAddSt).forEach(async (teamId) => {
+                    const studentsIds = teamsAddSt[teamId];
+                    const team = await teamRepository
+                        .createQueryBuilder('team')
+                        .where('team.id = :teamId', { teamId })
+                        .getOne();
+                    if (!team) {
+                        common_1.Logger.log("team not found when adding student to team", "TeamService/applyTeamsCompletion");
+                        throw new common_1.HttpException("team not found when adding student to team", common_1.HttpStatus.BAD_REQUEST);
+                    }
+                    await studentRepository
+                        .createQueryBuilder("student")
+                        .where('student.id in (:...studentsIds)', { studentsIds })
+                        .update({ team })
+                        .execute();
+                });
+                await manager.getRepository(promotion_entity_1.PromotionEntity)
+                    .createQueryBuilder('promotion')
+                    .update()
+                    .set({ allTeamsValidated: true })
+                    .where('promotion.id = :promotionId', { promotionId })
+                    .execute();
+            });
+            return "success";
         }
         catch (err) {
-            common_1.Logger.log(err, "UserService/applyTeamsCompletion");
+            common_1.Logger.log(err, "TeamService/applyTeamsCompletion");
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }

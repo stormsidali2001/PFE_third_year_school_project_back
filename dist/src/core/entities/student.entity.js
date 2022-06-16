@@ -48,7 +48,7 @@ __decorate([
     __metadata("design:type", Number)
 ], StudentEntity.prototype, "moy", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.students),
+    (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.students, { nullable: true }),
     __metadata("design:type", team_entity_1.TeamEntity)
 ], StudentEntity.prototype, "team", void 0);
 __decorate([

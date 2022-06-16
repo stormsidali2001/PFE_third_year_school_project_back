@@ -140,5 +140,5 @@ export class SoutenanceDto{
 export class ApplyTeamsCompletionDTO{
     addedStudents:{studentId:string,teamId:string}[];
     deletedStudents:{studentId:string,teamId:string}[];
-    newTeams:{students:{studentId:string}}[];
+    newTeams:{students:{studentId:string}[]}[];
 }

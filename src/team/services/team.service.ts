@@ -4,7 +4,8 @@ import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
-import { getManager } from "typeorm";
+import { StudentRepository } from "src/core/repositories/student.repository";
+import { getConnection, getManager } from "typeorm";
 
 
 
@@ -215,13 +216,122 @@ export class TeamService{
                 throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
             }  
 
-            return applyTeamsCompletionPayload
+            const teamsAddSt = {};
+            applyTeamsCompletionPayload.addedStudents.forEach(({teamId,studentId})=>{
+                if(!teamsAddSt[teamId] ){
+                    teamsAddSt[teamId]  = [];
+                   
+
+                }
+                teamsAddSt[teamId].push(studentId);
+              
+            })
+            const teamsDeleteSt = {};
+            applyTeamsCompletionPayload.deletedStudents.forEach(({teamId,studentId})=>{
+                if(!teamsDeleteSt[teamId] ){
+                    teamsDeleteSt[teamId]  = [];
+                }
+                teamsDeleteSt[teamId].push(studentId);
+              
+            })
+
+            await getConnection().transaction(async manager =>{
+                 /*
+                        handling new teams
+
+                 */
+                const teamRepository = manager.getRepository(TeamEntity);
+                const studentRepository =  manager.getRepository(StudentEntity);
+                 applyTeamsCompletionPayload.newTeams.forEach(async({students})=>{
+                   
+                    const teamLength:number = await teamRepository
+                    .createQueryBuilder('team')
+                    .getCount();
+                 
+                    const newTeam = teamRepository.create({nickName:`team${teamLength}`,promotion});
+                    const newTeamDb = await teamRepository.save(newTeam)
+
+                    students.forEach(async ({studentId})=>{
+                         await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id = :studentId',{studentId})
+                        .update()
+                        .set({team:newTeamDb})
+                        .execute();
+                    });
+                    const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random()*(students.length-1))].studentId;
+                    const choosenStudent = await studentRepository
+                    .createQueryBuilder('student')
+                    .where('student.id = :studentId',{studentId:randomlyChoosenTeamLeaderId})
+                    .getOne();
+                    
+                    await teamRepository
+                    .createQueryBuilder('team')
+                    .where('team.id = :teamId',{teamId:newTeamDb})
+                    .update()
+                    .set({teamLeader:choosenStudent})
+                    .execute();
+
+                 
+
+
+                })
 
 
 
+                   /*
+                        handling deletion
 
+                 */
+                        Object.keys(teamsDeleteSt).forEach(async teamId=>{
+                            const studentsIds = teamsDeleteSt[teamId]; //contains an array of studentIds                         
+                             await studentRepository
+                                .createQueryBuilder("student")
+                                .where('student.id in (:...studentsIds)',{studentsIds})
+                                .update({team:null})
+                                .execute();
+                             }) 
+
+                 /*
+                        handling teamsAddSt
+
+                 */
+                Object.keys(teamsAddSt).forEach(async teamId=>{
+                    const studentsIds = teamsAddSt[teamId]; //contains an array of studentIds
+                    const team = await teamRepository
+                                    .createQueryBuilder('team')
+                                    .where('team.id = :teamId',{teamId})
+                                    .getOne();
+                    if(!team){
+
+                          Logger.log("team not found when adding student to team","TeamService/applyTeamsCompletion")
+                          throw new HttpException("team not found when adding student to team",HttpStatus.BAD_REQUEST)
+                     }  
+                     await studentRepository
+                        .createQueryBuilder("student")
+                        .where('student.id in (:...studentsIds)',{studentsIds})
+                        .update({team})
+                        .execute();
+                }) 
+               
+
+                await manager.getRepository(PromotionEntity)
+                .createQueryBuilder('promotion')
+                .update()
+                .set({allTeamsValidated:true})
+                .where('promotion.id = :promotionId',{promotionId})
+                .execute();
+                
+
+
+            })
+
+            
+                   
+
+            return "success"
         }catch(err){
-            Logger.log(err,"UserService/applyTeamsCompletion")
+            Logger.log(err,"TeamService/applyTeamsCompletion")
             throw new HttpException(err,HttpStatus.BAD_REQUEST)
         }
 

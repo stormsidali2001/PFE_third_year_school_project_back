@@ -47,6 +47,12 @@ __decorate([
 ], PromotionEntity.prototype, "maxTeamForTheme", void 0);
 __decorate([
     (0, typeorm_1.Column)({
+        default: 3
+    }),
+    __metadata("design:type", Number)
+], PromotionEntity.prototype, "minThemesToAssignThemesToTeams", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
         default: false
     }),
     __metadata("design:type", Boolean)

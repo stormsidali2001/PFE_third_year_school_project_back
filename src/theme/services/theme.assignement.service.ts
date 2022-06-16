@@ -21,9 +21,19 @@ export class ThemeAssignementService{
             .getOne();
     
             if(!user){
-                Logger.log("permission denied","UserService/asignThemeToTeams")
+                Logger.log("permission denied","ThemeAssignementService/asignThemeToTeams")
                 throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
             } 
+
+            const promotion = await manager.getRepository(PromotionEntity)
+            .createQueryBuilder("promotion")
+            .where("promotion.id = :promotionId",{promotionId})
+            .getOne();
+
+            if(!promotion){
+                Logger.log("promotion not found","ThemeAssignementService/asignThemeToTeams")
+                throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
+            }
           
     
     
@@ -37,6 +47,24 @@ export class ThemeAssignementService{
             .orderBy('wish.order','ASC')
             .leftJoinAndSelect('team.students','student')
             .getMany();
+
+            if(Themes.length === 0){
+                Logger.log("there are no themes in the promotion yet","ThemeAssignementService/asignThemeToTeams")
+                throw new HttpException("there are no themes in the promotion yet",HttpStatus.BAD_REQUEST)
+              
+            }
+            
+            if(Themes.length < promotion.minThemesToAssignThemesToTeams){
+                Logger.log(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,"ThemeAssignementService/asignThemeToTeams")
+                throw new HttpException(   `promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,HttpStatus.BAD_REQUEST)
+            }
+
+            if(!promotion.allTeamsValidated){
+                Logger.log("teams are not completed and validated by the admin","ThemeAssignementService/asignThemeToTeams")
+                throw new HttpException("teams are not completed and validated by the admin",HttpStatus.BAD_REQUEST)
+            }
+            
+
     
               //
               

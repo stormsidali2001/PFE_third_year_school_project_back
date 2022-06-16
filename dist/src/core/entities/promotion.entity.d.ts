@@ -8,6 +8,7 @@ export declare class PromotionEntity {
     minMembersInTeam: number;
     maxMembersInTeam: number;
     maxTeamForTheme: number;
+    minThemesToAssignThemesToTeams: number;
     wishListSent: boolean;
     allTeamsValidated: boolean;
     themesAssignedToTeams: boolean;

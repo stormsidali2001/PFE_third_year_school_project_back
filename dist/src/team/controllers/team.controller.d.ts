@@ -16,5 +16,5 @@ export declare class TeamController {
         }[];
         newTeams: import("../../core/entities/team.entity").TeamEntity[];
     }>;
-    applyTeamsCompletion(userId: string, promotionId: string, applyTeamsCompletionPayload: ApplyTeamsCompletionDTO): Promise<ApplyTeamsCompletionDTO>;
+    applyTeamsCompletion(userId: string, promotionId: string, applyTeamsCompletionPayload: ApplyTeamsCompletionDTO): Promise<string>;
 }

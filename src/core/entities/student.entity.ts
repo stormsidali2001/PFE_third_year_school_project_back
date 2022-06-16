@@ -35,7 +35,7 @@ export class StudentEntity{
 
  
     //relations
-    @ManyToOne(type=>TeamEntity,team=>team.students)
+    @ManyToOne(type=>TeamEntity,team=>team.students,{nullable:true})
     team:TeamEntity;
    
     @OneToOne(type=>UserEntity) 

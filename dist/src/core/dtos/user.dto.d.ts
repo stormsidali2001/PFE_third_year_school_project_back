@@ -123,7 +123,7 @@ export declare class ApplyTeamsCompletionDTO {
     newTeams: {
         students: {
             studentId: string;
-        };
+        }[];
     }[];
 }
 export {};
