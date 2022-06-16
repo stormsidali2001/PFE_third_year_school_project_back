@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeAssignementService = void 0;
 const common_1 = require("@nestjs/common");
+const promotion_entity_1 = require("../../core/entities/promotion.entity");
 const team_entity_1 = require("../../core/entities/team.entity");
 const theme_entity_1 = require("../../core/entities/theme.entity");
 const user_entity_1 = require("../../core/entities/user.entity");
@@ -129,6 +130,10 @@ let ThemeAssignementService = class ThemeAssignementService {
     }
     async applyThemesToTeamsAssignements(userId, data) {
         try {
+            if (data.themeToTeam.length === 0) {
+                common_1.Logger.log("Error payload is empty", "ThemeAssignementService/applyThemesToTeamsAssignements");
+                throw new common_1.HttpException("Error payload is empty", common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
             const manager = (0, typeorm_1.getManager)();
             const user = manager.getRepository(user_entity_1.UserEntity)
                 .createQueryBuilder('user')
@@ -155,6 +160,7 @@ let ThemeAssignementService = class ThemeAssignementService {
                 .getMany();
             const teams = await manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')
+                .leftJoinAndSelect('team.promotion', 'promotion')
                 .where('team.id IN (:...fetchTeamIds)', { fetchTeamIds })
                 .getMany();
             if (themes.length != themeIds.length) {
@@ -164,6 +170,14 @@ let ThemeAssignementService = class ThemeAssignementService {
             if (teams.length !== fetchTeamIds.length) {
                 common_1.Logger.error("error in team ids", 'UserService/applyThemesToTeamsAssignements');
                 throw new common_1.HttpException("error in team ids", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (themes.length === 0) {
+                common_1.Logger.error("themes are not enough", 'UserService/applyThemesToTeamsAssignements');
+                throw new common_1.HttpException("themes are not enough", common_1.HttpStatus.BAD_REQUEST);
+            }
+            if (teams.length === 0) {
+                common_1.Logger.error("teams are not enough", 'UserService/applyThemesToTeamsAssignements');
+                throw new common_1.HttpException("teams are not enough", common_1.HttpStatus.BAD_REQUEST);
             }
             await (0, typeorm_1.getConnection)().transaction(async (manager) => {
                 data.themeToTeam.forEach(async ({ idTheme, teamIds }) => {
@@ -177,6 +191,12 @@ let ThemeAssignementService = class ThemeAssignementService {
                             .execute();
                     });
                 });
+                await manager.getRepository(promotion_entity_1.PromotionEntity)
+                    .createQueryBuilder('promotion')
+                    .update()
+                    .set({ themesAssignedToTeams: true })
+                    .where('promotion.id = :promotionId', { promotionId: teams[0].promotion.id })
+                    .execute();
             });
         }
         catch (err) {

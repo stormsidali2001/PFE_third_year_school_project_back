@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ThemeToTeamDTO } from "src/core/dtos/user.dto";
+import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
@@ -161,7 +162,10 @@ export class ThemeAssignementService{
     }
     async applyThemesToTeamsAssignements(userId:string,data:ThemeToTeamDTO):Promise<any>{
         try{
-            
+            if(data.themeToTeam.length ===0 ){
+                Logger.log("Error payload is empty","ThemeAssignementService/applyThemesToTeamsAssignements")
+                throw new HttpException("Error payload is empty",HttpStatus.INTERNAL_SERVER_ERROR)
+            }
             const manager = getManager();
             const user = manager.getRepository(UserEntity)
             .createQueryBuilder('user')
@@ -197,6 +201,7 @@ export class ThemeAssignementService{
             .getMany();
             const teams = await manager.getRepository(TeamEntity)
             .createQueryBuilder('team')
+            .leftJoinAndSelect('team.promotion','promotion')
             .where('team.id IN (:...fetchTeamIds)',{fetchTeamIds})
             .getMany();
          
@@ -208,6 +213,15 @@ export class ThemeAssignementService{
                 Logger.error("error in team ids",'UserService/applyThemesToTeamsAssignements')
                 throw new HttpException("error in team ids",HttpStatus.BAD_REQUEST);
             }
+            if(themes.length === 0){
+                Logger.error("themes are not enough",'UserService/applyThemesToTeamsAssignements')
+                throw new HttpException("themes are not enough",HttpStatus.BAD_REQUEST);
+            }   
+            if(teams.length === 0){
+                Logger.error("teams are not enough",'UserService/applyThemesToTeamsAssignements')
+                throw new HttpException("teams are not enough",HttpStatus.BAD_REQUEST);
+            }
+
     
             await getConnection().transaction(async manager =>{
                 data.themeToTeam.forEach(async ({idTheme,teamIds})=>{
@@ -224,6 +238,13 @@ export class ThemeAssignementService{
                     })
                     
                 })
+
+             await manager.getRepository(PromotionEntity)
+             .createQueryBuilder('promotion')
+             .update()
+             .set({themesAssignedToTeams:true})
+             .where('promotion.id = :promotionId',{promotionId:teams[0].promotion.id})
+             .execute()
     
             })
           

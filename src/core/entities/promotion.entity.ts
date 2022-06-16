@@ -16,12 +16,12 @@ export class PromotionEntity{
     name:string;
 
     @Column({
-        default:1
+        default:2
     })
     minMembersInTeam:number;
 
     @Column({
-        default:1
+        default:4
     })
     maxMembersInTeam:number;
 
@@ -41,6 +41,11 @@ export class PromotionEntity{
         default:false
     })
     allTeamsValidated:boolean
+
+    @Column({
+        default:false
+    })
+    themesAssignedToTeams:boolean
 
     //relations
 

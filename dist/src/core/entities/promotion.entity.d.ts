@@ -10,6 +10,7 @@ export declare class PromotionEntity {
     maxTeamForTheme: number;
     wishListSent: boolean;
     allTeamsValidated: boolean;
+    themesAssignedToTeams: boolean;
     teams: TeamEntity[];
     students: StudentEntity[];
     themes: ThemeEntity[];

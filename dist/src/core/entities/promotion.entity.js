@@ -29,13 +29,13 @@ __decorate([
 ], PromotionEntity.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        default: 1
+        default: 2
     }),
     __metadata("design:type", Number)
 ], PromotionEntity.prototype, "minMembersInTeam", void 0);
 __decorate([
     (0, typeorm_1.Column)({
-        default: 1
+        default: 4
     }),
     __metadata("design:type", Number)
 ], PromotionEntity.prototype, "maxMembersInTeam", void 0);
@@ -57,6 +57,12 @@ __decorate([
     }),
     __metadata("design:type", Boolean)
 ], PromotionEntity.prototype, "allTeamsValidated", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        default: false
+    }),
+    __metadata("design:type", Boolean)
+], PromotionEntity.prototype, "themesAssignedToTeams", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(type => team_entity_1.TeamEntity, team => team.promotion),
     __metadata("design:type", Array)
