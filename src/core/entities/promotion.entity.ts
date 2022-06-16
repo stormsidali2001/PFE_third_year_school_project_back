@@ -32,6 +32,15 @@ export class PromotionEntity{
     maxTeamForTheme:number
 
     @Column({
+        default:3
+        
+    })
+    minThemesToAssignThemesToTeams:number
+
+
+    
+
+    @Column({
         default:false
     })
     
