@@ -54,16 +54,24 @@ export class ThemeAssignementService{
               
             }
             
-            if(Themes.length < promotion.minThemesToAssignThemesToTeams){
-                Logger.log(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,"ThemeAssignementService/asignThemeToTeams")
-                throw new HttpException(   `promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,HttpStatus.BAD_REQUEST)
-            }
+            // if(Themes.length < promotion.minThemesToAssignThemesToTeams){
+            //     Logger.log(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,"ThemeAssignementService/asignThemeToTeams")
+            //     throw new HttpException(   `promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`,HttpStatus.BAD_REQUEST)
+            // }
 
             if(!promotion.allTeamsValidated){
                 Logger.log("teams are not completed and validated by the admin","ThemeAssignementService/asignThemeToTeams")
                 throw new HttpException("teams are not completed and validated by the admin",HttpStatus.BAD_REQUEST)
             }
-            
+            const teamsInPromotionNum = await manager.getRepository(TeamEntity)
+            .createQueryBuilder('team')
+            .where('team.promotionId = :promotionId',{promotionId})
+            .getCount()
+
+            if(teamsInPromotionNum > Themes.length*promotion.maxTeamForTheme){
+                Logger.log(`vous devez ajouter plus de theme : nombre d'equipe  = ${teamsInPromotionNum} > maximum de place dans les themes :${Themes.length*promotion.maxTeamForTheme}`,"ThemeAssignementService/asignThemeToTeams")
+                throw new HttpException(`vous devez ajouter plus de theme : nombre d'equipe  = ${teamsInPromotionNum} > maximum de place dans les themes :${Themes.length*promotion.maxTeamForTheme}`,HttpStatus.BAD_REQUEST)
+            }
 
     
               //

@@ -13,6 +13,7 @@ const student_entity_1 = require("../../core/entities/student.entity");
 const team_entity_1 = require("../../core/entities/team.entity");
 const user_entity_1 = require("../../core/entities/user.entity");
 const typeorm_1 = require("typeorm");
+const uniqid = require("uniqid");
 let TeamService = class TeamService {
     async getTeamsStats(userId, promotionId) {
         try {
@@ -193,32 +194,6 @@ let TeamService = class TeamService {
             await (0, typeorm_1.getConnection)().transaction(async (manager) => {
                 const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
                 const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-                applyTeamsCompletionPayload.newTeams.forEach(async ({ students }) => {
-                    const teamLength = await teamRepository
-                        .createQueryBuilder('team')
-                        .getCount();
-                    const newTeam = teamRepository.create({ nickName: `team${teamLength}`, promotion });
-                    const newTeamDb = await teamRepository.save(newTeam);
-                    students.forEach(async ({ studentId }) => {
-                        await studentRepository
-                            .createQueryBuilder('student')
-                            .where('student.id = :studentId', { studentId })
-                            .update()
-                            .set({ team: newTeamDb })
-                            .execute();
-                    });
-                    const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random() * (students.length - 1))].studentId;
-                    const choosenStudent = await studentRepository
-                        .createQueryBuilder('student')
-                        .where('student.id = :studentId', { studentId: randomlyChoosenTeamLeaderId })
-                        .getOne();
-                    await teamRepository
-                        .createQueryBuilder('team')
-                        .where('team.id = :teamId', { teamId: newTeamDb })
-                        .update()
-                        .set({ teamLeader: choosenStudent })
-                        .execute();
-                });
                 Object.keys(teamsDeleteSt).forEach(async (teamId) => {
                     const studentsIds = teamsDeleteSt[teamId];
                     await studentRepository
@@ -249,6 +224,38 @@ let TeamService = class TeamService {
                     .set({ allTeamsValidated: true })
                     .where('promotion.id = :promotionId', { promotionId })
                     .execute();
+            });
+            const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
+            const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+            applyTeamsCompletionPayload.newTeams.forEach(async ({ students }) => {
+                await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                    const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
+                    const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
+                    const newTeam = teamRepository.create({ nickName: `team${uniqid()}`, promotion });
+                    const newTeamDb = await teamRepository.save(newTeam);
+                    const studentsIds = students.map(s => s.studentId);
+                    await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id in (:...studentsIds)', { studentsIds })
+                        .update()
+                        .set({ team: newTeamDb })
+                        .execute();
+                    const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random() * (students.length - 1))].studentId;
+                    const choosenStudent = await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id = :studentId', { studentId: randomlyChoosenTeamLeaderId })
+                        .getOne();
+                    if (!choosenStudent) {
+                        common_1.Logger.log("choosen team leader not found", "TeamService/applyTeamsCompletion");
+                        throw new common_1.HttpException("choosen team leader not found", common_1.HttpStatus.BAD_REQUEST);
+                    }
+                    await teamRepository
+                        .createQueryBuilder('team')
+                        .where('team.id = :teamId', { teamId: newTeamDb.id })
+                        .update()
+                        .set({ teamLeader: choosenStudent })
+                        .execute();
+                });
             });
             return "success";
         }

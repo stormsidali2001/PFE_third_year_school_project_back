@@ -49,13 +49,17 @@ let ThemeAssignementService = class ThemeAssignementService {
                 common_1.Logger.log("there are no themes in the promotion yet", "ThemeAssignementService/asignThemeToTeams");
                 throw new common_1.HttpException("there are no themes in the promotion yet", common_1.HttpStatus.BAD_REQUEST);
             }
-            if (Themes.length < promotion.minThemesToAssignThemesToTeams) {
-                common_1.Logger.log(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`, "ThemeAssignementService/asignThemeToTeams");
-                throw new common_1.HttpException(`promotion needs ${promotion.minThemesToAssignThemesToTeams} themes before performing this operation`, common_1.HttpStatus.BAD_REQUEST);
-            }
             if (!promotion.allTeamsValidated) {
                 common_1.Logger.log("teams are not completed and validated by the admin", "ThemeAssignementService/asignThemeToTeams");
                 throw new common_1.HttpException("teams are not completed and validated by the admin", common_1.HttpStatus.BAD_REQUEST);
+            }
+            const teamsInPromotionNum = await manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .where('team.promotionId = :promotionId', { promotionId })
+                .getCount();
+            if (teamsInPromotionNum > Themes.length * promotion.maxTeamForTheme) {
+                common_1.Logger.log(`vous devez ajouter plus de theme : nombre d'equipe  = ${teamsInPromotionNum} > maximum de place dans les themes :${Themes.length * promotion.maxTeamForTheme}`, "ThemeAssignementService/asignThemeToTeams");
+                throw new common_1.HttpException(`vous devez ajouter plus de theme : nombre d'equipe  = ${teamsInPromotionNum} > maximum de place dans les themes :${Themes.length * promotion.maxTeamForTheme}`, common_1.HttpStatus.BAD_REQUEST);
             }
             const teams = await manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')

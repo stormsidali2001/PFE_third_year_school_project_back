@@ -29,6 +29,7 @@ export class PromotionEntity{
         default:4
         
     })
+    
     maxTeamForTheme:number
 
     @Column({

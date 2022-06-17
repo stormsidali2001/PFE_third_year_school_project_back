@@ -6,6 +6,7 @@ import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { StudentRepository } from "src/core/repositories/student.repository";
 import { getConnection, getManager } from "typeorm";
+import * as uniqid from 'uniqid'
 
 
 
@@ -236,47 +237,10 @@ export class TeamService{
             })
 
             await getConnection().transaction(async manager =>{
-                 /*
-                        handling new teams
-
-                 */
                 const teamRepository = manager.getRepository(TeamEntity);
                 const studentRepository =  manager.getRepository(StudentEntity);
-                 applyTeamsCompletionPayload.newTeams.forEach(async({students})=>{
-                   
-                    const teamLength:number = await teamRepository
-                    .createQueryBuilder('team')
-                    .getCount();
-                 
-                    const newTeam = teamRepository.create({nickName:`team${teamLength}`,promotion});
-                    const newTeamDb = await teamRepository.save(newTeam)
-
-                    students.forEach(async ({studentId})=>{
-                         await studentRepository
-                        .createQueryBuilder('student')
-                        .where('student.id = :studentId',{studentId})
-                        .update()
-                        .set({team:newTeamDb})
-                        .execute();
-                    });
-                    const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random()*(students.length-1))].studentId;
-                    const choosenStudent = await studentRepository
-                    .createQueryBuilder('student')
-                    .where('student.id = :studentId',{studentId:randomlyChoosenTeamLeaderId})
-                    .getOne();
-                    
-                    await teamRepository
-                    .createQueryBuilder('team')
-                    .where('team.id = :teamId',{teamId:newTeamDb})
-                    .update()
-                    .set({teamLeader:choosenStudent})
-                    .execute();
-
-                 
-
-
-                })
-
+             
+          
 
 
                    /*
@@ -325,6 +289,56 @@ export class TeamService{
 
 
             })
+
+
+
+                 /*
+                        handling new teams
+
+                 */
+             const teamRepository = manager.getRepository(TeamEntity);
+            const studentRepository =  manager.getRepository(StudentEntity);
+          
+          
+            applyTeamsCompletionPayload.newTeams.forEach(async({students})=>{
+            
+                await getConnection().transaction(async manager=>{
+                  
+                    const teamRepository = manager.getRepository(TeamEntity);
+                    const studentRepository =  manager.getRepository(StudentEntity);
+                   
+                    const newTeam = teamRepository.create({nickName:`team${uniqid()}`,promotion});
+                    const newTeamDb = await teamRepository.save(newTeam)
+                    const studentsIds = students.map(s=>s.studentId)
+                  
+                    
+                         await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id in (:...studentsIds)',{studentsIds})
+                        .update()
+                        .set({team:newTeamDb})
+                        .execute();
+                    
+                        const randomlyChoosenTeamLeaderId = students[Math.floor(Math.random()*(students.length-1))].studentId;
+                        const choosenStudent = await studentRepository
+                        .createQueryBuilder('student')
+                        .where('student.id = :studentId',{studentId:randomlyChoosenTeamLeaderId})
+                        .getOne();
+
+                        if(!choosenStudent){
+                            Logger.log("choosen team leader not found","TeamService/applyTeamsCompletion")
+                            throw new HttpException("choosen team leader not found",HttpStatus.BAD_REQUEST)
+                        }
+                        await teamRepository
+                        .createQueryBuilder('team')
+                        .where('team.id = :teamId',{teamId:newTeamDb.id})
+                        .update()
+                        .set({teamLeader:choosenStudent})
+                        .execute();
+
+                })
+            })
+
 
             
                    

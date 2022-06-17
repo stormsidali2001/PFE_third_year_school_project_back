@@ -19,7 +19,7 @@ export class TeamEntity{
     @PrimaryGeneratedColumn('uuid')
     id:string;
     
-    @Column()
+    @Column({unique:true})
     nickName:string;
 
     @Column({
