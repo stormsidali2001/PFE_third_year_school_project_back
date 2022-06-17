@@ -376,7 +376,7 @@ let UserService = class UserService {
                     theme: givenTheme,
                     nombre: membersCount,
                     promotion: promotion.name,
-                    validée: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam,
+                    complete: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam,
                     peut_soutenir: peutSoutenir
                 };
             });

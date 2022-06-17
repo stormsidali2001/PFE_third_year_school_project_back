@@ -26,20 +26,21 @@ export class TeamInvitationService{
              * 1-a team leader
              * 2-a student without a team (to form a team)
              */
+     
             const sender =
             await manager.getRepository(StudentEntity)
             .createQueryBuilder('student')
             .leftJoinAndSelect('student.promotion','promotion')
+            .leftJoinAndSelect('student.team','team')
+            .loadRelationCountAndMap("team.membersCount","team.students")
             .where('student.userId = :userId',{userId})
             .getOne()
-            
-         
-           
-            
+
             if(!sender){
                 Logger.error("sender not found",'UserService/sendATeamInvitation')
                 throw new HttpException("sender not found",HttpStatus.BAD_REQUEST);
             }
+            Logger.error(  `team of sender ${sender.firstName} ${sender.lastName} is : ${sender?.team?.nickName}`)
             
 
 
@@ -66,9 +67,15 @@ export class TeamInvitationService{
                 throw new HttpException("you v'e already send an invitation to that particular user",HttpStatus.BAD_REQUEST);
             }
             if(sender.promotion.id !== reciever.promotion.id){
-                Logger.error("the sender and reciever should be in the same promotion",'UserService/sendATeamInvitation')
+                Logger.error("the sender and reciever should be in the same promotion",'TeamInvitationService/sendATeamInvitation')
                 throw new HttpException("the sender and reciever should be in the same promotion",HttpStatus.BAD_REQUEST);
 
+            }
+            
+            //@ts-ignore
+            if(sender.team && sender.team.membersCount >= sender.promotion.maxMembersInTeam){
+                Logger.error("can't add more students to your team.",'TeamInvitationService/sendATeamInvitation')
+                throw new HttpException("can't add more students to your team.",HttpStatus.BAD_REQUEST);
             }
             const invitationsRepository = manager.getRepository(InvitationEntity);
             const invitation:InvitationEntity = invitationsRepository.create({description,sender,reciever});
@@ -110,6 +117,7 @@ export class TeamInvitationService{
              .leftJoinAndSelect('invitation.sender','sender')
              .leftJoinAndSelect('invitation.reciever','reciever')
              .leftJoinAndSelect('sender.team','steam')
+             .leftJoinAndSelect("sender.user","suser")
              .leftJoinAndSelect('reciever.team','rteam')
              .leftJoinAndSelect('reciever.user','ruser')
              .leftJoinAndSelect('sender.promotion','spromotion')
@@ -168,17 +176,18 @@ export class TeamInvitationService{
     })
 
      
+        const socket = this.socketService.socket as Server;
         if(newTeamCreated){
 
             outputMessage += `\n team: ${invitation.sender.team.nickName} was created.`
             await this.userService._sendTeamNotfication(invitation.sender.team.id,`you are now in the new team: ${invitation.sender.team.nickName} .`)
-            const socket = this.socketService.socket as Server;
             await socket.to(invitation.reciever.user.id).emit("refresh")
+            await socket.to(invitation.sender.user.id).emit("refresh")
             
         }else{
             outputMessage += `\n ${invitation.reciever.firstName +' '+invitation.reciever.lastName} joined the ${invitation.reciever.team.nickName}.`
             await this.userService._sendTeamNotfication(invitation.sender.team.id,`${invitation.reciever.firstName} ${invitation.reciever.lastName} joined your team`,invitation.reciever.id,`you joined the team: ${invitation.sender.team.nickName} successfully...`);
-           
+            await socket.to(invitation.reciever.user.id).emit("refresh")
            
         }
        
@@ -256,6 +265,8 @@ export class TeamInvitationService{
             })
             .andWhere('student.userId <> :userId',{userId})
             .andWhere('student.teamId IS NULL')
+            .orderBy("student.firstName","ASC")
+            .orderBy("student.lastName","ASC")
             .getMany()
             
            

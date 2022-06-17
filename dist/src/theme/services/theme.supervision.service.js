@@ -100,7 +100,7 @@ let ThemeSupervisionService = class ThemeSupervisionService {
             }
             await manager.getRepository(responsible_entity_1.ResponsibleEntity)
                 .save(encadrement.theme.teams.map(team => {
-                return { teacher: encadrement.teacher, team };
+                return { teacher: encadrement.teacher, team, theme: encadrement.theme };
             }));
         }
         catch (err) {
@@ -108,15 +108,19 @@ let ThemeSupervisionService = class ThemeSupervisionService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getTeamsTeacherResponsibleFor(userId) {
+    async getTeamsTeacherResponsibleFor(userId, themeId) {
         try {
             const manager = (0, typeorm_1.getManager)();
-            return await manager.getRepository(team_entity_1.TeamEntity)
+            let query = manager.getRepository(team_entity_1.TeamEntity)
                 .createQueryBuilder('team')
                 .leftJoinAndSelect('team.responsibleTeachers', 'responsibleTeachers')
                 .leftJoinAndSelect('responsibleTeachers.teacher', 'teacher')
-                .where('teacher.userId = :userId', { userId })
-                .getMany();
+                .leftJoinAndSelect('responsibleTeachers.theme', 'theme')
+                .where('teacher.userId = :userId', { userId });
+            if (themeId !== 'all') {
+                query = query.andWhere("responsibleTeachers.themeId = :themeId", { themeId });
+            }
+            return await query.getMany();
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTeamsTeacherResponsibleFor');

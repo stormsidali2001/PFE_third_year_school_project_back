@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { TeacherEntity } from "./teacher.entity";
 import { TeamEntity } from "./team.entity";
+import { ThemeEntity } from "./theme.entity";
 
 
 
@@ -18,4 +19,7 @@ export class ResponsibleEntity{
 
     @ManyToOne(type=>TeamEntity,team=>team.responsibleTeachers)
     team:TeamEntity;
+
+    @ManyToOne(type=>ThemeEntity,theme=>theme.resbonsibilities)
+    theme:ThemeEntity
 }

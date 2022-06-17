@@ -13,6 +13,7 @@ exports.ResponsibleEntity = void 0;
 const typeorm_1 = require("typeorm");
 const teacher_entity_1 = require("./teacher.entity");
 const team_entity_1 = require("./team.entity");
+const theme_entity_1 = require("./theme.entity");
 let ResponsibleEntity = class ResponsibleEntity {
 };
 __decorate([
@@ -31,6 +32,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(type => team_entity_1.TeamEntity, team => team.responsibleTeachers),
     __metadata("design:type", team_entity_1.TeamEntity)
 ], ResponsibleEntity.prototype, "team", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(type => theme_entity_1.ThemeEntity, theme => theme.resbonsibilities),
+    __metadata("design:type", theme_entity_1.ThemeEntity)
+], ResponsibleEntity.prototype, "theme", void 0);
 ResponsibleEntity = __decorate([
     (0, typeorm_1.Entity)('responsible')
 ], ResponsibleEntity);

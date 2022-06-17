@@ -3,7 +3,7 @@ import { ThemeEntity } from "src/core/entities/theme.entity";
 export declare class ThemeSupervisionService {
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
     assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
-    getTeamsTeacherResponsibleFor(userId: string): Promise<TeamEntity[]>;
+    getTeamsTeacherResponsibleFor(userId: string, themeId: string): Promise<TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<TeamEntity[]>;
     getTeamsithThemes(promotionId: string): Promise<{
         id: string;

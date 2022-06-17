@@ -24,6 +24,7 @@ async encadrerTheme(userId:string,themeId:string,teacherId:string){
                 Logger.log("permission denied","UserService/encadrerTheme")
                 throw new HttpException("permission denied",HttpStatus.BAD_REQUEST)
             } 
+            
 
             const theme = await manager.getRepository(ThemeEntity)
             .createQueryBuilder('theme')
@@ -111,7 +112,7 @@ async assignTeamsToTeacher(userId:string,teamIds:string[],teacherId:string){
         await manager.getRepository(ResponsibleEntity)
         .save(
                 encadrement.theme.teams.map(team=>{
-                return {teacher:encadrement.teacher,team}
+                return {teacher:encadrement.teacher,team,theme:encadrement.theme}
                 })
         )
     }catch(err){ 
@@ -121,17 +122,21 @@ async assignTeamsToTeacher(userId:string,teamIds:string[],teacherId:string){
     }
 }
 
-async getTeamsTeacherResponsibleFor(userId:string){
+async getTeamsTeacherResponsibleFor(userId:string,themeId:string ){
     try{
         const manager = getManager()
 
-        return await manager.getRepository(TeamEntity)
+       let query =  manager.getRepository(TeamEntity)
         .createQueryBuilder('team')
         .leftJoinAndSelect('team.responsibleTeachers','responsibleTeachers')
         .leftJoinAndSelect('responsibleTeachers.teacher','teacher')
-        .where('teacher.userId = :userId',{userId})
-        .getMany()
+        .leftJoinAndSelect('responsibleTeachers.theme','theme')
+        .where('teacher.userId = :userId',{userId});
 
+        if(themeId!== 'all'){
+            query = query.andWhere("responsibleTeachers.themeId = :themeId",{themeId})
+        }
+        return await query.getMany();
     }catch(err){
         Logger.error(err,'UserService/getTeamsTeacherResponsibleFor')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

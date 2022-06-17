@@ -4,7 +4,7 @@ export declare class ThemeSupervisionController {
     constructor(themeSupervisionService: ThemeSupervisionService);
     encadrerTheme(userId: string, themeId: string, teacherId: string): Promise<void>;
     assignTeamsToTeacher(userId: string, teamIds: string[], teacherId: string): Promise<void>;
-    getTeamsTeacherResponsibleFor(userId: string): Promise<import("../../core/entities/team.entity").TeamEntity[]>;
+    getTeamsTeacherResponsibleFor(userId: string, themeId: any): Promise<import("../../core/entities/team.entity").TeamEntity[]>;
     getTeamsTeacherResponsibleForWithMembers(userId: string, promotionId: string): Promise<import("../../core/entities/team.entity").TeamEntity[]>;
     getTeamsithThemes(promotionId: string): Promise<{
         id: string;

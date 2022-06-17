@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { EncadrementEntity } from "./encadrement.entity";
 import { EntrepriseEntity } from "./entreprise.entity";
 import { PromotionEntity } from "./promotion.entity";
+import { ResponsibleEntity } from "./responsible.entity";
 import { TeacherEntity } from "./teacher.entity";
 import { TeamEntity } from "./team.entity";
 import { ThemeDocumentEntity } from "./theme.document.entity";
@@ -45,6 +46,9 @@ export class ThemeEntity{
 
     @OneToMany(type=>WishEntity,wish=>wish.theme)
     wishes:WishEntity[];
+
+    @OneToMany(type=>ResponsibleEntity,res=>res.theme)
+    resbonsibilities:ResponsibleEntity[];
 
 
 

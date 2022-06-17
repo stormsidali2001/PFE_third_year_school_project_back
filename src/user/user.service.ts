@@ -477,7 +477,7 @@ async getTeams(promotionId:string){
                 theme:givenTheme,
                 nombre:membersCount,
                 promotion:promotion.name,
-                validée: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam,
+                complete: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam,
                 peut_soutenir:peutSoutenir
             }
         });
@@ -488,6 +488,7 @@ async getTeams(promotionId:string){
 
 
 }
+
 
 async getTeam(teamId){
     try{

@@ -35,10 +35,10 @@ export class ThemeSupervisionController{
                 throw new HttpException(err,HttpStatus.BAD_REQUEST);
             }
     }
-    @Get('getTeamsTeacherResponsibleFor')
-    async getTeamsTeacherResponsibleFor(@GetCurrentUserId() userId:string){
+    @Get('getTeamsTeacherResponsibleFor/:themeId')
+    async getTeamsTeacherResponsibleFor(@GetCurrentUserId() userId:string , @Param('themeId') themeId){
         try{
-            return await this.themeSupervisionService.getTeamsTeacherResponsibleFor(userId)
+            return await this.themeSupervisionService.getTeamsTeacherResponsibleFor(userId,themeId)
         }catch(err){
             Logger.error(err,'UserController/getTeamsTeacherResponsibleFor')
             throw new HttpException(err,HttpStatus.BAD_REQUEST);

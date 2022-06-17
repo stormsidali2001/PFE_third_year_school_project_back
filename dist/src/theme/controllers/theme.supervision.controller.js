@@ -39,9 +39,9 @@ let ThemeSupervisionController = class ThemeSupervisionController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getTeamsTeacherResponsibleFor(userId) {
+    async getTeamsTeacherResponsibleFor(userId, themeId) {
         try {
-            return await this.themeSupervisionService.getTeamsTeacherResponsibleFor(userId);
+            return await this.themeSupervisionService.getTeamsTeacherResponsibleFor(userId, themeId);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserController/getTeamsTeacherResponsibleFor');
@@ -89,10 +89,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ThemeSupervisionController.prototype, "assignTeamsToTeacher", null);
 __decorate([
-    (0, common_1.Get)('getTeamsTeacherResponsibleFor'),
+    (0, common_1.Get)('getTeamsTeacherResponsibleFor/:themeId'),
     __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Param)('themeId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ThemeSupervisionController.prototype, "getTeamsTeacherResponsibleFor", null);
 __decorate([

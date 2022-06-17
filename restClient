@@ -299,8 +299,8 @@ Content-Type:application/json
     "ssn":"034565456465",
     "email":"t.teacher@esi-sba.dz",
     "password":"1@2@3@4@passwordP",
-    "firstName":"teacher3",
-    "lastName":"teacher3",
+    "firstName":"teacher",
+    "lastName":"teacher",
     "speciality":"Web"
 }
 
