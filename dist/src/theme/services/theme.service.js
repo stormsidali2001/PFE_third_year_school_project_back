@@ -5,17 +5,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeService = void 0;
 const common_1 = require("@nestjs/common");
+const admin_entity_1 = require("../../core/entities/admin.entity");
 const entreprise_entity_1 = require("../../core/entities/entreprise.entity");
 const promotion_entity_1 = require("../../core/entities/promotion.entity");
 const teacher_entity_1 = require("../../core/entities/teacher.entity");
 const theme_document_entity_1 = require("../../core/entities/theme.document.entity");
 const theme_entity_1 = require("../../core/entities/theme.entity");
 const user_entity_1 = require("../../core/entities/user.entity");
+const user_service_1 = require("../../user/user.service");
 const typeorm_1 = require("typeorm");
 let ThemeService = class ThemeService {
+    constructor(userService) {
+        this.userService = userService;
+    }
     async createThemeSuggestion(userId, title, description, documents, promotionId) {
         try {
             const manager = (0, typeorm_1.getManager)();
@@ -41,16 +49,18 @@ let ThemeService = class ThemeService {
                 throw new common_1.HttpException("promotion not found", common_1.HttpStatus.BAD_REQUEST);
             }
             let themeSuggestion;
+            let teacher;
+            let entreprise;
             const themeRepository = manager.getRepository(theme_entity_1.ThemeEntity);
             if (userType === user_entity_1.UserType.TEACHER) {
-                const teacher = await manager.getRepository(teacher_entity_1.TeacherEntity)
+                teacher = await manager.getRepository(teacher_entity_1.TeacherEntity)
                     .createQueryBuilder('teacher')
                     .where('teacher.userId = :userId', { userId })
                     .getOne();
                 themeSuggestion = themeRepository.create({ title, description, suggestedByTeacher: teacher, promotion });
             }
             else if (userType === user_entity_1.UserType.ENTERPRISE) {
-                const entreprise = await manager.getRepository(entreprise_entity_1.EntrepriseEntity)
+                entreprise = await manager.getRepository(entreprise_entity_1.EntrepriseEntity)
                     .createQueryBuilder('entrprise')
                     .where('entrprise.userId = :userId', { userId })
                     .getOne();
@@ -71,9 +81,15 @@ let ThemeService = class ThemeService {
                 .insert()
                 .values(themeSuggestionsDocs)
                 .execute();
+            const admins = await manager.getRepository(admin_entity_1.AdminEntity)
+                .createQueryBuilder("admin")
+                .leftJoinAndSelect('admin.user', 'user')
+                .getMany();
+            const entityCoordinates = user.userType === user_entity_1.UserType.TEACHER ? `${teacher.firstName} ${teacher.lastName}` : `${entreprise.name}`;
+            await this.userService._sendNotificationToAdmins(admins, `une nouvelle suggestion de theme est deposee par ${user.userType === user_entity_1.UserType.TEACHER ? "l'enseignat" : "l'entreprise"} : ${entityCoordinates} pour la promotion ${promotion.name}`);
         }
         catch (err) {
-            common_1.Logger.error(err, 'UserService/createThemeSuggestion');
+            common_1.Logger.error(err, 'ThemeService/createThemeSuggestion');
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
@@ -139,12 +155,22 @@ let ThemeService = class ThemeService {
                 common_1.Logger.error("permession denied", 'UserService/validateThemeSuggestion');
                 throw new common_1.HttpException("permession denied", common_1.HttpStatus.BAD_REQUEST);
             }
+            const theme = await manager.getRepository(theme_entity_1.ThemeEntity)
+                .createQueryBuilder('theme')
+                .where('theme.id = :themeId', { themeId })
+                .leftJoinAndSelect("theme.suggestedByTeacher", "suggestedByTeacher")
+                .leftJoinAndSelect('suggestedByTeacher.user', 'tuser')
+                .leftJoinAndSelect("theme.suggestedByEntreprise", "suggestedByEntreprise")
+                .leftJoinAndSelect('suggestedByEntreprise.user', 'euser')
+                .getOne();
             await manager.getRepository(theme_entity_1.ThemeEntity)
                 .createQueryBuilder('theme')
                 .update()
                 .set({ validated: true })
                 .where('theme.id = :themeId', { themeId })
                 .execute();
+            const suggestedBy = theme.suggestedByTeacher ? theme.suggestedByTeacher : theme.suggestedByEntreprise;
+            await this.userService._sendNotfication(suggestedBy.user.id, `l'administration a accepter votre suggestion de theme`);
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/validateThemeSuggestion');
@@ -210,7 +236,8 @@ let ThemeService = class ThemeService {
     }
 };
 ThemeService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [user_service_1.UserService])
 ], ThemeService);
 exports.ThemeService = ThemeService;
 //# sourceMappingURL=theme.service.js.map

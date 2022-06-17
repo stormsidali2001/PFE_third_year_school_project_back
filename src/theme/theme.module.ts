@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { UserService } from "src/user/user.service";
 import { ThemeAssignementController } from "./controllers/theme.assignement.controller";
 import { ThemeCommitsController } from "./controllers/theme.commits.controller";
 import { ThemeController } from "./controllers/theme.controller";
@@ -13,7 +14,7 @@ import { ThemeSupervisionService } from "./services/theme.supervision.service";
 
 @Module({
     imports:[TypeOrmModule.forFeature([])],
-    providers:[ThemeService,ThemeSupervisionService,ThemeAssignementService,ThemeCommitsService],
+    providers:[ThemeService,ThemeSupervisionService,ThemeAssignementService,ThemeCommitsService,UserService],
     controllers:[ThemeController,ThemeSupervisionController,ThemeAssignementController,ThemeCommitsController]
 
 })

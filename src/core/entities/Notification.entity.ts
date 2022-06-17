@@ -12,7 +12,9 @@ export class NotificationEntity{
     @Column()
     description:string;
 
-    @Column()
+    @Column({
+      default:false
+    })
     seen:boolean;
 
     @CreateDateColumn()

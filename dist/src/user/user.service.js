@@ -144,6 +144,20 @@ let UserService = class UserService {
         socket.to(userId).emit("new_notification", notification);
         return `notification sent with `;
     }
+    async _sendNotificationToAdmins(admins, description) {
+        const manager = (0, typeorm_1.getManager)();
+        const notifications = [];
+        const notificationRepository = manager.getRepository(Notification_entity_1.NotificationEntity);
+        admins.forEach(admin => {
+            const notification = notificationRepository.create({ user: admin.user, description });
+            notifications.push(notification);
+        });
+        await notificationRepository.save(notifications);
+        notifications.forEach(nf => {
+            const socket = this.socketService.socket;
+            socket.to(nf.user.id).emit("new_notification", nf);
+        });
+    }
     async getLastNotifications(userId, number = undefined) {
         try {
             const manager = (0, typeorm_1.getManager)();

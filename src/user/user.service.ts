@@ -178,6 +178,21 @@ export class UserService{
             return `notification sent with `;
             
 }  
+async _sendNotificationToAdmins(admins:AdminEntity[],description:string){
+    const manager = getManager();
+    const notifications:NotificationEntity[] = []
+    const notificationRepository = manager.getRepository(NotificationEntity);
+    admins.forEach(admin=>{
+        const notification = notificationRepository.create({user:admin.user,description});
+        notifications.push(notification);
+    })
+
+    await notificationRepository.save(notifications);
+    notifications.forEach(nf=>{
+        const socket = this.socketService.socket as Server;
+        socket.to(nf.user.id).emit("new_notification",nf)
+    })
+}
     //the number param has an undefined or number type
 async  getLastNotifications(userId:string,number:number = undefined){   
 

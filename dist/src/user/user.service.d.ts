@@ -10,6 +10,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { SocketService } from "src/socket/socket.service";
 import { TeamDocumentEntity } from "src/core/entities/team.document.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
+import { AdminEntity } from "src/core/entities/admin.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { DocumentTypeEntity } from "src/core/entities/document-types.entity";
@@ -66,6 +67,7 @@ export declare class UserService {
     _sendNotficationStudent(studentId: string, description: string): Promise<string>;
     _sendTeamNotfication(teamId: string, description: string, expectStudentId?: string, expectMessage?: string): Promise<string>;
     _sendNotfication(userId: string, description: string): Promise<string>;
+    _sendNotificationToAdmins(admins: AdminEntity[], description: string): Promise<void>;
     getLastNotifications(userId: string, number?: number): Promise<{
         notifications: NotificationEntity[];
         totalNotificationCount: number;

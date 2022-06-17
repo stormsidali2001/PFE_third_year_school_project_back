@@ -23,7 +23,9 @@ __decorate([
     __metadata("design:type", String)
 ], NotificationEntity.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({
+        default: false
+    }),
     __metadata("design:type", Boolean)
 ], NotificationEntity.prototype, "seen", void 0);
 __decorate([

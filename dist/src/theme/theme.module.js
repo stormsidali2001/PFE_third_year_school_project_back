@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const user_service_1 = require("../user/user.service");
 const theme_assignement_controller_1 = require("./controllers/theme.assignement.controller");
 const theme_commits_controller_1 = require("./controllers/theme.commits.controller");
 const theme_controller_1 = require("./controllers/theme.controller");
@@ -22,7 +23,7 @@ let ThemeModule = class ThemeModule {
 ThemeModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([])],
-        providers: [theme_service_1.ThemeService, theme_supervision_service_1.ThemeSupervisionService, theme_assignement_service_1.ThemeAssignementService, theme_commits_service_1.ThemeCommitsService],
+        providers: [theme_service_1.ThemeService, theme_supervision_service_1.ThemeSupervisionService, theme_assignement_service_1.ThemeAssignementService, theme_commits_service_1.ThemeCommitsService, user_service_1.UserService],
         controllers: [theme_controller_1.ThemeController, theme_supervision_controller_1.ThemeSupervisionController, theme_assignement_controller_1.ThemeAssignementController, theme_commits_controller_1.ThemeCommitsController]
     })
 ], ThemeModule);

@@ -1,16 +1,22 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ThemeDocDto } from "src/core/dtos/user.dto";
+import { AdminEntity } from "src/core/entities/admin.entity";
 import { EntrepriseEntity } from "src/core/entities/entreprise.entity";
+import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
 import { ThemeDocumentEntity } from "src/core/entities/theme.document.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
+import { UserService } from "src/user/user.service";
 import { getManager } from "typeorm";
 
 
 @Injectable()
 export class ThemeService {
+    constructor(
+        private readonly userService:UserService
+    ){}
 //theme suggestions ------------------------------------------------------------------------------
 async createThemeSuggestion(userId:string,title:string,description:string,documents:ThemeDocDto[],promotionId:string){
 
@@ -19,10 +25,7 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
         const user = await manager.getRepository(UserEntity)
         .createQueryBuilder('user')
         .where('user.id = :userId',{userId})
-        .getOne();
-
-      
-        
+        .getOne();      
         if(!user){
             Logger.error("user not found",'UserService/createThemeSuggestion')
             throw new HttpException("user not found",HttpStatus.BAD_REQUEST);
@@ -43,16 +46,18 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
             throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST);
         }
         let themeSuggestion;
+        let teacher:TeacherEntity;
+        let entreprise:EntrepriseEntity;
         const themeRepository = manager.getRepository(ThemeEntity)
         if(userType === UserType.TEACHER){
-            const teacher = await manager.getRepository(TeacherEntity)
+             teacher = await manager.getRepository(TeacherEntity)
             .createQueryBuilder('teacher')
             .where('teacher.userId = :userId',{userId})
             .getOne();
             themeSuggestion = themeRepository.create({title,description,suggestedByTeacher:teacher,promotion})
 
         }else if(userType === UserType.ENTERPRISE){
-            const entreprise = await manager.getRepository(EntrepriseEntity)
+             entreprise = await manager.getRepository(EntrepriseEntity)
             .createQueryBuilder('entrprise')
             .where('entrprise.userId = :userId',{userId})
             .getOne();
@@ -71,6 +76,7 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
         .insert()
         .values(themeSuggestion)
         .execute();
+       
 
         
 
@@ -86,10 +92,17 @@ async createThemeSuggestion(userId:string,title:string,description:string,docume
         .values(themeSuggestionsDocs)
         .execute();
 
+         const admins = await manager.getRepository(AdminEntity)
+        .createQueryBuilder("admin")
+        .leftJoinAndSelect('admin.user','user')
+        .getMany();
+        const entityCoordinates = user.userType === UserType.TEACHER ? `${teacher.firstName} ${teacher.lastName}`:`${entreprise.name}`;
+        await this.userService._sendNotificationToAdmins(admins,`une nouvelle suggestion de theme est deposee par ${user.userType === UserType.TEACHER?"l'enseignat":"l'entreprise"} : ${entityCoordinates} pour la promotion ${promotion.name}`)
+
       
        
     }catch(err){
-        Logger.error(err,'UserService/createThemeSuggestion')
+        Logger.error(err,'ThemeService/createThemeSuggestion')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
 
     }
@@ -169,13 +182,24 @@ async validateThemeSuggestion(userId:string,themeId:string){
             Logger.error("permession denied",'UserService/validateThemeSuggestion')
             throw new HttpException("permession denied",HttpStatus.BAD_REQUEST);
         }
-
+        const theme =  await manager.getRepository(ThemeEntity)
+                            .createQueryBuilder('theme')
+                            .where('theme.id = :themeId',{themeId})
+                            .leftJoinAndSelect("theme.suggestedByTeacher","suggestedByTeacher")
+                            .leftJoinAndSelect('suggestedByTeacher.user','tuser')
+                            .leftJoinAndSelect("theme.suggestedByEntreprise","suggestedByEntreprise")
+                            .leftJoinAndSelect('suggestedByEntreprise.user','euser')
+                            .getOne();
         await manager.getRepository(ThemeEntity)
         .createQueryBuilder('theme')
         .update()
         .set({validated:true})
         .where('theme.id = :themeId',{themeId})
         .execute();
+        const suggestedBy:TeacherEntity| EntrepriseEntity  = theme.suggestedByTeacher ? theme.suggestedByTeacher : theme.suggestedByEntreprise;
+      
+
+    await this.userService._sendNotfication(suggestedBy.user.id,`l'administration a accepter votre suggestion de theme`)
 
     }catch(err){
         Logger.error(err,'UserService/validateThemeSuggestion')
