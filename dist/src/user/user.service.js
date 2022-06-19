@@ -222,6 +222,25 @@ let UserService = class UserService {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getStudentInfos(studentId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const student = await manager.getRepository(student_entity_1.StudentEntity)
+                .createQueryBuilder('student')
+                .where("student.id = :studentId", { studentId })
+                .leftJoinAndSelect('student.promotion', 'promotion')
+                .leftJoinAndSelect('student.team', 'team')
+                .leftJoinAndSelect('student.user', 'user')
+                .getOne();
+            delete student.user.password;
+            delete student.user.id;
+            return student;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/GetStudentInfos');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async getTeachers() {
         try {
             const manager = (0, typeorm_1.getManager)();
@@ -229,6 +248,21 @@ let UserService = class UserService {
             const teachers = await teacherRepository.createQueryBuilder('teachers')
                 .getMany();
             return teachers;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTeachers');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getTeacher(teacherId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            const teacherRepository = manager.getRepository(teacher_entity_1.TeacherEntity);
+            const teacher = await teacherRepository.createQueryBuilder('teacher')
+                .leftJoinAndSelect("teacher.user", "user")
+                .where("teacher.id = :teacherId", { teacherId })
+                .getOne();
+            return teacher;
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTeachers');
@@ -275,8 +309,6 @@ let UserService = class UserService {
             const promotion = await manager.getRepository(promotion_entity_1.PromotionEntity)
                 .createQueryBuilder('promotion')
                 .where('promotion.id = :promotionId', { promotionId })
-                .leftJoinAndSelect("promotion.teams", "team")
-                .loadRelationCountAndMap("team.membersCount", "team.students")
                 .getOne();
             if (!user) {
                 common_1.Logger.log("permission denied", "UserService/submitWishList");
@@ -286,27 +318,19 @@ let UserService = class UserService {
                 common_1.Logger.log("promotion not found", "UserService/submitWishList");
                 throw new common_1.HttpException("promotion not found", common_1.HttpStatus.BAD_REQUEST);
             }
-            const allTeamsAreValid = promotion.teams.every(team => {
-                return team.membersCount >= promotion.minMembersInTeam && team.membersCount <= promotion.maxMembersInTeam;
-            });
-            if (!allTeamsAreValid) {
-                common_1.Logger.log("il existe des equipe non valide", "UserService/submitWishList");
-                throw new common_1.HttpException("il existe des equipe non valide", common_1.HttpStatus.BAD_REQUEST);
+            if (promotion.wishListSent) {
+                common_1.Logger.log("vous avez deja envoyée la fiche de voeux a cette promotion", "UserService/submitWishList");
+                throw new common_1.HttpException("vous avez deja envoyée la fiche de voeux a cette promotion", common_1.HttpStatus.BAD_REQUEST);
             }
-            const students = await manager.getRepository(student_entity_1.StudentEntity)
-                .createQueryBuilder('student')
-                .where('student.promotionId = :promotionId', { promotionId })
-                .andWhere('student.teamId IS NULL')
-                .getMany();
-            if ((students === null || students === void 0 ? void 0 : students.length) > 0) {
-                common_1.Logger.log("il existe des etudiants sans equipes", "UserService/submitWishList");
-                throw new common_1.HttpException("il existe des etudiants sans equipes", common_1.HttpStatus.BAD_REQUEST);
+            if (!promotion.allTeamsValidated) {
+                common_1.Logger.log("les equipes de la promotion sont non validés", "UserService/submitWishList");
+                throw new common_1.HttpException("les equipes de la promotion sont non validés", common_1.HttpStatus.BAD_REQUEST);
             }
             return await manager.getRepository(promotion_entity_1.PromotionEntity)
                 .createQueryBuilder('promotion')
                 .update()
                 .set({ wishListSent: true })
-                .where('promotion.id = :pomotionId', { promotionId })
+                .where('promotion.id = :promotionId', { promotionId })
                 .execute();
         }
         catch (err) {
@@ -337,8 +361,8 @@ let UserService = class UserService {
                 .where('wish.teamId IS NOT NULL and wish.teamId = :teamId', { teamId: student.team.id })
                 .getOne();
             if (wish) {
-                common_1.Logger.error("your team already submeted the wish list", 'UserService/submitWishList');
-                throw new common_1.HttpException("your team already submeted the wish list", common_1.HttpStatus.BAD_REQUEST);
+                common_1.Logger.error("votre equipe a deja envoyer ses voeux", 'UserService/submitWishList');
+                throw new common_1.HttpException("your team already submitted the wish list", common_1.HttpStatus.BAD_REQUEST);
             }
             const { wishes } = wishList;
             if ((wishes === null || wishes === void 0 ? void 0 : wishes.length) == 0) {
@@ -377,13 +401,18 @@ let UserService = class UserService {
                 .createQueryBuilder('team')
                 .leftJoinAndSelect('team.givenTheme', 'givenTheme')
                 .loadRelationCountAndMap('team.membersCount', 'team.students')
+                .leftJoinAndSelect('team.students', 'students')
                 .leftJoinAndSelect('team.promotion', 'promotion');
             if (promotionId !== 'all') {
                 query = query.where('promotion.id = :promotionId', { promotionId });
             }
             const teams = await query.getMany();
-            return teams.map(({ nickName, givenTheme, membersCount, id, promotion, peutSoutenir }) => {
+            return teams.map(({ nickName, givenTheme, membersCount, id, promotion, peutSoutenir, students }) => {
                 common_1.Logger.error(nickName, promotion, "debug");
+                let sum = 0;
+                students.forEach(el => {
+                    sum += el.moy;
+                });
                 return {
                     id,
                     pseudo: nickName,
@@ -391,7 +420,8 @@ let UserService = class UserService {
                     nombre: membersCount,
                     promotion: promotion.name,
                     complete: membersCount >= promotion.minMembersInTeam && membersCount <= promotion.maxMembersInTeam,
-                    peut_soutenir: peutSoutenir
+                    peut_soutenir: peutSoutenir,
+                    moyenne: sum / students.length
                 };
             });
         }
@@ -412,15 +442,20 @@ let UserService = class UserService {
                 .leftJoinAndSelect('team.teamLeader', 'leader')
                 .getOne();
             const { id, nickName, givenTheme, students, promotion, teamLeader, peutSoutenir } = team;
+            let sum = 0;
+            students.forEach(el => {
+                sum += el.moy;
+            });
             return {
                 id,
                 pseudo: nickName,
                 theme: givenTheme,
                 members: students,
                 promotion: promotion,
-                validated: students.length >= promotion.minMembersInTeam && students.length <= promotion.maxMembersInTeam,
+                complete: students.length >= promotion.minMembersInTeam && students.length <= promotion.maxMembersInTeam,
                 teamLeader,
                 peut_soutenir: peutSoutenir,
+                moyenne: sum / students.length
             };
         }
         catch (err) {

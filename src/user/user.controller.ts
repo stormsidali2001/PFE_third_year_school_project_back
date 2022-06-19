@@ -171,6 +171,9 @@ export class UserController{
  
      }
 
+
+    
+
    
 
     @Public()
@@ -240,6 +243,15 @@ export class UserController{
         return await this.userService.getSalles()
     }
 
+    @Get('studentsInfo/:studentId')
+    async getStudentInfos(@Param('studentId') studentId:string){
+        return await this.userService.getStudentInfos(studentId);
+    }
+
+    @Post("sendWishList")
+    async sendWishList(@GetCurrentUserId() userId:string,@Body('promotionId') promotionId:string){
+      await this.userService.sendWishList(userId,promotionId)
+    }
    
     //test routes---------------------------
     @Public()

@@ -75,7 +75,9 @@ export declare class UserService {
     getStudents(): Promise<StudentEntity[]>;
     deleteStudent(studentId: string): Promise<string>;
     editStudent(studentId: string, data: Partial<StudentEntity>): Promise<string>;
+    getStudentInfos(studentId: string): Promise<StudentEntity>;
     getTeachers(): Promise<TeacherEntity[]>;
+    getTeacher(teacherId: string): Promise<TeacherEntity>;
     deleteTeacher(teacherId: string): Promise<string>;
     editTeacher(teacherId: string, data: Partial<TeacherEntity>): Promise<string>;
     sendWishList(userId: string, promotionId: string): Promise<import("typeorm").UpdateResult>;
@@ -88,6 +90,7 @@ export declare class UserService {
         promotion: string;
         complete: boolean;
         peut_soutenir: boolean;
+        moyenne: number;
     }[]>;
     getTeam(teamId: any): Promise<{
         id: string;
@@ -95,9 +98,10 @@ export declare class UserService {
         theme: ThemeEntity;
         members: StudentEntity[];
         promotion: PromotionEntity;
-        validated: boolean;
+        complete: boolean;
         teamLeader: StudentEntity;
         peut_soutenir: boolean;
+        moyenne: number;
     }>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;

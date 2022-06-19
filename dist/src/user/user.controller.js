@@ -178,6 +178,12 @@ let UserController = class UserController {
     async getSalles() {
         return await this.userService.getSalles();
     }
+    async getStudentInfos(studentId) {
+        return await this.userService.getStudentInfos(studentId);
+    }
+    async sendWishList(userId, promotionId) {
+        await this.userService.sendWishList(userId, promotionId);
+    }
     async sendNotification(userId, description) {
         try {
             return await this.userService._sendNotfication(userId, description);
@@ -359,6 +365,21 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getSalles", null);
+__decorate([
+    (0, common_1.Get)('studentsInfo/:studentId'),
+    __param(0, (0, common_1.Param)('studentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getStudentInfos", null);
+__decorate([
+    (0, common_1.Post)("sendWishList"),
+    __param(0, (0, get_current_user_id_decorator_1.GetCurrentUserId)()),
+    __param(1, (0, common_1.Body)('promotionId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sendWishList", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('test/sendNotification'),

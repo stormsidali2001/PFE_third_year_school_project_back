@@ -4,7 +4,6 @@ import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { StudentEntity } from "src/core/entities/student.entity";
 import { TeamEntity } from "src/core/entities/team.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
-import { StudentRepository } from "src/core/repositories/student.repository";
 import { getConnection, getManager } from "typeorm";
 import * as uniqid from 'uniqid'
 

@@ -32,6 +32,7 @@ export declare class UserController {
         promotion: string;
         complete: boolean;
         peut_soutenir: boolean;
+        moyenne: number;
     }[]>;
     getTeam(teamId: string): Promise<{
         id: string;
@@ -39,9 +40,10 @@ export declare class UserController {
         theme: import("../core/entities/theme.entity").ThemeEntity;
         members: import("../core/entities/student.entity").StudentEntity[];
         promotion: import("../core/entities/promotion.entity").PromotionEntity;
-        validated: boolean;
+        complete: boolean;
         teamLeader: import("../core/entities/student.entity").StudentEntity;
         peut_soutenir: boolean;
+        moyenne: number;
     }>;
     getUser(userId: string): Promise<{
         [x: string]: string | {
@@ -92,6 +94,8 @@ export declare class UserController {
     getAllPromotions(): Promise<import("../core/entities/promotion.entity").PromotionEntity[]>;
     getPromotionDocumentTypes(userId: any): Promise<import("../core/entities/document-types.entity").DocumentTypeEntity[]>;
     getSalles(): Promise<import("../core/entities/salle.entity").SalleEntity[]>;
+    getStudentInfos(studentId: string): Promise<import("../core/entities/student.entity").StudentEntity>;
+    sendWishList(userId: string, promotionId: string): Promise<void>;
     sendNotification(userId: string, description: string): Promise<string>;
     createNewConfig(key: string, value: string): Promise<void>;
     createNewPromotion(name: string, documentTypes: string[]): Promise<void>;

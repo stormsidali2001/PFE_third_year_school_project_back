@@ -224,7 +224,7 @@ let ThemeService = class ThemeService {
                 .leftJoinAndSelect('theme.teams', 'teams')
                 .leftJoinAndSelect('theme.encadrement', 'encadrement')
                 .leftJoinAndSelect('encadrement.teacher', 'teacher')
-                .leftJoinAndSelect('teacher.teamsInCharge', 'teamsInCharge')
+                .leftJoinAndSelect('teacher.teamsInCharge', 'teamsInCharge', 'teamsInCharge.themeId = theme.id')
                 .leftJoinAndSelect('teamsInCharge.team', 'team')
                 .getOne();
             return theme;

@@ -17,6 +17,7 @@ const team_entity_1 = require("../../core/entities/team.entity");
 const socket_service_1 = require("../../socket/socket.service");
 const user_service_1 = require("../../user/user.service");
 const typeorm_1 = require("typeorm");
+const uniqid = require("uniqid");
 let TeamInvitationService = class TeamInvitationService {
     constructor(userService, socketService) {
         this.userService = userService;
@@ -108,11 +109,8 @@ let TeamInvitationService = class TeamInvitationService {
                 if (!invitation.sender.team) {
                     const teamRepository = manager.getRepository(team_entity_1.TeamEntity);
                     const studentRepository = manager.getRepository(student_entity_1.StudentEntity);
-                    const teamLength = await teamRepository
-                        .createQueryBuilder('team')
-                        .getCount();
                     newTeamCreated = true;
-                    const newTeam = teamRepository.create({ nickName: 'team' + teamLength, teamLeader: invitation.sender, promotion: invitation.sender.promotion });
+                    const newTeam = teamRepository.create({ nickName: 'team' + uniqid(), teamLeader: invitation.sender, promotion: invitation.sender.promotion });
                     await teamRepository.save(newTeam);
                     invitation.reciever.team = newTeam;
                     invitation.sender.team = newTeam;

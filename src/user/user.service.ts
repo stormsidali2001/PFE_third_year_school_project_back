@@ -271,6 +271,26 @@ async editStudent(studentId:string,data:Partial<StudentEntity>){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
+async getStudentInfos(studentId:string){
+    try{
+        const manager = getManager();
+
+        const student = await manager.getRepository(StudentEntity)
+        .createQueryBuilder('student')
+        .where("student.id = :studentId",{studentId})
+        .leftJoinAndSelect('student.promotion','promotion')
+        .leftJoinAndSelect('student.team','team')
+        .leftJoinAndSelect('student.user','user')
+        .getOne();
+        delete student.user.password;
+        delete student.user.id;
+
+        return student;
+    }catch(err){
+        Logger.error(err,'UserService/GetStudentInfos')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
 //crud operations Teacher----------------------------------------
 async getTeachers(){
     try{
@@ -282,6 +302,23 @@ async getTeachers(){
        
 
         return teachers;
+    }catch(err){
+        Logger.error(err,'UserService/getTeachers')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async getTeacher(teacherId:string){
+    try{
+        const manager = getManager();
+        const teacherRepository = manager.getRepository(TeacherEntity);
+
+        const teacher =  await teacherRepository.createQueryBuilder('teacher')
+        .leftJoinAndSelect("teacher.user","user")
+        .where("teacher.id = :teacherId",{teacherId})
+        .getOne();
+       
+
+        return teacher;
     }catch(err){
         Logger.error(err,'UserService/getTeachers')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
@@ -326,11 +363,10 @@ async sendWishList(userId:string,promotionId:string){
         .where("user.id = :userId",{userId})
         .andWhere("user.userType = :userType",{userType:UserType.ADMIN})
         .getOne();
+
         const promotion = await manager.getRepository(PromotionEntity)
         .createQueryBuilder('promotion')
         .where('promotion.id = :promotionId',{promotionId})
-        .leftJoinAndSelect("promotion.teams","team")
-        .loadRelationCountAndMap("team.membersCount","team.students")
         .getOne();
 
         if(!user){
@@ -341,37 +377,22 @@ async sendWishList(userId:string,promotionId:string){
             Logger.log("promotion not found","UserService/submitWishList")
             throw new HttpException("promotion not found",HttpStatus.BAD_REQUEST)
         }  
-    
-      
-       const allTeamsAreValid =  promotion.teams.every(team=>{
-            //@ts-ignore
-            return  team.membersCount >= promotion.minMembersInTeam && team.membersCount <= promotion.maxMembersInTeam
-            
-        })
-        if(!allTeamsAreValid){
-            Logger.log("il existe des equipe non valide","UserService/submitWishList")
-            throw new HttpException("il existe des equipe non valide",HttpStatus.BAD_REQUEST)
+        if(promotion.wishListSent){
+            Logger.log("vous avez deja envoyée la fiche de voeux a cette promotion","UserService/submitWishList")
+            throw new HttpException("vous avez deja envoyée la fiche de voeux a cette promotion",HttpStatus.BAD_REQUEST)
         }
-
-        const students = await manager.getRepository(StudentEntity)
-        .createQueryBuilder('student')
-        .where('student.promotionId = :promotionId',{promotionId})
-        .andWhere('student.teamId IS NULL')
-        .getMany();
-        if(students?.length >0){
-            Logger.log("il existe des etudiants sans equipes","UserService/submitWishList")
-            throw new HttpException("il existe des etudiants sans equipes",HttpStatus.BAD_REQUEST)
+        if(!promotion.allTeamsValidated){
+            Logger.log("les equipes de la promotion sont non validés","UserService/submitWishList")
+            throw new HttpException("les equipes de la promotion sont non validés",HttpStatus.BAD_REQUEST)
         }
-
-
-
+     
 
 
      return   await manager.getRepository(PromotionEntity)
         .createQueryBuilder('promotion')
         .update()
         .set({wishListSent:true})
-        .where('promotion.id = :pomotionId',{promotionId})
+        .where('promotion.id = :promotionId',{promotionId})
         .execute();  
 
     }catch(err){
@@ -409,8 +430,8 @@ try{
     .where('wish.teamId IS NOT NULL and wish.teamId = :teamId',{teamId:student.team.id})
     .getOne()
     if(wish){
-        Logger.error("your team already submeted the wish list",'UserService/submitWishList')
-        throw new HttpException("your team already submeted the wish list",HttpStatus.BAD_REQUEST);
+        Logger.error("votre equipe a deja envoyer ses voeux",'UserService/submitWishList')
+        throw new HttpException("your team already submitted the wish list",HttpStatus.BAD_REQUEST);
     }
     const {wishes} = wishList;
    
@@ -466,7 +487,6 @@ try{
 
 
 
-
 //team crud operations
 async getTeams(promotionId:string){
     try{
@@ -475,6 +495,7 @@ async getTeams(promotionId:string){
         .createQueryBuilder('team')
         .leftJoinAndSelect('team.givenTheme','givenTheme')
         .loadRelationCountAndMap('team.membersCount','team.students')
+        .leftJoinAndSelect('team.students','students')
         .leftJoinAndSelect('team.promotion','promotion')
        
         if(promotionId !=='all'){
@@ -482,10 +503,17 @@ async getTeams(promotionId:string){
         }
 
         const teams = await query.getMany()
+      
+  
         
         //@ts-ignore
-        return teams.map(({nickName,givenTheme,membersCount,id,promotion,peutSoutenir})=>{
+        return teams.map(({nickName,givenTheme,membersCount,id,promotion,peutSoutenir,students})=>{
            Logger.error(nickName,promotion,"debug")
+           // just i'm lazy to get it in a sigle sql query ~_~ 
+           let sum = 0;
+            students.forEach(el=>{
+                sum += el.moy;
+            })
             return {
                 id,
                 pseudo:nickName,
@@ -493,7 +521,8 @@ async getTeams(promotionId:string){
                 nombre:membersCount,
                 promotion:promotion.name,
                 complete: membersCount >= promotion.minMembersInTeam && membersCount <=  promotion.maxMembersInTeam,
-                peut_soutenir:peutSoutenir
+                peut_soutenir:peutSoutenir,
+                moyenne: sum/students.length
             }
         });
     }catch(err){
@@ -517,17 +546,24 @@ async getTeam(teamId){
         .leftJoinAndSelect('team.teamLeader','leader')
         .getOne();
         
+        
         //@ts-ignore
             const {id,nickName,givenTheme,students,promotion,teamLeader,peutSoutenir} = team;
+            let sum = 0;
+            students.forEach(el=>{
+                sum += el.moy;
+            })
             return {
                 id,
                 pseudo:nickName,
                 theme:givenTheme,
                 members:students,
                 promotion:promotion,
-                validated: students.length >= promotion.minMembersInTeam &&  students.length <=  promotion.maxMembersInTeam,
+                complete: students.length >= promotion.minMembersInTeam &&  students.length <=  promotion.maxMembersInTeam,
                 teamLeader,
                 peut_soutenir:peutSoutenir,
+                moyenne:sum/students.length
+                
             }
      
     }catch(err){
@@ -707,6 +743,7 @@ async getTeamsithThemes(promotionId:string){
         throw new HttpException(err,HttpStatus.BAD_REQUEST);
     }
 }
+
 
 }
 

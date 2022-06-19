@@ -12,6 +12,7 @@ import { StudentEntity } from "src/core/entities/student.entity";
 import { ResponsibleEntity } from "src/core/entities/responsible.entity";
 import { CommitEntity } from "src/core/entities/commit.entity";
 import { CommitDocumentEntity } from "src/core/entities/commit.document.entity";
+import { TeacherEntity } from "src/core/entities/teacher.entity";
 
 
 
@@ -205,9 +206,12 @@ export class TeamDocumentsService{
             .createQueryBuilder('student')
             .where('student.userId = :userId',{userId})
             .innerJoinAndSelect('student.team','team')
-            .innerJoin('team.teamLeader','teamLeader')
+            .innerJoinAndSelect('team.teamLeader','teamLeader')
             .andWhere('teamLeader.id = student.id')
+            .innerJoinAndSelect('team.givenTheme','givenTheme')
             .getOne();
+
+
     
             if(!student){
                 Logger.error("permission denied",'UserService/commitDocs')
@@ -216,15 +220,13 @@ export class TeamDocumentsService{
            
             const responsibles = await manager.getRepository(ResponsibleEntity)
             .createQueryBuilder('res')
+            .leftJoinAndSelect('res.team','resTeam')
             .where('res.teamId = :teamId',{teamId:student.team.id})
-            .innerJoinAndSelect('res.team','team')
-            .innerJoinAndSelect('team.givenTheme','givenTheme')
-            .innerJoinAndSelect('givenTheme.encadrement','encadrement')
-            .andWhere('encadrement.teacherId = res.teacherId')
-            .leftJoinAndSelect('encadrement.teacher','teacher')
-            .leftJoinAndSelect('teacher.user','user')
+            .andWhere('res.themeId = :themeId',{themeId:student.team.givenTheme.id})
+            .leftJoinAndSelect('res.teacher','teacher')
+            .leftJoinAndSelect("teacher.user",'user')
             .getMany();
-          
+
             if(responsibles.length === 0){
                 Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",'UserService/commitDocs')
                 throw new HttpException("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ",HttpStatus.BAD_REQUEST);
@@ -282,8 +284,11 @@ export class TeamDocumentsService{
               
                 for(let k in responsibles){
                     const res= responsibles[k];
-                    const userId = res.teacher.user.id;
-                    this.userService._sendNotfication(userId,`l'equipe : ${res.team.nickName} a commiter des nouveaux documents`)
+                  
+
+                        const userId =res.teacher.user.id
+                        await this.userService._sendNotfication(userId,`l'equipe : ${res.team.nickName} a commiter des nouveaux documents`);
+                 
 
                   
                   

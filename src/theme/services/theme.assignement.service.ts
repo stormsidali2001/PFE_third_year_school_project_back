@@ -5,12 +5,16 @@ import { TeamEntity } from "src/core/entities/team.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
 import { WishEntity } from "src/core/entities/wish.entity";
+import { UserService } from "src/user/user.service";
 import { getConnection, getManager } from "typeorm";
 
 
 
 @Injectable()
 export class ThemeAssignementService{
+    constructor(
+        private readonly userService:UserService
+    ){}
     async asignThemesToTeams(userId:string,promotionId:string,method:string){
         try{
             const manager = getManager();
@@ -80,7 +84,7 @@ export class ThemeAssignementService{
               .createQueryBuilder('team')
               .where(qb=>`team.id not in ${qb.subQuery()
               .select('wish.teamId').from(WishEntity,'wish').getQuery()}`)
-             .getMany()
+              .getMany()
             if(teams.length >0){
                 const newWishes = []
                 let newThemes =JSON.parse(JSON.stringify(Themes));

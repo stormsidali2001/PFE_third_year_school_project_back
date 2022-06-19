@@ -177,7 +177,7 @@ async validateThemeSuggestion(userId:string,themeId:string){
         .createQueryBuilder('user')
         .where('user.userType = :userType',{userType:UserType.ADMIN})
         .andWhere('user.id = :userId',{userId})
-        .getOne()
+        .getOne();
         if(!user){
             Logger.error("permession denied",'UserService/validateThemeSuggestion')
             throw new HttpException("permession denied",HttpStatus.BAD_REQUEST);
@@ -267,7 +267,7 @@ async getTheme(themeId:string){
         .leftJoinAndSelect('theme.teams','teams')
         .leftJoinAndSelect('theme.encadrement','encadrement')
         .leftJoinAndSelect('encadrement.teacher','teacher')
-        .leftJoinAndSelect('teacher.teamsInCharge','teamsInCharge')
+        .leftJoinAndSelect('teacher.teamsInCharge','teamsInCharge','teamsInCharge.themeId = theme.id')
         .leftJoinAndSelect('teamsInCharge.team','team')
         .getOne()
 

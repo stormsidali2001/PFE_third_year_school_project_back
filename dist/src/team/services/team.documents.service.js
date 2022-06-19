@@ -175,8 +175,9 @@ let TeamDocumentsService = class TeamDocumentsService {
                 .createQueryBuilder('student')
                 .where('student.userId = :userId', { userId })
                 .innerJoinAndSelect('student.team', 'team')
-                .innerJoin('team.teamLeader', 'teamLeader')
+                .innerJoinAndSelect('team.teamLeader', 'teamLeader')
                 .andWhere('teamLeader.id = student.id')
+                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
                 .getOne();
             if (!student) {
                 common_1.Logger.error("permission denied", 'UserService/commitDocs');
@@ -184,13 +185,11 @@ let TeamDocumentsService = class TeamDocumentsService {
             }
             const responsibles = await manager.getRepository(responsible_entity_1.ResponsibleEntity)
                 .createQueryBuilder('res')
+                .leftJoinAndSelect('res.team', 'resTeam')
                 .where('res.teamId = :teamId', { teamId: student.team.id })
-                .innerJoinAndSelect('res.team', 'team')
-                .innerJoinAndSelect('team.givenTheme', 'givenTheme')
-                .innerJoinAndSelect('givenTheme.encadrement', 'encadrement')
-                .andWhere('encadrement.teacherId = res.teacherId')
-                .leftJoinAndSelect('encadrement.teacher', 'teacher')
-                .leftJoinAndSelect('teacher.user', 'user')
+                .andWhere('res.themeId = :themeId', { themeId: student.team.givenTheme.id })
+                .leftJoinAndSelect('res.teacher', 'teacher')
+                .leftJoinAndSelect("teacher.user", 'user')
                 .getMany();
             if (responsibles.length === 0) {
                 common_1.Logger.error("aucun ensignant encadrant le theme donnee a l'equipe est responsable de cette derniere ", 'UserService/commitDocs');
@@ -227,7 +226,7 @@ let TeamDocumentsService = class TeamDocumentsService {
                 for (let k in responsibles) {
                     const res = responsibles[k];
                     const userId = res.teacher.user.id;
-                    this.userService._sendNotfication(userId, `l'equipe : ${res.team.nickName} a commiter des nouveaux documents`);
+                    await this.userService._sendNotfication(userId, `l'equipe : ${res.team.nickName} a commiter des nouveaux documents`);
                 }
             });
         }

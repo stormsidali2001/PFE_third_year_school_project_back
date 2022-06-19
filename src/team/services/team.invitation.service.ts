@@ -6,6 +6,7 @@ import { SocketService } from "src/socket/socket.service";
 import { UserService } from "src/user/user.service";
 import { getConnection, getManager } from "typeorm";
 import { Server } from 'ws';
+import * as uniqid from 'uniqid'
 
 
 
@@ -152,11 +153,9 @@ export class TeamInvitationService{
         if(!invitation.sender.team){
             const teamRepository =  manager.getRepository(TeamEntity);
             const studentRepository = manager.getRepository(StudentEntity);
-            const teamLength:number = await teamRepository
-            .createQueryBuilder('team')
-            .getCount()
+          
             newTeamCreated = true;
-            const newTeam = teamRepository.create({nickName:'team'+teamLength,teamLeader:invitation.sender,promotion:invitation.sender.promotion});
+            const newTeam = teamRepository.create({nickName:'team'+uniqid(),teamLeader:invitation.sender,promotion:invitation.sender.promotion});
             await teamRepository.save(newTeam);
             invitation.reciever.team = newTeam;
             invitation.sender.team = newTeam;
