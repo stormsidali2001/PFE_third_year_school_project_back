@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import { UserRepository } from "src/core/repositories/user.repository";
 import { AdminDto, EnterpriseDTO, StudentDTO, StudentTestDTO, TeacherDTO, TeacherTestDTO, UserDTO, UserRO } from "../core/dtos/user.dto";
 import {  UserEntity, UserType } from "../core/entities/user.entity";
