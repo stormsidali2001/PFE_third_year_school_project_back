@@ -22,6 +22,7 @@ export declare class UserController {
     deleteStudent(studentId: string): Promise<string>;
     editStudent(): Promise<void>;
     getTeachers(): Promise<import("../core/entities/teacher.entity").TeacherEntity[]>;
+    getTeacher(teacherId: string): Promise<import("../core/entities/teacher.entity").TeacherEntity>;
     deleteTeacher(teacherId: string): Promise<string>;
     editTeacher(): Promise<void>;
     getTeams(promotionId: string): Promise<{

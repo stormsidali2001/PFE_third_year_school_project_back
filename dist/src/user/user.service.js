@@ -262,6 +262,7 @@ let UserService = class UserService {
                 .leftJoinAndSelect("teacher.user", "user")
                 .where("teacher.id = :teacherId", { teacherId })
                 .getOne();
+            delete teacher.user.password;
             return teacher;
         }
         catch (err) {
@@ -370,20 +371,22 @@ let UserService = class UserService {
                 throw new common_1.HttpException("wishes not found", common_1.HttpStatus.BAD_REQUEST);
             }
             const newWishList = [];
-            const themeIds = wishes.map(el => el.themeId);
-            const themes = await manager.getRepository(theme_entity_1.ThemeEntity)
-                .createQueryBuilder('theme')
-                .where('theme.id  in (:...themeIds)', { themeIds: themeIds })
-                .getMany();
-            if (themeIds.length !== student.promotion.themes.length) {
-                common_1.Logger.error("wrong number of themes", 'UserService/submitWishList');
-                throw new common_1.HttpException("wrong number of themes", common_1.HttpStatus.BAD_REQUEST);
-            }
-            wishes.forEach(async (el, index) => {
-                newWishList.push({
-                    order: el.order,
-                    team: student.team,
-                    theme: themes[index]
+            await (0, typeorm_1.getConnection)().transaction(async (manager) => {
+                wishes.forEach(async (el, index) => {
+                    const theme = await manager.getRepository(theme_entity_1.ThemeEntity)
+                        .createQueryBuilder("theme")
+                        .where("theme.id = :themeId", { themeId: el.themeId })
+                        .andWhere('theme.validated = true')
+                        .getOne();
+                    if (!theme) {
+                        common_1.Logger.error("theme not found", 'UserService/submitWishList');
+                        throw new common_1.HttpException("theme not found", common_1.HttpStatus.BAD_REQUEST);
+                    }
+                    newWishList.push({
+                        order: el.order,
+                        team: student.team,
+                        theme: theme
+                    });
                 });
             });
             await manager.getRepository(wish_entity_1.WishEntity)

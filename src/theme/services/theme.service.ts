@@ -2,12 +2,13 @@ import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ThemeDocDto } from "src/core/dtos/user.dto";
 import { AdminEntity } from "src/core/entities/admin.entity";
 import { EntrepriseEntity } from "src/core/entities/entreprise.entity";
-import { NotificationEntity } from "src/core/entities/Notification.entity";
 import { PromotionEntity } from "src/core/entities/promotion.entity";
 import { TeacherEntity } from "src/core/entities/teacher.entity";
+import { TeamEntity } from "src/core/entities/team.entity";
 import { ThemeDocumentEntity } from "src/core/entities/theme.document.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { UserEntity, UserType } from "src/core/entities/user.entity";
+import { TeamRepository } from "src/core/repositories/team.list.repository";
 import { UserService } from "src/user/user.service";
 import { getManager } from "typeorm";
 
@@ -273,6 +274,28 @@ async getTheme(themeId:string){
 
        
         return theme ;
+    }catch(err){
+        Logger.error(err,'UserService/getTheme')
+        throw new HttpException(err,HttpStatus.BAD_REQUEST);
+    }
+}
+async getWishLists(promotionId:string){
+    try{
+        const manager = getManager();
+        let query =  manager.getRepository(TeamEntity)
+        .createQueryBuilder('team')
+        .innerJoinAndSelect('team.teamLeader','leader')
+        .innerJoinAndSelect('team.wishes','wishes')
+        .orderBy('wishes.order')
+        .innerJoinAndSelect('wishes.theme','theme');
+
+        if(promotionId!== 'all'){
+            query = query.where('team.promotionId = :promotionId',{promotionId});
+          
+        }
+
+        return await query.getMany()
+        
     }catch(err){
         Logger.error(err,'UserService/getTheme')
         throw new HttpException(err,HttpStatus.BAD_REQUEST);

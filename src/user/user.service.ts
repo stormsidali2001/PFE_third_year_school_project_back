@@ -316,6 +316,7 @@ async getTeacher(teacherId:string){
         .leftJoinAndSelect("teacher.user","user")
         .where("teacher.id = :teacherId",{teacherId})
         .getOne();
+        delete teacher.user.password
        
 
         return teacher;
@@ -385,6 +386,9 @@ async sendWishList(userId:string,promotionId:string){
             Logger.log("les equipes de la promotion sont non validés","UserService/submitWishList")
             throw new HttpException("les equipes de la promotion sont non validés",HttpStatus.BAD_REQUEST)
         }
+        
+     
+      
      
 
 
@@ -443,33 +447,32 @@ try{
      const newWishList =[]
     
 
-     const themeIds = wishes.map(el=>el.themeId);
     
     
         
-        const themes = await manager.getRepository(ThemeEntity)
-        .createQueryBuilder('theme')
-        .where('theme.id  in (:...themeIds)',{themeIds:themeIds})
-        .getMany();
-     
-       
-        if(themeIds.length !== student.promotion.themes.length){
-            Logger.error("wrong number of themes",'UserService/submitWishList')
-            throw new HttpException("wrong number of themes",HttpStatus.BAD_REQUEST);
-        }
+        await getConnection().transaction(async manager=>{
 
-
-        wishes.forEach( async (el,index)=>{
-          
-          
-    
-    
-             newWishList.push({
-                order:el.order,
-                team:student.team,
-                theme:themes[index]
+            wishes.forEach( async (el,index)=>{
                 
-            }) 
+                const theme = await manager.getRepository(ThemeEntity)
+                .createQueryBuilder("theme")
+                .where("theme.id = :themeId",{themeId:el.themeId})
+                .andWhere('theme.validated = true')
+                .getOne();
+                if(!theme){
+                    Logger.error("theme not found",'UserService/submitWishList')
+                    throw new HttpException("theme not found",HttpStatus.BAD_REQUEST);
+                }
+                
+        
+        
+                 newWishList.push({
+                    order:el.order,
+                    team:student.team,
+                    theme:theme
+                    
+                }) 
+        })
     
       
     

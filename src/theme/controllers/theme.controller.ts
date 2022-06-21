@@ -41,6 +41,11 @@ export class ThemeController{
         }
     }
 
+    @Get('getWishLists/:promotionId')
+    async getWishLists(@Param("promotionId") promotionId:string){
+        return await this.themeService.getWishLists(promotionId);
+    }
+
     @Public()
     @Get('getThemeSuggestions/:promotionId')
     async getThemeSuggestions(@Param('promotionId') promotionId:string){

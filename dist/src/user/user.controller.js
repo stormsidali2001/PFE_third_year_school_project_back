@@ -116,6 +116,15 @@ let UserController = class UserController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getTeacher(teacherId) {
+        try {
+            return await this.userService.getTeacher(teacherId);
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserController/getTeachers');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
     async deleteTeacher(teacherId) {
         try {
             return await this.userService.deleteTeacher(teacherId);
@@ -300,6 +309,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getTeachers", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('getTeacher/:teacherId'),
+    __param(0, (0, common_1.Param)('teacherId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getTeacher", null);
 __decorate([
     (0, common_1.Post)('deleteTeacher'),
     __param(0, (0, common_1.Body)('teacherId')),

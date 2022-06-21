@@ -87,13 +87,15 @@ let ThemeAssignementService = class ThemeAssignementService {
                     newThemes.forEach((th, index) => {
                         newWishes.push({
                             team,
-                            order: index,
+                            order: Math.floor(Math.random() * (Themes.length - 1)),
                             theme: th
                         });
                     });
                 });
                 await manager.getRepository(wish_entity_1.WishEntity)
                     .save(newWishes);
+                common_1.Logger.log("y'en a des equipes qui one pas remplit la fiche de voeux ... leurs voeux sont remplit d'une maniere aleatoire maintenant consulter la liste des fiches de voeux", "UserService/asignThemeToTeams");
+                throw new common_1.HttpException("y'en a des equipes qui one pas remplit la fiche de voeux ... leurs voeux sont remplit d'une maniere aleatoire maintenant consulter la liste des fiches de voeux", common_1.HttpStatus.BAD_REQUEST);
             }
             const af_team_to_th = {};
             const ignoreTeam = new Set();
@@ -110,7 +112,7 @@ let ThemeAssignementService = class ThemeAssignementService {
                             });
                             return sum / team.students.length;
                         };
-                        return (a.order === b.order) ? getMoyTeam(a.team) - getMoyTeam(b.team) : 0;
+                        return (a.order === b.order) ? getMoyTeam(b.team) - getMoyTeam(a.team) : 0;
                     });
                 }
                 else if (method === 'random') {

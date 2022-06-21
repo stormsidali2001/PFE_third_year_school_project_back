@@ -15,6 +15,7 @@ const admin_entity_1 = require("../../core/entities/admin.entity");
 const entreprise_entity_1 = require("../../core/entities/entreprise.entity");
 const promotion_entity_1 = require("../../core/entities/promotion.entity");
 const teacher_entity_1 = require("../../core/entities/teacher.entity");
+const team_entity_1 = require("../../core/entities/team.entity");
 const theme_document_entity_1 = require("../../core/entities/theme.document.entity");
 const theme_entity_1 = require("../../core/entities/theme.entity");
 const user_entity_1 = require("../../core/entities/user.entity");
@@ -228,6 +229,25 @@ let ThemeService = class ThemeService {
                 .leftJoinAndSelect('teamsInCharge.team', 'team')
                 .getOne();
             return theme;
+        }
+        catch (err) {
+            common_1.Logger.error(err, 'UserService/getTheme');
+            throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    async getWishLists(promotionId) {
+        try {
+            const manager = (0, typeorm_1.getManager)();
+            let query = manager.getRepository(team_entity_1.TeamEntity)
+                .createQueryBuilder('team')
+                .innerJoinAndSelect('team.teamLeader', 'leader')
+                .innerJoinAndSelect('team.wishes', 'wishes')
+                .orderBy('wishes.order')
+                .innerJoinAndSelect('wishes.theme', 'theme');
+            if (promotionId !== 'all') {
+                query = query.where('team.promotionId = :promotionId', { promotionId });
+            }
+            return await query.getMany();
         }
         catch (err) {
             common_1.Logger.error(err, 'UserService/getTheme');

@@ -16,12 +16,12 @@ export class PromotionEntity{
     name:string;
 
     @Column({
-        default:2
+        default:4
     })
     minMembersInTeam:number;
 
     @Column({
-        default:4
+        default:6
     })
     maxMembersInTeam:number;
 

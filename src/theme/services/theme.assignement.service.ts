@@ -101,7 +101,7 @@ export class ThemeAssignementService{
                    
                      newWishes.push({
                          team,
-                         order:index,
+                         order:Math.floor(Math.random()*(Themes.length-1)),
                          theme:th
                      })
                  })
@@ -109,6 +109,9 @@ export class ThemeAssignementService{
     
                 await manager.getRepository(WishEntity)
                 .save(newWishes)
+                
+                Logger.log("y'en a des equipes qui one pas remplit la fiche de voeux ... leurs voeux sont remplit d'une maniere aleatoire maintenant consulter la liste des fiches de voeux","UserService/asignThemeToTeams")
+                throw new HttpException("y'en a des equipes qui one pas remplit la fiche de voeux ... leurs voeux sont remplit d'une maniere aleatoire maintenant consulter la liste des fiches de voeux",HttpStatus.BAD_REQUEST)
     
             }
                
@@ -137,7 +140,7 @@ export class ThemeAssignementService{
                             return sum /team.students.length;
                         }
     
-                        return (a.order === b.order)? getMoyTeam(a.team) - getMoyTeam(b.team):0;
+                        return (a.order === b.order)?  getMoyTeam(b.team)- getMoyTeam(a.team):0;
                     })
     
                 }else if(method === 'random'){

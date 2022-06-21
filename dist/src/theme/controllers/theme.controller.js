@@ -31,6 +31,9 @@ let ThemeController = class ThemeController {
             throw new common_1.HttpException(err, common_1.HttpStatus.BAD_REQUEST);
         }
     }
+    async getWishLists(promotionId) {
+        return await this.themeService.getWishLists(promotionId);
+    }
     async getThemeSuggestions(promotionId) {
         try {
             return await this.themeService.getThemeSuggestions(promotionId);
@@ -106,6 +109,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, Array, String]),
     __metadata("design:returntype", Promise)
 ], ThemeController.prototype, "createThemeSuggestion", null);
+__decorate([
+    (0, common_1.Get)('getWishLists/:promotionId'),
+    __param(0, (0, common_1.Param)("promotionId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ThemeController.prototype, "getWishLists", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('getThemeSuggestions/:promotionId'),

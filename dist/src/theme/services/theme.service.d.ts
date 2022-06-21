@@ -1,4 +1,5 @@
 import { ThemeDocDto } from "src/core/dtos/user.dto";
+import { TeamEntity } from "src/core/entities/team.entity";
 import { ThemeEntity } from "src/core/entities/theme.entity";
 import { UserService } from "src/user/user.service";
 export declare class ThemeService {
@@ -12,4 +13,5 @@ export declare class ThemeService {
     getAllThemes(): Promise<ThemeEntity[]>;
     getThemes(promotionId: string): Promise<ThemeEntity[]>;
     getTheme(themeId: string): Promise<ThemeEntity>;
+    getWishLists(promotionId: string): Promise<TeamEntity[]>;
 }

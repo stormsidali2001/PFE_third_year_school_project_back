@@ -157,6 +157,17 @@ export class UserController{
          }
  
      }
+     @Public()
+     @Get('getTeacher/:teacherId')
+     async getTeacher(@Param('teacherId') teacherId:string){
+         try{
+             return await this.userService.getTeacher(teacherId)
+         }catch(err){
+             Logger.error(err,'UserController/getTeachers')
+             throw new HttpException(err,HttpStatus.BAD_REQUEST);
+         }
+ 
+     }
      @Post('deleteTeacher')
      async deleteTeacher(@Body('teacherId') teacherId:string ){
          try{

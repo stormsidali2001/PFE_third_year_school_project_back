@@ -4,6 +4,7 @@ export declare class ThemeController {
     private readonly themeService;
     constructor(themeService: ThemeService);
     createThemeSuggestion(userId: string, title: string, description: string, documents: ThemeDocDto[], promotionId: string): Promise<void>;
+    getWishLists(promotionId: string): Promise<import("../../core/entities/team.entity").TeamEntity[]>;
     getThemeSuggestions(promotionId: string): Promise<import("../../core/entities/theme.entity").ThemeEntity[]>;
     getAllThemeSuggestions(): Promise<import("../../core/entities/theme.entity").ThemeEntity[]>;
     getThemeSuggestion(themeId: string): Promise<import("../../core/entities/theme.entity").ThemeEntity>;
