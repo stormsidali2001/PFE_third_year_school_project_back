@@ -410,8 +410,8 @@ export class AuthService{
         let transporter = nodemailer.createTransport({
             service:'Gmail',
             auth: {
-              user: "assoulsidali@gmail.com", // generated ethereal user
-              pass: "mydreamismylife@", // generated ethereal password
+              user: "", // generated ethereal user
+              pass: "", // generated ethereal password
             },
           });
 
