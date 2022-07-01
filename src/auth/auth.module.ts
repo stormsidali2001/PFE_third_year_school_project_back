@@ -26,7 +26,8 @@ import { UserService } from "src/user/user.service";
 
 ],
     controllers:[AuthController],
-    providers:[AuthService,
+    providers:[
+        AuthService,
         // AccessTokenStrategy,
         // RefrechTokenStrategy,
         LocalStrategy,
