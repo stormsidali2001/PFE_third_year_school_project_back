@@ -10,7 +10,7 @@ export class RefrechTokenStrategy extends PassportStrategy(Strategy,'jwt-refrech
     constructor(config:ConfigService){
         super({
             jwtFromRequest:ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey:config.get<string>('ACCESS_TOKEN_SECRET'),
+            secretOrKey:config.get<string>('REFRECH_TOKEN_SECRET'),
             passReqToCallback:true
         })
     }
