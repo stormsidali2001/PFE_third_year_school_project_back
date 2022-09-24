@@ -12,7 +12,7 @@ export class SessionAdapter extends IoAdapter{
         const server = super.createIOServer(port,options);
         const wrap = (middleware)=>(socket,next)=>middleware(socket.request,{},next)
         server.use((socket,next)=>{
-            socket.data.username = 'houda rahi hna '
+            socket.data.username = ' '
             next();
         })
 
