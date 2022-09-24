@@ -20,7 +20,7 @@ export class SessionAdapter extends IoAdapter{
         server.use(wrap(passport.initialize()))
         server.use(wrap(passport.session()))
         
-        console.log("hhhhhhhhhhhh")
+        console.log("")
         return server;
     }
 }
